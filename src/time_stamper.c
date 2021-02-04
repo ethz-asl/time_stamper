@@ -10,10 +10,11 @@
 
 // Constants
 /*****************************************/
-#define DRV_NAME            "time_stamper"
-#define N_BUFFER_ENTRIES    1024
-#define IRQ_GPIO            23      // P9_23
-#define TRIGGER_GPIO        27     // P9_27
+#define DRV_NAME                "time_stamper"
+#define N_BUFFER_ENTRIES        1024    
+#define READ_CHARACTER_LIMIT    1000
+#define IRQ_GPIO                23      // P9_23
+#define TRIGGER_GPIO            27     // P9_27
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Matthias Mueller");
@@ -25,10 +26,7 @@ MODULE_VERSION("0.01");
 struct TimestampRingBuffer {
     int head;
     int tail;
-    struct {
-        u64 id;
-        u64 nsecs;
-    } bufferentries[N_BUFFER_ENTRIES];
+    struct timespec bufferentries[N_BUFFER_ENTRIES];
 };
 
 // function prototypes
@@ -56,8 +54,19 @@ static struct kobj_attribute ts_buffer_attribute =__ATTR(ts_buffer, 0664, ts_buf
 */
 static irqreturn_t ts_timestamp_handler(int irq, void* irq_data)
 {
+    /// used to measure delaybetween IRQ fired and handler called
     toggle = !toggle;
     gpio_set_value(triggerGPIO, toggle);
+
+    /// save the current time in the ringbuffer
+    getnstimeofday( &(ringbuffer.bufferentries[ringbuffer.head]) );
+
+    /// increment the head counter
+    ringbuffer.head = (ringbuffer.head+1) % N_BUFFER_ENTRIES;
+
+    /// when head overtakes tail, increment tail as well
+    if(ringbuffer.head == ringbuffer.tail)
+        ringbuffer.tail = (ringbuffer.tail+1) % N_BUFFER_ENTRIES;
 
     return IRQ_HANDLED;
 }
@@ -67,7 +76,15 @@ static irqreturn_t ts_timestamp_handler(int irq, void* irq_data)
 */
 static ssize_t ts_buffer_readout(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
 {
-    return 0;
+    ssize_t r = 0; 
+
+    /// fill the requested buffer with the timestamps in the ringbuffer until all is read or a certain limit is reached
+    while(r < READ_CHARACTER_LIMIT && ringbuffer.tail != ringbuffer.head){
+        r += sprintf(buf + r, "%ld.%ld\n", ringbuffer.bufferentries[ringbuffer.tail].tv_sec, ringbuffer.bufferentries[ringbuffer.tail].tv_nsec);
+        ringbuffer.tail = (ringbuffer.tail+1) % N_BUFFER_ENTRIES;
+    }
+
+    return r;
 }
 
 /**
@@ -78,7 +95,7 @@ static ssize_t ts_buffer_clear(struct kobject *kobj, struct kobj_attribute *attr
     ringbuffer.head = 0;
     ringbuffer.tail = ringbuffer.head;
 
-    return 0;
+    return count;
 }
 
 /**
