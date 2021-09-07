@@ -63,7 +63,7 @@ static irqreturn_t ts_timestamp_handler(int irq, void* irq_data)
     gpio_set_value(triggerGPIO, toggle);
 #endif
     /// save the current time in the ringbuffer
-    ktime_get( &(ringbuffer.bufferentries[ringbuffer.head]) );
+    ktime_get_real_ts64( &(ringbuffer.bufferentries[ringbuffer.head]) );
 
     /// increment the head counter
     ringbuffer.head = (ringbuffer.head+1) % N_BUFFER_ENTRIES;
@@ -84,7 +84,7 @@ static ssize_t ts_buffer_readout(struct kobject *kobj, struct kobj_attribute *at
 
     /// fill the requested buffer with the timestamps in the ringbuffer until all is read or a certain limit is reached
     while(r < READ_CHARACTER_LIMIT && ringbuffer.tail != ringbuffer.head){
-        r += sprintf(buf + r, "%ld.%ld\n", ringbuffer.bufferentries[ringbuffer.tail].tv_sec, ringbuffer.bufferentries[ringbuffer.tail].tv_nsec);
+        r += sprintf(buf + r, "%lld.%ld\n", ringbuffer.bufferentries[ringbuffer.tail].tv_sec, ringbuffer.bufferentries[ringbuffer.tail].tv_nsec);
         ringbuffer.tail = (ringbuffer.tail+1) % N_BUFFER_ENTRIES;
     }
 
