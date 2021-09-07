@@ -1,9 +1,3 @@
-#if __STDC_VERSION__ >= 199901L
-#define _XOPEN_SOURCE 600
-#else
-#define _XOPEN_SOURCE 500
-#endif /* __STDC_VERSION__ */
-
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -12,7 +6,8 @@
 #include <linux/gpio.h>      
 #include <linux/interrupt.h> 
 #include <linux/delay.h>
-#include <linux/time.h>
+#include <linux/ktime.h>
+//#include <linux/time.h>
 
 // Constants
 /*****************************************/
