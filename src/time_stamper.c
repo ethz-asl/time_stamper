@@ -15,11 +15,13 @@
 #define READ_CHARACTER_LIMIT    1000
 #define IRQ_GPIO                23      // P9_23
 #define TRIGGER_GPIO            27     // P9_27
+#define IRQ_EDGE                IRQF_TRIGGER_RISING     // specify the edge of the irq
+//#define TOGGLE_ENABLE               // remove comment to enable toggling on trigger_gpio when an interrupt happens
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Matthias Mueller");
 MODULE_DESCRIPTION("Raspberry Pi kernel module to timestamp GPIO events via IRQ");
-MODULE_VERSION("0.01");
+MODULE_VERSION("0.02");
 
 // Typedefs
 /*****************************************/
@@ -54,10 +56,11 @@ static struct kobj_attribute ts_buffer_attribute =__ATTR(ts_buffer, 0664, ts_buf
 */
 static irqreturn_t ts_timestamp_handler(int irq, void* irq_data)
 {
+#ifdef TOGGLE_ENABLE
     /// used to measure delaybetween IRQ fired and handler called
     toggle = !toggle;
     gpio_set_value(triggerGPIO, toggle);
-
+#endif
     /// save the current time in the ringbuffer
     getnstimeofday( &(ringbuffer.bufferentries[ringbuffer.head]) );
 
@@ -116,14 +119,14 @@ static int __init ts_init(void)
         printk(KERN_ALERT DRV_NAME " : failed to create the sysfs file for the buffer access\n");
         return err;
     }       
-
+#ifdef TOGGLE_ENABLE
     /// setup trigger gpio and set it to output
     err = gpio_request_one(triggerGPIO, GPIOF_OUT_INIT_LOW, DRV_NAME " trig");
     if (err < 0) {
         printk(KERN_ALERT DRV_NAME " : failed to request Trigger pin %d.\n", triggerGPIO);
         return -1;
     }
-
+#endif
     /// setup irq gpio and set it to input
     err = gpio_request_one(irqGPIO, GPIOF_IN, DRV_NAME " irq");
     if (err < 0) {
@@ -139,8 +142,8 @@ static int __init ts_init(void)
         return -1;
     }
 
-    /// enable the interrupt as rising edge, connect it to the handler function and send the irqNumber as cookie
-    err = request_any_context_irq(irqNumber, ts_timestamp_handler, IRQF_TRIGGER_RISING, DRV_NAME, (void*)irqNumber);
+    /// enable the interrupt as a specified edge, connect it to the handler function and send the irqNumber as cookie
+    err = request_any_context_irq(irqNumber, ts_timestamp_handler, IRQ_EDGE, DRV_NAME, (void*)irqNumber);
     if (err < 0) {
         printk(KERN_ALERT DRV_NAME " : failed to enable IRQ %d for pin %d.\n",irqNumber, irqGPIO);
         gpio_free(irqGPIO);
@@ -168,8 +171,9 @@ static void __exit ts_exit(void)
 
     /// remove GPIOs
     gpio_free(irqGPIO);
+#ifdef TOGGLE_ENABLE
     gpio_free(triggerGPIO);
-
+#endif
     printk(KERN_INFO DRV_NAME " : GPIO IRQ Timestamper ended\n");
 }
 
