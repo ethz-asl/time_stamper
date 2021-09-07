@@ -29,7 +29,7 @@ MODULE_VERSION("0.02");
 struct TimestampRingBuffer {
     int head;
     int tail;
-    struct timespec bufferentries[N_BUFFER_ENTRIES];
+    struct timespec64 bufferentries[N_BUFFER_ENTRIES];
 };
 
 // function prototypes
@@ -63,7 +63,7 @@ static irqreturn_t ts_timestamp_handler(int irq, void* irq_data)
     gpio_set_value(triggerGPIO, toggle);
 #endif
     /// save the current time in the ringbuffer
-    getnstimeofday( &(ringbuffer.bufferentries[ringbuffer.head]) );
+    ktime_get( &(ringbuffer.bufferentries[ringbuffer.head]) );
 
     /// increment the head counter
     ringbuffer.head = (ringbuffer.head+1) % N_BUFFER_ENTRIES;
