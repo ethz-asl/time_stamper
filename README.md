@@ -15,6 +15,25 @@ The Paspberry Pi does have GPIO pins which could generate a direct hardware inte
  - TOGGLE_ENABLE: by specifying this define, the TRIGGER_GPIO function will be enabled; disable it when only the time stamping should be used without pin toggling when the event happened
 
 ## compile
+first, you need the correct packages to build the kernel module. Install them by
+`sudo apt install make gcc`
+
+Additionally, the kernel headers are required. For Ubuntu, install them by 
+`apt-get install build-essential linux-headers-\`uname -r\``
+
+## usage
+Start the kernel module with
+`sudo insmod time_stamper.ko`
+
+To check if it is correctly loaded, check the kernel log:
+`sudo dmesg`
+
+And if the module is still loaded 
+`lsmod | grep "time_stamper"`
+
+To remove it, use the following line:
+`sudo rmmod time_stamper`
+
 
 
 ## verification
