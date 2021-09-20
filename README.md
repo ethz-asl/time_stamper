@@ -34,6 +34,10 @@ And if the module is still loaded
 To remove it, use the following line:
 `sudo rmmod time_stamper`
 
+The kernel module creates a file "ts_buffer" in "/sys/kernel/time_stamper/". There, the timestamped times could be read out, e.g. 
+`cat /sys/kernel/time_stamper/ts_buffer`
+To clear the buffer, just anything could be written to it to clear the buffer
+`echo "1" | /sys/kernel/time_stamper/ts_buffer`
 
 
 ## verification
