@@ -3,7 +3,6 @@
 #include "TimestampManager.h"
 #include <string>
 #include <sstream>
-#include <iostream>
 
 TimestampManager::TimestampManager() = default;
 
@@ -27,7 +26,6 @@ bool TimestampManager::Poll() {
   }
 
   last_timestamp_ = std::stod(ss.str());
-  std::cout << last_timestamp_ << std::endl;
   close(fd_);
 
   return true;
