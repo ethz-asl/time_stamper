@@ -8,7 +8,15 @@ Node::Node(const SysfsPwm& sysfs_pwm)
 }
 bool Node::Init() {
   timestamp_pub_ = nh_.advertise<time_stamper_ros::Timestamp>("time_stamper/Timestamp", 1);
-  //TODO Check if exported;
+  if (sysfs_pwm_.IsExported()) {
+    ROS_INFO("Pwm already exported");
+  } else {
+    if (!sysfs_pwm_._Export()) {
+      ROS_ERROR("Failed to export pwm");
+      return false;
+    }
+    ROS_INFO("Exported pwm");
+  }
 
   if (sysfs_pwm_.IsRunning()) {
     ROS_INFO("Pwm already running");
@@ -16,9 +24,10 @@ bool Node::Init() {
     ROS_INFO("Starting pwm");
     if (!sysfs_pwm_.Start()) {
       ROS_ERROR("Could not start pwm");
+      return false;
     }
+    ROS_INFO("Started pwm");
   }
-
   return true;
 }
 
@@ -44,4 +53,8 @@ void Node::Start() {
 
 void Node::CleanUp() {
   ROS_INFO("Cleaning up node");
+  if (!sysfs_pwm_.Stop()) {
+    ROS_ERROR("Failed to stop pwm");
+  }
+  ROS_INFO("Stopped pwm");
 }
