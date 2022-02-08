@@ -1,8 +1,12 @@
 #include <SysfsPwm.h>
 #include <unistd.h>
 #include <cstring>
+#include <dirent.h>
 
 bool SysfsPwm::IsExported() {
+  if (DirectoryExists("/sys/class/pwm/pwmchip0/pwm0")) {
+    return true;
+  }
   return false;
 }
 
@@ -18,7 +22,6 @@ bool SysfsPwm::IsRunning() {
   int a = 0;
   bool has_read = sysfsread("/sys/class/pwm/pwmchip0/pwm0/enable", &a, 1);
 
-  //TODO improve exception handling
   if (!has_read) {
     return false;
   }
@@ -55,7 +58,7 @@ bool SysfsPwm::ChangeDutyCycleRaw(int value) {
   return sysfsctl("/sys/class/pwm/pwmchip0/pwm0/duty_cycle", value_str, O_WRONLY);
 }
 
-bool SysfsPwm::sysfsctl(const std::string& path, const std::string& message, int file_flags) {
+bool SysfsPwm::sysfsctl(const std::string &path, const std::string &message, int file_flags) {
   int fd = open(path.c_str(), file_flags);
   if (fd == -1) {
     return false;
@@ -67,11 +70,27 @@ bool SysfsPwm::sysfsctl(const std::string& path, const std::string& message, int
   return nbytes == message.size();
 }
 
-bool SysfsPwm::sysfsread(const std::string& path, void* buffer, size_t buffer_size, int file_flags) {
+bool SysfsPwm::sysfsread(const std::string &path, void *buffer, size_t buffer_size, int file_flags) {
   int fd = open(path.c_str(), file_flags);
   if (fd == -1) {
     return false;
   }
   ssize_t nbytes = read(fd, buffer, buffer_size);
   return nbytes == buffer_size;
+}
+bool SysfsPwm::DirectoryExists(const char *path) {
+  if (path == nullptr) {
+    return false;
+  }
+
+  DIR* pDir = opendir(path);
+
+  bool bExists = false;
+
+  if (pDir != nullptr) {
+    bExists = true;
+    (void) closedir(pDir);
+  }
+
+  return bExists;
 }
