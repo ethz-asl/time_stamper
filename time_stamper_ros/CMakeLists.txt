@@ -48,3 +48,12 @@ target_link_libraries(
         ${PROJECT_NAME}
 
 )
+
+catkin_add_gtest(${PROJECT_NAME}-test
+        test/test_entry_point.cc
+        )
+
+target_link_libraries(${PROJECT_NAME}-test
+        ${PROJECT_NAME}
+        ${catkin_LIBRARIES}
+        )

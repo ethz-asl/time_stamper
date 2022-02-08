@@ -2,11 +2,12 @@
 #include <string>
 #include <fcntl.h>
 #include "IPwmSubsystem.h"
+
 class SysfsPwm : public IPwmSubsystem {
  public:
   SysfsPwm() = default;
   bool IsExported() override;
-  bool _Export() override;
+  bool Export() override;
   bool Unexport() override;
   bool IsRunning() override;
   bool Start() override;

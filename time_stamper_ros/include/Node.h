@@ -9,6 +9,8 @@ class Node {
   void Start();
   void CleanUp();
   ~Node() = default;
+
+  static bool run_node;
  private:
   ros::Publisher timestamp_pub_;
   ros::NodeHandle nh_;

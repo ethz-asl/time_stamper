@@ -4,7 +4,7 @@ class IPwmSubsystem {
  public:
   IPwmSubsystem() = default;
   virtual bool IsExported() = 0;
-  virtual bool _Export() = 0;
+  virtual bool Export() = 0;
   virtual bool Unexport() = 0;
   virtual bool IsRunning() = 0;
   virtual bool Start() = 0;

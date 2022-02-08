@@ -2,6 +2,8 @@
 #include <cstring>
 #include "time_stamper_ros/Timestamp.h"
 #include "TimestampManager.h"
+bool Node::run_node = true;
+
 Node::Node(const SysfsPwm& sysfs_pwm)
 : sysfs_pwm_(sysfs_pwm) {
 
@@ -11,7 +13,7 @@ bool Node::Init() {
   if (sysfs_pwm_.IsExported()) {
     ROS_INFO("Pwm already exported");
   } else {
-    if (!sysfs_pwm_._Export()) {
+    if (!sysfs_pwm_.Export()) {
       ROS_ERROR("Failed to export pwm");
       return false;
     }
@@ -40,8 +42,8 @@ bool Node::Init() {
 
 void Node::Start() {
   TimestampManager timestamp_manager;
-  extern bool run_node;
-  while (ros::ok() && run_node) {
+
+  while (ros::ok() && Node::run_node) {
     ros::Rate loop_rate(10);
 
 

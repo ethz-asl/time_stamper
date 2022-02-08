@@ -3,12 +3,10 @@
 #include "ros/ros.h"
 #include "Node.h"
 
-__attribute__((unused)) bool run_node = true;
-
 void SignalHandler(int signum) {
   if (signum == SIGINT) {
     ROS_INFO("Received sigint. Shutting down.");
-    run_node = false;
+    Node::run_node = false;
   }
 }
 

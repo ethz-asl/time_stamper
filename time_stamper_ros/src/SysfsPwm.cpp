@@ -10,7 +10,7 @@ bool SysfsPwm::IsExported() {
   return false;
 }
 
-bool SysfsPwm::_Export() {
+bool SysfsPwm::Export() {
   return sysfsctl("/sys/class/pwm/pwmchip0/export", "0", O_WRONLY);
 }
 
