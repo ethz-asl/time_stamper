@@ -22,7 +22,11 @@ bool SysfsPwm::IsRunning() {
   if (!has_read) {
     return false;
   }
-  return a;
+
+  if (a == 1) {
+    return true;
+  }
+  return false;
 }
 
 bool SysfsPwm::Start() {
