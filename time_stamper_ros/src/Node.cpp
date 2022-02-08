@@ -18,6 +18,13 @@ bool Node::Init() {
     ROS_INFO("Exported pwm");
   }
 
+  int frequency = 50;
+  if (!sysfs_pwm_.SetFrequency(frequency)) {
+    ROS_ERROR("Failed to set Frequency");
+    return false;
+  }
+  ROS_INFO_STREAM("Set frequency to " << frequency);
+
   if (sysfs_pwm_.IsRunning()) {
     ROS_INFO("Pwm already running");
   } else {

@@ -40,12 +40,12 @@ bool SysfsPwm::Stop() {
 }
 
 bool SysfsPwm::SetFrequency(int hz) {
-  int a = 10000000;
-  bool r = ChangeDutyCycleRaw(a / 2);
+  int freq = (int) 1e9 / hz;
+  bool r = ChangeDutyCycleRaw(freq / 2);
   if (!r) {
     return false;
   }
-  return sysfsctl("/sys/class/pwm/pwmchip0/pwm0/period", std::to_string(a));
+  return sysfsctl("/sys/class/pwm/pwmchip0/pwm0/period", std::to_string(freq));
 }
 
 bool SysfsPwm::ChangeDutyCycle(int percentage) {
