@@ -1,4 +1,4 @@
-# time_stamper
+# time_stamper kernel module
 Timestamp kernel module for the Raspberry Pi (and possible other devices)
 
 ## introduction
