@@ -1,20 +1,40 @@
 #include "Node.h"
 #include <unistd.h>
 #include <cstring>
+#include "ros/ros.h"
 #include "fcntl.h"
-Node::Node() {
+Node::Node(const SysfsPwm& sysfs_pwm)
+: sysfs_pwm_(sysfs_pwm) {
 
 }
 
+void Node::Start() {
+  extern bool run_node;
+  while (ros::ok() && run_node) {
+    ros::spinOnce();
+  }
+  CleanUp();
+}
+
 bool Node::Init() {
+  //TODO Check if exported;
+
+  if (sysfs_pwm_.IsRunning()) {
+    ROS_INFO("Pwm already running");
+  } else {
+    ROS_INFO("Starting pwm");
+    if (!sysfs_pwm_.Start()) {
+      ROS_ERROR("Could not start pwm");
+    }
+  }
+
+
   /*
-    //SysfsPwm sysfs_pwm1(1);
     int fd = open("/sys/kernel/time_stamper/ts_buffer", O_RDWR);
     if (fd == -1) {
       std::cout << "Error %i from open: " << errno << " " << strerror(errno) << std::endl;
       return false;
     }
-
 
       int buffer_size = 4096;
       while (true) {
@@ -27,36 +47,9 @@ bool Node::Init() {
           }
           std::cout << std::endl;
         }
-      }
+      }*/
 
-  // echo 10000000 > pwm0/period
-  // echo 5000000 > pwm0/duty_cycle
-  // echo 1 > pwm0/enable
-
-  std::string path = "/sys/class/pwm/pwmchip0/export";
-  fd = open(path.c_str(), O_WRONLY);
-  if (fd == -1) {
-    printf("Error %i from open: %s\n", errno, strerror(errno));
-
-    return false;
-  }
-
-  if (write(fd, "0", 1) != 1) {
-    std::cout << "Error writing to " << path << std::endl;
-  }
-
-  close(fd);
-
-  fd = open("/sys/class/pwm/pwmchip0/pwm0/period", O_WRONLY);
-  write(fd, "10000000", 8);
-  close(fd);
-
-  fd = open("/sys/class/pwm/pwmchip0/pwm0/duty_cycle", O_WRONLY);
-  write(fd, "5000000", 7);
-  close(fd);
-
-  fd = open("/sys/class/pwm/pwmchip0/pwm0/enable", O_WRONLY);
-  write(fd, "1", 1);
-  */
-  return true;
+}
+void Node::CleanUp() {
+  ROS_INFO("Cleaning up node");
 }
