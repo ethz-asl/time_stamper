@@ -7,6 +7,7 @@ __attribute__((unused)) bool run_node = true;
 
 void SignalHandler(int signum) {
   if (signum == SIGINT) {
+    ROS_INFO("Received sigint. Shutting down.");
     run_node = false;
   }
 }
@@ -18,5 +19,6 @@ int main(int argc, char **argv) {
   if (!node.Init()) {
     ROS_FATAL("Failed to initialize node.");
   }
+  node.Start();
   return 0;
 }

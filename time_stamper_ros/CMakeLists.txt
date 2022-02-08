@@ -34,7 +34,7 @@ include_directories(
 add_library(${PROJECT_NAME}
         src/SysfsPwm.cpp
         src/Node.cpp
-        )
+        src/TimestampManager.cpp include/TimestampManager.h)
 
 add_executable(${PROJECT_NAME}-node
         src/Main.cpp

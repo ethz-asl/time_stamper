@@ -1,22 +1,13 @@
 #include "Node.h"
-#include <unistd.h>
 #include <cstring>
-#include "ros/ros.h"
-#include "fcntl.h"
+#include "time_stamper_ros/Timestamp.h"
+#include "TimestampManager.h"
 Node::Node(const SysfsPwm& sysfs_pwm)
 : sysfs_pwm_(sysfs_pwm) {
 
 }
-
-void Node::Start() {
-  extern bool run_node;
-  while (ros::ok() && run_node) {
-    ros::spinOnce();
-  }
-  CleanUp();
-}
-
 bool Node::Init() {
+  timestamp_pub_ = nh_.advertise<time_stamper_ros::Timestamp>("time_stamper/Timestamp", 1);
   //TODO Check if exported;
 
   if (sysfs_pwm_.IsRunning()) {
@@ -28,28 +19,29 @@ bool Node::Init() {
     }
   }
 
+  return true;
+}
 
-  /*
-    int fd = open("/sys/kernel/time_stamper/ts_buffer", O_RDWR);
-    if (fd == -1) {
-      std::cout << "Error %i from open: " << errno << " " << strerror(errno) << std::endl;
-      return false;
+void Node::Start() {
+  TimestampManager timestamp_manager;
+  extern bool run_node;
+  while (ros::ok() && run_node) {
+    ros::Rate loop_rate(10);
+
+
+    if (timestamp_manager.Poll()) {
+      time_stamper_ros::Timestamp msg;
+      msg.timestamp = timestamp_manager.GetLastTimestamp();
+      timestamp_pub_.publish(msg);
     }
 
-      int buffer_size = 4096;
-      while (true) {
-        unsigned char temp_buffer[buffer_size];
-        ssize_t n = read(fd, &temp_buffer, buffer_size);
-        if (n > 0) {
-          std::cout << "Read bytes: " << n << std::endl;
-          for (int i = 0; i < n; i++) {
-            std::cout << temp_buffer[i];
-          }
-          std::cout << std::endl;
-        }
-      }*/
-
+    ros::spinOnce();
+    loop_rate.sleep();
+  }
+  CleanUp();
 }
+
+
 void Node::CleanUp() {
   ROS_INFO("Cleaning up node");
 }
