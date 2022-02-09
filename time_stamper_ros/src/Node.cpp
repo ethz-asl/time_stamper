@@ -19,6 +19,7 @@ bool Node::Init() {
     ROS_INFO("Exported pwm");
   }
 
+  //TODO Move to config
   int frequency = 50;
   if (!pwm_subsystem_.SetFrequency(frequency)) {
     ROS_ERROR("Failed to set Frequency");
@@ -27,7 +28,7 @@ bool Node::Init() {
   ROS_INFO_STREAM("Set frequency to " << frequency);
 
   if (pwm_subsystem_.IsRunning()) {
-    ROS_INFO("Pwm already running");
+    ROS_WARN("Pwm already running");
   } else {
     ROS_INFO("Starting pwm");
     if (!pwm_subsystem_.Start()) {
