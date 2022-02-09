@@ -11,16 +11,16 @@ bool SysfsPwm::IsExported() {
 }
 
 bool SysfsPwm::Export() {
-  return sysfsctl("/sys/class/pwm/pwmchip0/export", "0", O_WRONLY);
+  return Write("/sys/class/pwm/pwmchip0/export", "0");
 }
 
 bool SysfsPwm::Unexport() {
-  return sysfsctl("/sys/class/pwm/pwmchip0/unexport", "0", O_WRONLY);
+  return Write("/sys/class/pwm/pwmchip0/unexport", "0");
 }
 
 bool SysfsPwm::IsRunning() {
   int a = 0;
-  bool has_read = sysfsread("/sys/class/pwm/pwmchip0/pwm0/enable", &a, 1);
+  bool has_read = Read("/sys/class/pwm/pwmchip0/pwm0/enable", &a, 1);
 
   if (!has_read) {
     return false;
@@ -33,10 +33,10 @@ bool SysfsPwm::IsRunning() {
 }
 
 bool SysfsPwm::Start() {
-  return sysfsctl("/sys/class/pwm/pwmchip0/pwm0/enable", "1");
+  return Write("/sys/class/pwm/pwmchip0/pwm0/enable", "1");
 }
 bool SysfsPwm::Stop() {
-  return sysfsctl("/sys/class/pwm/pwmchip0/pwm0/enable", "0");
+  return Write("/sys/class/pwm/pwmchip0/pwm0/enable", "0");
 }
 
 bool SysfsPwm::SetFrequency(int hz) {
@@ -45,21 +45,21 @@ bool SysfsPwm::SetFrequency(int hz) {
   if (!r) {
     return false;
   }
-  return sysfsctl("/sys/class/pwm/pwmchip0/pwm0/period", std::to_string(freq));
+  return Write("/sys/class/pwm/pwmchip0/pwm0/period", std::to_string(freq));
 }
 
 bool SysfsPwm::ChangeDutyCycle(int percentage) {
   std::string value_str = std::to_string(5000000);
-  return sysfsctl("/sys/class/pwm/pwmchip0/pwm0/duty_cycle", value_str, O_WRONLY);
+  return Write("/sys/class/pwm/pwmchip0/pwm0/duty_cycle", value_str);
 }
 
 bool SysfsPwm::ChangeDutyCycleRaw(int value) {
   std::string value_str = std::to_string(value);
-  return sysfsctl("/sys/class/pwm/pwmchip0/pwm0/duty_cycle", value_str, O_WRONLY);
+  return Write("/sys/class/pwm/pwmchip0/pwm0/duty_cycle", value_str);
 }
 
-bool SysfsPwm::sysfsctl(const std::string &path, const std::string &message, int file_flags) {
-  int fd = open(path.c_str(), file_flags);
+bool SysfsPwm::Write(const std::string &path, const std::string &message) {
+  int fd = open(path.c_str(), O_WRONLY);
   if (fd == -1) {
     return false;
   }
@@ -70,8 +70,8 @@ bool SysfsPwm::sysfsctl(const std::string &path, const std::string &message, int
   return nbytes == message.size();
 }
 
-bool SysfsPwm::sysfsread(const std::string &path, void *buffer, size_t buffer_size, int file_flags) {
-  int fd = open(path.c_str(), file_flags);
+bool SysfsPwm::Read(const std::string &path, void *buffer, size_t buffer_size) {
+  int fd = open(path.c_str(), O_RDONLY);
   if (fd == -1) {
     return false;
   }

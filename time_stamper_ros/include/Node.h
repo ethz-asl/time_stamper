@@ -4,7 +4,7 @@
 #include "ros/ros.h"
 class Node {
  public:
-  explicit Node(const SysfsPwm& sysfs_pwm);
+  explicit Node(IPwmSubsystem& sysfs_pwm);
   bool Init();
   void Start();
   void CleanUp();
@@ -14,6 +14,6 @@ class Node {
  private:
   ros::Publisher timestamp_pub_;
   ros::NodeHandle nh_;
-  SysfsPwm sysfs_pwm_;
+  IPwmSubsystem& pwm_subsystem_;
 };
 

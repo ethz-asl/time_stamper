@@ -4,16 +4,15 @@
 #include "TimestampManager.h"
 bool Node::run_node = true;
 
-Node::Node(const SysfsPwm& sysfs_pwm)
-: sysfs_pwm_(sysfs_pwm) {
+Node::Node(IPwmSubsystem& pwm_subsystem)
+: pwm_subsystem_(pwm_subsystem) {}
 
-}
 bool Node::Init() {
   timestamp_pub_ = nh_.advertise<time_stamper_ros::Timestamp>("time_stamper/Timestamp", 1);
-  if (sysfs_pwm_.IsExported()) {
+  if (pwm_subsystem_.IsExported()) {
     ROS_INFO("Pwm already exported");
   } else {
-    if (!sysfs_pwm_.Export()) {
+    if (!pwm_subsystem_.Export()) {
       ROS_ERROR("Failed to export pwm");
       return false;
     }
@@ -21,17 +20,17 @@ bool Node::Init() {
   }
 
   int frequency = 50;
-  if (!sysfs_pwm_.SetFrequency(frequency)) {
+  if (!pwm_subsystem_.SetFrequency(frequency)) {
     ROS_ERROR("Failed to set Frequency");
     return false;
   }
   ROS_INFO_STREAM("Set frequency to " << frequency);
 
-  if (sysfs_pwm_.IsRunning()) {
+  if (pwm_subsystem_.IsRunning()) {
     ROS_INFO("Pwm already running");
   } else {
     ROS_INFO("Starting pwm");
-    if (!sysfs_pwm_.Start()) {
+    if (!pwm_subsystem_.Start()) {
       ROS_ERROR("Could not start pwm");
       return false;
     }
@@ -62,7 +61,7 @@ void Node::Start() {
 
 void Node::CleanUp() {
   ROS_INFO("Cleaning up node");
-  if (!sysfs_pwm_.Stop()) {
+  if (!pwm_subsystem_.Stop()) {
     ROS_ERROR("Failed to stop pwm");
   }
   ROS_INFO("Stopped pwm");
