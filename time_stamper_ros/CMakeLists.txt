@@ -51,9 +51,11 @@ target_link_libraries(
 
 catkin_add_gtest(${PROJECT_NAME}-test
         test/test_entry_point.cc
+        test/test_mock_pwm_subsystem.cc
         )
 
 target_link_libraries(${PROJECT_NAME}-test
         ${PROJECT_NAME}
         ${catkin_LIBRARIES}
+        gmock_main
         )
