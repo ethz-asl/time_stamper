@@ -5,9 +5,7 @@
 bool Node::run_node = true;
 
 Node::Node(IPwmSubsystem &pwm_subsystem)
-    : pwm_subsystem_(pwm_subsystem) {
-
-}
+    : pwm_subsystem_(pwm_subsystem) {}
 
 bool Node::Init(int frequency, bool forceReset) {
   if (forceReset) {

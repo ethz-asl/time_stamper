@@ -5,7 +5,6 @@
 
 using ::testing::Return;
 
-//TODO Update Unittests - fix Reset() warnings
 class MockPwmSubsystem : public IPwmSubsystem {
  public:
   MOCK_METHOD0(IsExported, bool());
