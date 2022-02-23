@@ -5,12 +5,17 @@
 bool Node::run_node = true;
 
 Node::Node(IPwmSubsystem& pwm_subsystem)
-: pwm_subsystem_(pwm_subsystem) {}
+: pwm_subsystem_(pwm_subsystem) {
 
-bool Node::Init() {
-  pwm_subsystem_.Reset();
-  ROS_INFO("Reset pwm");
-  usleep(1e3 * 10);
+}
+
+bool Node::Init(int frequency, bool forceReset) {
+  if (forceReset) {
+    pwm_subsystem_.Reset();
+    ROS_INFO("Reset pwm");
+    usleep(1e3 * 10);
+  }
+
   timestamp_pub_ = nh_.advertise<time_stamper_ros::Timestamp>("time_stamper/Timestamp", 1);
   if (pwm_subsystem_.IsExported()) {
     ROS_INFO("Pwm already exported");
@@ -22,8 +27,6 @@ bool Node::Init() {
     ROS_INFO("Exported pwm");
   }
 
-  //TODO Move to config
-  int frequency = 50;
   if (!pwm_subsystem_.SetFrequency(frequency)) {
     ROS_ERROR("Failed to set Frequency");
     return false;

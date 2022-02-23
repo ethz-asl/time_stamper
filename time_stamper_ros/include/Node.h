@@ -5,7 +5,7 @@
 class Node {
  public:
   explicit Node(IPwmSubsystem& sysfs_pwm);
-  bool Init();
+  bool Init(int frequency, bool forceReset);
   void Start();
   void CleanUp();
   ~Node() = default;

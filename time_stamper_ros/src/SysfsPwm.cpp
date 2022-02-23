@@ -20,7 +20,12 @@ bool SysfsPwm::Reset() {
     return false;
   }
 
-  return Start();
+  if (!Start()) {
+    return false;
+  }
+  usleep(1e3 * 10);
+  Stop();
+  return true;
 }
 
 bool SysfsPwm::Export() {

@@ -15,7 +15,11 @@ int main(int argc, char **argv) {
   SysfsPwm sysfs_pwm;
   Node node(sysfs_pwm);
   signal(SIGINT, SignalHandler);
-  if (!node.Init()) {
+
+  ros::NodeHandle nh_private("~");
+  int frequency = nh_private.param("frequency", 50);
+
+  if (!node.Init(frequency, false)) {
     ROS_FATAL("Failed to initialize node.");
   }
   node.Start();

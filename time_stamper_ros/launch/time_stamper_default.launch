@@ -1,0 +1,5 @@
+<launch>
+    <node name="time_stamper" pkg="time_stamper_ros" type="time_stamper_ros-node" output="screen">
+        <param name = "frequency" value="100" type="int"/>
+    </node>
+</launch>
