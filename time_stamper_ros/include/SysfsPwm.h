@@ -13,6 +13,7 @@ class SysfsPwm : public IPwmSubsystem {
   bool Start() override;
   bool Stop() override;
   bool SetFrequency(int hz) override;
+  bool Reset() override;
 
   [[deprecated("This function is experimental and might break.")]]
   bool ChangeDutyCycle(int value) override;
@@ -23,4 +24,5 @@ class SysfsPwm : public IPwmSubsystem {
  private:
   static bool DirectoryExists(const char* path);
   bool ChangeDutyCycleRaw(int value) override;
+
 };

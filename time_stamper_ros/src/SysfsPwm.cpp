@@ -10,6 +10,19 @@ bool SysfsPwm::IsExported() {
   return false;
 }
 
+bool SysfsPwm::Reset() {
+  bool isReset = Unexport()
+  && Export()
+  && Write("/sys/class/pwm/pwmchip0/pwm0/period", "10000000")
+  && Write("/sys/class/pwm/pwmchip0/pwm0/duty_cycle", "5000000");
+
+  if (!isReset) {
+    return false;
+  }
+
+  return Start();
+}
+
 bool SysfsPwm::Export() {
   return Write("/sys/class/pwm/pwmchip0/export", "0");
 }
@@ -83,7 +96,7 @@ bool SysfsPwm::DirectoryExists(const char *path) {
     return false;
   }
 
-  DIR* pDir = opendir(path);
+  DIR *pDir = opendir(path);
 
   bool bExists = false;
 
