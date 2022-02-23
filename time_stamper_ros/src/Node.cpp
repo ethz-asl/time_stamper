@@ -4,8 +4,8 @@
 #include "TimestampManager.h"
 bool Node::run_node = true;
 
-Node::Node(IPwmSubsystem& pwm_subsystem)
-: pwm_subsystem_(pwm_subsystem) {
+Node::Node(IPwmSubsystem &pwm_subsystem)
+    : pwm_subsystem_(pwm_subsystem) {
 
 }
 
@@ -52,7 +52,6 @@ void Node::Start() {
   while (ros::ok() && Node::run_node) {
     ros::Rate loop_rate(10);
 
-
     if (timestamp_manager.Poll()) {
       time_stamper_ros::Timestamp msg;
       msg.timestamp = timestamp_manager.GetLastTimestamp();
@@ -64,7 +63,6 @@ void Node::Start() {
   }
   CleanUp();
 }
-
 
 void Node::CleanUp() {
   ROS_INFO("Cleaning up node");

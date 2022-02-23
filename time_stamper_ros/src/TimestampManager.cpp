@@ -6,7 +6,6 @@
 
 TimestampManager::TimestampManager() = default;
 
-
 bool TimestampManager::Poll() {
   int fd_ = open("/sys/kernel/time_stamper/ts_buffer", O_RDWR);
 

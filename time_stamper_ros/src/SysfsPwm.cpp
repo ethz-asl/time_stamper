@@ -3,8 +3,8 @@
 #include <cstring>
 #include <dirent.h>
 
-SysfsPwm::SysfsPwm(std::string  pwmchip_path)
-: pwm_chip_path_(std::move(pwmchip_path)) {}
+SysfsPwm::SysfsPwm(std::string pwmchip_path)
+    : pwm_chip_path_(std::move(pwmchip_path)) {}
 
 bool SysfsPwm::IsExported() {
   std::string pathstr = pwm_chip_path_ + "/pwm0";
@@ -16,9 +16,9 @@ bool SysfsPwm::IsExported() {
 
 bool SysfsPwm::Reset() {
   bool isReset = Unexport()
-  && Export()
-  && Write("/pwm0/period", "10000000")
-  && Write("/pwm0/duty_cycle", "5000000");
+      && Export()
+      && Write("/pwm0/period", "10000000")
+      && Write("/pwm0/duty_cycle", "5000000");
 
   if (!isReset) {
     return false;

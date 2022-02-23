@@ -5,7 +5,7 @@
 
 class SysfsPwm : public IPwmSubsystem {
  public:
-  explicit SysfsPwm(std::string  pwmchip_path);
+  explicit SysfsPwm(std::string pwmchip_path);
   bool IsExported() override;
   bool Export() override;
   bool Unexport() override;
@@ -17,15 +17,13 @@ class SysfsPwm : public IPwmSubsystem {
 
   [[deprecated("This function is experimental and might break.")]]
   bool ChangeDutyCycle(int value) override;
-  bool Write(const std::string& path, const std::string& message) override;
-  bool Read(const std::string& path, void* buffer, size_t buffer_size) override;
+  bool Write(const std::string &path, const std::string &message) override;
+  bool Read(const std::string &path, void *buffer, size_t buffer_size) override;
 
   ~SysfsPwm() = default;
  private:
   std::string pwm_chip_path_;
-  static bool DirectoryExists(const char* path);
+  static bool DirectoryExists(const char *path);
   bool ChangeDutyCycleRaw(int value) override;
-
-
 
 };

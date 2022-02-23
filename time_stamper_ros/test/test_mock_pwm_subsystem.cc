@@ -18,8 +18,8 @@ class MockPwmSubsystem : public IPwmSubsystem {
   MOCK_METHOD1(SetFrequency, bool(int hz));
   MOCK_METHOD1(ChangeDutyCycle, bool(int hz));
   MOCK_METHOD1(ChangeDutyCycleRaw, bool(int value));
-  MOCK_METHOD2(Write, bool(const std::string& path, const std::string& message));
-  MOCK_METHOD3(Read, bool(const std::string& path, void* buffer, size_t buffer_size));
+  MOCK_METHOD2(Write, bool(const std::string &path, const std::string &message));
+  MOCK_METHOD3(Read, bool(const std::string &path, void *buffer, size_t buffer_size));
 };
 
 TEST(MockPwmSubsystem, TestNodeInitUninitialized) {
@@ -119,7 +119,7 @@ TEST(MockPwmSubsystem, TestFrequencyValueValidation) {
 TEST(MockPwmSubsystem, TestNodeInitSanityCheck) {
   //Precondition: Subsystem is not exported but running, which is undefined behavior and should stop node instantly
 
- //TODO implement
+  //TODO implement
 }
 
 
