@@ -3,8 +3,12 @@
 #include <cstring>
 #include <dirent.h>
 
+SysfsPwm::SysfsPwm(std::string  pwmchip_path)
+: pwm_chip_path_(std::move(pwmchip_path)) {}
+
 bool SysfsPwm::IsExported() {
-  if (DirectoryExists("/sys/class/pwm/pwmchip0/pwm0")) {
+  std::string pathstr = pwm_chip_path_ + "/pwm0";
+  if (DirectoryExists(pathstr.c_str())) {
     return true;
   }
   return false;
@@ -13,8 +17,8 @@ bool SysfsPwm::IsExported() {
 bool SysfsPwm::Reset() {
   bool isReset = Unexport()
   && Export()
-  && Write("/sys/class/pwm/pwmchip0/pwm0/period", "10000000")
-  && Write("/sys/class/pwm/pwmchip0/pwm0/duty_cycle", "5000000");
+  && Write("/pwm0/period", "10000000")
+  && Write("/pwm0/duty_cycle", "5000000");
 
   if (!isReset) {
     return false;
@@ -29,16 +33,16 @@ bool SysfsPwm::Reset() {
 }
 
 bool SysfsPwm::Export() {
-  return Write("/sys/class/pwm/pwmchip0/export", "0");
+  return Write("/export", "0");
 }
 
 bool SysfsPwm::Unexport() {
-  return Write("/sys/class/pwm/pwmchip0/unexport", "0");
+  return Write("/unexport", "0");
 }
 
 bool SysfsPwm::IsRunning() {
   int a = 0;
-  bool has_read = Read("/sys/class/pwm/pwmchip0/pwm0/enable", &a, 1);
+  bool has_read = Read("/pwm0/enable", &a, 1);
 
   if (!has_read) {
     return false;
@@ -51,10 +55,10 @@ bool SysfsPwm::IsRunning() {
 }
 
 bool SysfsPwm::Start() {
-  return Write("/sys/class/pwm/pwmchip0/pwm0/enable", "1");
+  return Write("/pwm0/enable", "1");
 }
 bool SysfsPwm::Stop() {
-  return Write("/sys/class/pwm/pwmchip0/pwm0/enable", "0");
+  return Write("/pwm0/enable", "0");
 }
 
 bool SysfsPwm::SetFrequency(int hz) {
@@ -63,21 +67,22 @@ bool SysfsPwm::SetFrequency(int hz) {
   if (!r) {
     return false;
   }
-  return Write("/sys/class/pwm/pwmchip0/pwm0/period", std::to_string(freq));
+  return Write("/pwm0/period", std::to_string(freq));
 }
 
 bool SysfsPwm::ChangeDutyCycle(int percentage) {
   std::string value_str = std::to_string(5000000);
-  return Write("/sys/class/pwm/pwmchip0/pwm0/duty_cycle", value_str);
+  return Write("/pwm0/duty_cycle", value_str);
 }
 
 bool SysfsPwm::ChangeDutyCycleRaw(int value) {
   std::string value_str = std::to_string(value);
-  return Write("/sys/class/pwm/pwmchip0/pwm0/duty_cycle", value_str);
+  return Write("/pwm0/duty_cycle", value_str);
 }
 
 bool SysfsPwm::Write(const std::string &path, const std::string &message) {
-  int fd = open(path.c_str(), O_WRONLY);
+  std::string pathstr = pwm_chip_path_ + path;
+  int fd = open(pathstr.c_str(), O_WRONLY);
   if (fd == -1) {
     return false;
   }
@@ -89,7 +94,8 @@ bool SysfsPwm::Write(const std::string &path, const std::string &message) {
 }
 
 bool SysfsPwm::Read(const std::string &path, void *buffer, size_t buffer_size) {
-  int fd = open(path.c_str(), O_RDONLY);
+  std::string pathstr = pwm_chip_path_ + path;
+  int fd = open(pathstr.c_str(), O_RDONLY);
   if (fd == -1) {
     return false;
   }

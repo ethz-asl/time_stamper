@@ -5,7 +5,7 @@
 
 class SysfsPwm : public IPwmSubsystem {
  public:
-  SysfsPwm() = default;
+  explicit SysfsPwm(std::string  pwmchip_path);
   bool IsExported() override;
   bool Export() override;
   bool Unexport() override;
@@ -22,7 +22,10 @@ class SysfsPwm : public IPwmSubsystem {
 
   ~SysfsPwm() = default;
  private:
+  std::string pwm_chip_path_;
   static bool DirectoryExists(const char* path);
   bool ChangeDutyCycleRaw(int value) override;
+
+
 
 };
