@@ -3,6 +3,11 @@
 #include <fcntl.h>
 #include "IPwmSubsystem.h"
 
+#define SYSFS_EXPERIMENTAL [[deprecated("This function is experimental and might break.")]]
+
+/**
+ * Interface functions are documented in IPwmSubsystem.h
+ */
 class SysfsPwm : public IPwmSubsystem {
  public:
   /**
@@ -12,58 +17,17 @@ class SysfsPwm : public IPwmSubsystem {
   explicit SysfsPwm(std::string pwmchip_path);
 
   /**
-   * Checks if pwmchip is exported.
-   * @return if true pwmchip is exported, otherwise false.
+   * Interface functions are documented in IPwmSubsystem.h
    */
   bool IsExported() override;
-
-  /**
-   * Exports pwmchip.
-   * @return true if successful, otherwise false.
-   */
   bool Export() override;
-
-  /**
-   * Contrary to Export()
-   * @return true if successful, otherwise false.
-   */
   bool Unexport() override;
-
-  /**
-   * Checks if pwmchip is enabled/running
-   * @return true if running, otherwise false.
-   */
   bool IsRunning() override;
-
-  /**
-   * Enables pwmchip, IsRunning() is set to true.
-   * @return true if successful, otherwise false and errno is set.
-   */
   bool Start() override;
-
-  /**
-   * Disables pwmchip, IsRunning() is set to false.
-   * @return true if successful, otherwise false and errno is set.
-   */
-
   bool Stop() override;
-
-  /**
-   * Sets clock frequency.
-   * @param hz
-   * @return true if set, otherwise false.
-   */
   bool SetFrequency(int hz) override;
-
-  /**
-   * Useful when pwmchip is in a undefined state.
-   * Restarts pwmchip, Runs for a short period with default configuration and stops again.
-   * @return true if successful, otherwise false.
-   */
   bool Reset() override;
-
-  [[deprecated("This function is experimental and might break.")]]
-  bool ChangeDutyCycle(int value) override;
+  SYSFS_EXPERIMENTAL bool ChangeDutyCycle(int percentage) override;
 
   /**
    * Default destructor.
@@ -72,21 +36,12 @@ class SysfsPwm : public IPwmSubsystem {
 
  private:
   /**
-   * Internal write function. Wrapper for posix write(2) with some checks.
-   * @param path
-   * @param message
-   * @return true if successful, otherwise false and errno is set.
+   * IPwmSubsystem internal functions
    */
   bool Write(const std::string &path, const std::string &message) override;
-
-  /**
-   * Internal read function. Wrapper for posix read(2) with some checks.
-   * @param path relative to pwmchip path
-   * @param buffer buffer to read data to
-   * @param buffer_size sizeof(buffer)
-   * @return true if successful, otherwise false and errno is set.
-   */
   bool Read(const std::string &path, void *buffer, size_t buffer_size) override;
+  static bool DirectoryExists(const char *path);
+  bool ChangeDutyCycleRaw(int value) override;
 
   /**
    * Stores pwmchip path.
@@ -94,16 +49,15 @@ class SysfsPwm : public IPwmSubsystem {
   std::string pwm_chip_path_;
 
   /**
-   * Internal utility function to check if directory exists
-   * @param path Absolute path to directory
-   * @return true if directory exists, otherwise false.
+   * Internal constants
    */
-  static bool DirectoryExists(const char *path);
+  static constexpr int PWM_DEFAULT_PERIOD = 10000000;
+  static constexpr int PWM_DEFAULT_DUTYCYCLE = PWM_DEFAULT_PERIOD / 2;
 
-  /**
-   * Internal function to set duty cycle
-   * @param value raw value
-   * @return true if set successful, otherwise false.
-   */
-  bool ChangeDutyCycleRaw(int value) override;
+  inline static const std::string PWM0 = "/pwm0";
+  inline static const std::string PWM_EXPORT = "/export";
+  inline static const std::string PWM_UNEXPORT = "/unexport";
+  inline static const std::string PWM_ENABLE = "/pwm0/enable";
+  inline static const std::string PWM_PERIOD = "/pwm0/period";
+  inline static const std::string PWM_DUTYCYCLE = "/pwm0/duty_cycle";
 };

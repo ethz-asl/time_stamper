@@ -7,7 +7,7 @@ SysfsPwm::SysfsPwm(std::string pwmchip_path)
     : pwm_chip_path_(std::move(pwmchip_path)) {}
 
 bool SysfsPwm::IsExported() {
-  std::string pathstr = pwm_chip_path_ + "/pwm0";
+  std::string pathstr = pwm_chip_path_ + PWM0;
   if (DirectoryExists(pathstr.c_str())) {
     return true;
   }
@@ -17,8 +17,8 @@ bool SysfsPwm::IsExported() {
 bool SysfsPwm::Reset() {
   bool isReset = Unexport()
       && Export()
-      && Write("/pwm0/period", "10000000")
-      && Write("/pwm0/duty_cycle", "5000000");
+      && Write(PWM_PERIOD, std::to_string(PWM_DEFAULT_PERIOD))
+      && Write(PWM_DUTYCYCLE, std::to_string(PWM_DEFAULT_DUTYCYCLE));
 
   if (!isReset) {
     return false;
@@ -33,51 +33,53 @@ bool SysfsPwm::Reset() {
 }
 
 bool SysfsPwm::Export() {
-  return Write("/export", "0");
+  return Write(PWM_EXPORT, "0");
 }
 
 bool SysfsPwm::Unexport() {
-  return Write("/unexport", "0");
+  return Write(PWM_UNEXPORT, "0");
 }
 
 bool SysfsPwm::IsRunning() {
   int a = 0;
-  bool has_read = Read("/pwm0/enable", &a, 1);
+  bool has_read = Read(PWM_ENABLE, &a, 1);
 
   if (!has_read) {
     return false;
   }
 
-  if (a == 1) {
-    return true;
-  }
-  return false;
+  return a == 1;
 }
 
 bool SysfsPwm::Start() {
-  return Write("/pwm0/enable", "1");
+  return Write(PWM_ENABLE, "1");
 }
 bool SysfsPwm::Stop() {
-  return Write("/pwm0/enable", "0");
+  return Write(PWM_ENABLE, "0");
 }
 
 bool SysfsPwm::SetFrequency(int hz) {
+
+  if (hz == 0) {
+    return false;
+  }
+
   int freq = (int) 1e9 / hz;
   bool r = ChangeDutyCycleRaw(freq / 2);
   if (!r) {
     return false;
   }
-  return Write("/pwm0/period", std::to_string(freq));
+  return Write(PWM_PERIOD, std::to_string(freq));
 }
 
 bool SysfsPwm::ChangeDutyCycle(int percentage) {
   std::string value_str = std::to_string(5000000);
-  return Write("/pwm0/duty_cycle", value_str);
+  return Write(PWM_DUTYCYCLE, value_str);
 }
 
 bool SysfsPwm::ChangeDutyCycleRaw(int value) {
   std::string value_str = std::to_string(value);
-  return Write("/pwm0/duty_cycle", value_str);
+  return Write(PWM_DUTYCYCLE, value_str);
 }
 
 bool SysfsPwm::Write(const std::string &path, const std::string &message) {
