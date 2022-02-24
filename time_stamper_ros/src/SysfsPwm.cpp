@@ -69,11 +69,11 @@ bool SysfsPwm::SetFrequency(int hz) {
   }
 
   int freq = (int) 1e9 / hz;
-  bool r = ChangeDutyCycleRaw(freq / 2);
+  bool r = Write(PWM_PERIOD, std::to_string(freq));
   if (!r) {
     return false;
   }
-  return Write(PWM_PERIOD, std::to_string(freq));
+  return ChangeDutyCycleRaw(freq / 2); //50% DutyCycle
 }
 
 bool SysfsPwm::ChangeDutyCycle(int percentage) {
@@ -106,6 +106,7 @@ bool SysfsPwm::Read(const std::string &path, void *buffer, size_t buffer_size) {
     return false;
   }
   ssize_t nbytes = read(fd, buffer, buffer_size);
+  close(fd);
   return nbytes == buffer_size;
 }
 bool SysfsPwm::DirectoryExists(const char *path) {
@@ -119,7 +120,7 @@ bool SysfsPwm::DirectoryExists(const char *path) {
 
   if (pDir != nullptr) {
     bExists = true;
-    (void) closedir(pDir);
+    closedir(pDir);
   }
 
   return bExists;
