@@ -27,8 +27,12 @@ bool SysfsPwm::Reset() {
   if (!Start()) {
     return false;
   }
+  //Run pwmchip for 10ms before stopping
   usleep(1e3 * 10);
   Stop();
+
+  //Give pwmchip 10ms time to stop
+  usleep(1e3 * 10);
   return true;
 }
 

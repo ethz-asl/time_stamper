@@ -40,8 +40,6 @@ add_executable(${PROJECT_NAME}-node
         src/Main.cpp
         )
 
-#find_library(WIRINGPI_LIBRARIES NAMES wiringPi)
-#target_link_libraries(${PROJECT_NAME}_node ${WIRINGPI_LIBRARIES})
 target_link_libraries(
         ${PROJECT_NAME}-node
         ${catkin_LIBRARIES}

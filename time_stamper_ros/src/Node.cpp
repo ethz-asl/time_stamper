@@ -11,7 +11,6 @@ bool Node::Init(int frequency, bool forceReset) {
   if (forceReset) {
     pwm_subsystem_.Reset();
     ROS_INFO("Reset pwm");
-    usleep(1e3 * 10);
   }
 
   timestamp_pub_ = nh_.advertise<time_stamper_ros::Timestamp>("time_stamper/Timestamp", 1);
