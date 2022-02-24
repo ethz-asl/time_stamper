@@ -16,6 +16,7 @@ bool TimestampManager::Poll() {
   unsigned char temp_buffer[BUFFER_SIZE];
   ssize_t bytes = read(fd_, &temp_buffer, BUFFER_SIZE);
   if (bytes == 0) {
+    close(fd_);
     return false;
 
   }

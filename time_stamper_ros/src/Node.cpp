@@ -25,7 +25,7 @@ bool Node::Init(int frequency, bool forceReset) {
   }
 
   if (!pwm_subsystem_.SetFrequency(frequency)) {
-    ROS_ERROR("Failed to set Frequency");
+    ROS_ERROR_STREAM("Failed to set Frequency: " << strerror(errno));
     return false;
   }
   ROS_INFO_STREAM("Set frequency to " << frequency);
@@ -64,7 +64,8 @@ void Node::Start() {
 void Node::CleanUp() {
   ROS_INFO("Cleaning up node");
   if (!pwm_subsystem_.Stop()) {
-    ROS_ERROR("Failed to stop pwm");
+    ROS_ERROR_STREAM("Failed to stop pwm: " << strerror(errno));
+    return;
   }
   ROS_INFO("Stopped pwm");
 }
