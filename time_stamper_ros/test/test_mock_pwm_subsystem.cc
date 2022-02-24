@@ -32,7 +32,7 @@ TEST(MockPwmSubsystem, TestNodeInitUninitialized) {
   EXPECT_CALL(mock_pwm_subsystem, Export()).WillOnce(Return(true));
   EXPECT_CALL(mock_pwm_subsystem, SetFrequency(50)).WillOnce(Return(true));
   EXPECT_CALL(mock_pwm_subsystem, IsRunning()).WillOnce(Return(false));
-  EXPECT_CALL(mock_pwm_subsystem, Start).WillOnce(Return(true));
+  EXPECT_CALL(mock_pwm_subsystem, Start()).WillOnce(Return(true));
 
   node.Init(50, false);
 }
@@ -49,7 +49,7 @@ TEST(MockPwmSubsystem, TestNodeInitUninitializedWithForceReset) {
   EXPECT_CALL(mock_pwm_subsystem, Export()).WillOnce(Return(true));
   EXPECT_CALL(mock_pwm_subsystem, SetFrequency(50)).WillOnce(Return(true));
   EXPECT_CALL(mock_pwm_subsystem, IsRunning()).WillOnce(Return(false));
-  EXPECT_CALL(mock_pwm_subsystem, Start).WillOnce(Return(true));
+  EXPECT_CALL(mock_pwm_subsystem, Start()).WillOnce(Return(true));
 
   node.Init(50, true);
 }
