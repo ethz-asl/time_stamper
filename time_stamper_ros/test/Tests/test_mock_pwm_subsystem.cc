@@ -17,8 +17,6 @@ class MockPwmSubsystem : public IPwmSubsystem {
   MOCK_METHOD1(SetFrequency, bool(int hz));
   MOCK_METHOD1(ChangeDutyCycle, bool(int hz));
   MOCK_METHOD1(ChangeDutyCycleRaw, bool(int value));
-  MOCK_METHOD2(Write, bool(const std::string &path, const std::string &message));
-  MOCK_METHOD3(Read, bool(const std::string &path, void *buffer, size_t buffer_size));
 };
 
 TEST(MockPwmSubsystem, TestNodeInitUninitialized) {
@@ -103,16 +101,6 @@ TEST(MockPwmSubsystem, TestNodeInitFailSetFrequency) {
   EXPECT_CALL(mock_pwm_subsystem, SetFrequency(50)).WillOnce(Return(false));
 
   node.Init(50, false);
-}
-
-TEST(MockPwmSubsystem, TestFrequencyValueValidation) {
-  //Precondition: Subsystem is in any valid state
-  MockPwmSubsystem mock_pwm_subsystem;
-  //TODO define valid range
-
-  //Expectation: Subsystem should filter invalid values
-  EXPECT_CALL(mock_pwm_subsystem, SetFrequency(50)).WillOnce(Return(true));
-  mock_pwm_subsystem.SetFrequency(50);
 }
 
 TEST(MockPwmSubsystem, TestNodeInitSanityCheck) {

@@ -34,7 +34,11 @@ include_directories(
 add_library(${PROJECT_NAME}
         src/SysfsPwm.cpp
         src/Node.cpp
-        src/TimestampManager.cpp include/TimestampManager.h)
+        src/TimestampManager.cpp
+        include/TimestampManager.h
+        include/IFileSystem.h
+        src/Filesystem.cpp
+        include/Filesystem.h )
 
 add_executable(${PROJECT_NAME}-node
         src/Main.cpp
@@ -48,8 +52,10 @@ target_link_libraries(
 )
 
 catkin_add_gtest(${PROJECT_NAME}-test
-        test/test_entry_point.cc
-        test/test_mock_pwm_subsystem.cc
+        test/Mocks/MockFilesystem.h
+        test/Tests/test_entry_point.cc
+        test/Tests/test_mock_pwm_subsystem.cc
+        test/Tests/test_mock_filesystem.cc
         )
 
 target_link_libraries(${PROJECT_NAME}-test

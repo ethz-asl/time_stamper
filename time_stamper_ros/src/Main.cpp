@@ -3,6 +3,7 @@
 #include "ros/ros.h"
 #include "Node.h"
 #include "SysfsPwm.h"
+#include "Filesystem.h"
 
 void SignalHandler(int signum) {
   if (signum == SIGINT) {
@@ -18,7 +19,8 @@ int main(int argc, char **argv) {
   int frequency = nh_private.param("frequency", 50);
   std::string pwmchip_path = nh_private.param("pwmchip_path", std::string("/sys/class/pwm/pwmchip0"));
 
-  SysfsPwm sysfs_pwm(pwmchip_path);
+  Filesystem filesystem;
+  SysfsPwm sysfs_pwm(pwmchip_path, filesystem);
   Node node(sysfs_pwm);
   signal(SIGINT, SignalHandler);
 

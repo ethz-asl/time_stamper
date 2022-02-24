@@ -2,19 +2,20 @@
 #include <string>
 #include <fcntl.h>
 #include "IPwmSubsystem.h"
+#include "IFileSystem.h"
 
 #define SYSFS_EXPERIMENTAL [[deprecated("This function is experimental and might break.")]]
 
 /**
  * Interface functions are documented in IPwmSubsystem.h
  */
-class SysfsPwm : public IPwmSubsystem {
+ class SysfsPwm : public IPwmSubsystem {
  public:
   /**
    * SysfsPwm constructor.
    * @param pwmchip_path path to pwmchip e.g. /sys/class/pwm/pwmchip0
    */
-  explicit SysfsPwm(std::string pwmchip_path);
+  SysfsPwm(std::string pwmchip_path, IFileSystem& file_system);
 
   /**
    * Interface functions are documented in IPwmSubsystem.h
@@ -38,9 +39,6 @@ class SysfsPwm : public IPwmSubsystem {
   /**
    * IPwmSubsystem internal functions
    */
-  bool Write(const std::string &path, const std::string &message) override;
-  bool Read(const std::string &path, void *buffer, size_t buffer_size) override;
-  static bool DirectoryExists(const char *path);
   bool ChangeDutyCycleRaw(int value) override;
 
   /**
@@ -49,15 +47,8 @@ class SysfsPwm : public IPwmSubsystem {
   std::string pwm_chip_path_;
 
   /**
-   * Internal constants
+   * Interface to access filesystem
    */
-  static constexpr int PWM_DEFAULT_PERIOD = 10000000;
-  static constexpr int PWM_DEFAULT_DUTYCYCLE = PWM_DEFAULT_PERIOD / 2;
 
-  inline static const std::string PWM0 = "/pwm0";
-  inline static const std::string PWM_EXPORT = "/export";
-  inline static const std::string PWM_UNEXPORT = "/unexport";
-  inline static const std::string PWM_ENABLE = "/pwm0/enable";
-  inline static const std::string PWM_PERIOD = "/pwm0/period";
-  inline static const std::string PWM_DUTYCYCLE = "/pwm0/duty_cycle";
+  IFileSystem &fs_;
 };

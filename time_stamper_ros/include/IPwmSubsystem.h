@@ -66,28 +66,26 @@ class IPwmSubsystem {
   virtual bool ChangeDutyCycleRaw(int value) = 0;
 
   /**
-   * Internal write function. Wrapper for posix write(2) with some checks.
-   * @param path
-   * @param message
-   * @return true if successful, otherwise false and errno is set.
-   */
-  virtual bool Write(const std::string &path, const std::string &message) = 0;
-
-  /**
-   * Internal read function. Wrapper for posix read(2) with some checks.
-   * @param path relative to pwmchip path
-   * @param buffer buffer to read data to
-   * @param buffer_size sizeof(buffer)
-   * @return true if successful, otherwise false and errno is set.
-   */
-  virtual bool Read(const std::string &path, void *buffer, size_t buffer_size) = 0;
-
-  /**
    * Useful when pwmchip is in a undefined state.
    * Restarts pwmchip, Runs for a short period with default configuration and stops again.
    * @return true if successful, otherwise false.
    */
   virtual bool Reset() = 0;
+
+
+  /**
+   * Internal constants
+   */
+  static constexpr int PWM_MAXSPEED_HZ = 10526315; //95ns
+  static constexpr int PWM_DEFAULT_PERIOD = 10000000;
+  static constexpr int PWM_DEFAULT_DUTYCYCLE = PWM_DEFAULT_PERIOD / 2;
+
+  inline static const std::string PWM0 = "/pwm0";
+  inline static const std::string PWM_EXPORT = "/export";
+  inline static const std::string PWM_UNEXPORT = "/unexport";
+  inline static const std::string PWM_ENABLE = "/pwm0/enable";
+  inline static const std::string PWM_PERIOD = "/pwm0/period";
+  inline static const std::string PWM_DUTYCYCLE = "/pwm0/duty_cycle";
 
   /**
    * Default destructor
