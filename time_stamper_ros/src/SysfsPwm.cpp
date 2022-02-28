@@ -1,15 +1,12 @@
 #include <SysfsPwm.h>
 #include <unistd.h>
+#include <iostream>
 
-SysfsPwm::SysfsPwm(std::string pwmchip_path, IFileSystem& file_system)
+SysfsPwm::SysfsPwm(std::string pwmchip_path, IFileSystem &file_system)
     : pwm_chip_path_(std::move(pwmchip_path)), fs_(file_system) {}
 
 bool SysfsPwm::IsExported() {
-  std::string pathstr = pwm_chip_path_ + PWM0;
-  if (fs_.DirectoryExists(pathstr.c_str())) {
-    return true;
-  }
-  return false;
+  return fs_.DirectoryExists((pwm_chip_path_ + PWM0).c_str());
 }
 
 bool SysfsPwm::Reset() {
@@ -67,10 +64,9 @@ bool SysfsPwm::SetFrequency(int hz) {
     return false;
   }
 
-  /*Dutycycle needs to be smaller than period or else pwm0 throws invalid argument error.
+  /* Dutycycle needs to be smaller than period or else pwm0 throws invalid argument error.
   Set to 0 to ignore previous state and avoid errors */
   fs_.Write(pwm_chip_path_ + PWM_DUTYCYCLE, "0");
-
 
   int freq = (int) 1e9 / hz;
   bool r = fs_.Write(pwm_chip_path_ + PWM_PERIOD, std::to_string(freq));
@@ -81,11 +77,23 @@ bool SysfsPwm::SetFrequency(int hz) {
 }
 
 bool SysfsPwm::ChangeDutyCycle(int percentage) {
-  std::string value_str = std::to_string(5000000);
-  return fs_.Write(pwm_chip_path_ + PWM_DUTYCYCLE, value_str);
+  if (percentage > 100 || percentage <= 0) {
+    errno = EINVAL;
+    return false;
+  }
+
+  int freq = 0;
+  if (!GetFrequency(&freq, sizeof(freq))) {
+    return false;
+  }
+  int raw_duty_cycle = (freq / 100) * percentage;
+  return fs_.Write(pwm_chip_path_ + PWM_DUTYCYCLE, std::to_string(raw_duty_cycle));
 }
 
 bool SysfsPwm::ChangeDutyCycleRaw(int value) {
   std::string value_str = std::to_string(value);
   return fs_.Write(pwm_chip_path_ + PWM_DUTYCYCLE, value_str);
+}
+bool SysfsPwm::GetFrequency(void *buffer, ssize_t size) {
+  return fs_.Read(pwm_chip_path_ + PWM_PERIOD, buffer, size);
 }

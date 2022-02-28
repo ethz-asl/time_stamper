@@ -1,4 +1,5 @@
 #include <dirent.h>
+#include "sys/stat.h"
 #include <unistd.h>
 #include <fcntl.h>
 #include "Filesystem.h"
@@ -30,14 +31,10 @@ bool Filesystem::DirectoryExists(const char *path) {
     return false;
   }
 
-  DIR *pDir = opendir(path);
-
-  bool bExists = false;
-
-  if (pDir != nullptr) {
-    bExists = true;
-    closedir(pDir);
+  struct stat fileInfo{};
+  if (lstat(path, &fileInfo) != 0) {
+    return false;
   }
 
-  return bExists;
+  return S_ISDIR(fileInfo.st_mode);
 }

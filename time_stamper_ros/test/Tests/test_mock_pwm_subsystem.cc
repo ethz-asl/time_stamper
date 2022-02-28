@@ -17,6 +17,7 @@ class MockPwmSubsystem : public IPwmSubsystem {
   MOCK_METHOD1(SetFrequency, bool(int hz));
   MOCK_METHOD1(ChangeDutyCycle, bool(int hz));
   MOCK_METHOD1(ChangeDutyCycleRaw, bool(int value));
+  MOCK_METHOD2(GetFrequency, bool(void *buffer, ssize_t size));
 };
 
 TEST(MockPwmSubsystem, TestNodeInitUninitialized) {
@@ -102,11 +103,3 @@ TEST(MockPwmSubsystem, TestNodeInitFailSetFrequency) {
 
   node.Init(50, false);
 }
-
-TEST(MockPwmSubsystem, TestNodeInitSanityCheck) {
-  //Precondition: Subsystem is not exported but running, which is undefined behavior and should stop node instantly
-
-  //TODO implement
-}
-
-

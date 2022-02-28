@@ -9,13 +9,13 @@
 /**
  * Interface functions are documented in IPwmSubsystem.h
  */
- class SysfsPwm : public IPwmSubsystem {
+class SysfsPwm : public IPwmSubsystem {
  public:
   /**
    * SysfsPwm constructor.
    * @param pwmchip_path path to pwmchip e.g. /sys/class/pwm/pwmchip0
    */
-  SysfsPwm(std::string pwmchip_path, IFileSystem& file_system);
+  SysfsPwm(std::string pwmchip_path, IFileSystem &file_system);
 
   /**
    * Interface functions are documented in IPwmSubsystem.h
@@ -28,6 +28,7 @@
   bool Stop() override;
   bool SetFrequency(int hz) override;
   bool Reset() override;
+  bool GetFrequency(void *buffer, ssize_t size) override;
   SYSFS_EXPERIMENTAL bool ChangeDutyCycle(int percentage) override;
 
   /**
