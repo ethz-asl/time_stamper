@@ -3,35 +3,11 @@ project(time_stamper_ros)
 
 add_compile_options(-std=c++17)
 
-find_package(catkin REQUIRED
-        roscpp
-        std_msgs
-        message_generation
-        )
+find_package(catkin_simple REQUIRED)
+catkin_simple()
 
-add_message_files(FILES
-        Timestamp.msg
-        )
 
-generate_messages(DEPENDENCIES std_msgs)
-
-catkin_package(
-        INCLUDE_DIRS include
-        LIBRARIES rpi_timestamp_generator
-        CATKIN_DEPENDS roscpp message_runtime
-)
-
-set(CMAKE_MODULE_PATH
-        ${CMAKE_MODULE_PATH}
-        ${PROJECT_SOURCE_DIR}/cmake/
-        )
-
-include_directories(
-        include
-        ${catkin_INCLUDE_DIRS}
-)
-
-add_library(${PROJECT_NAME}
+cs_add_library(${PROJECT_NAME}
         src/SysfsPwm.cpp
         src/Node.cpp
         src/TimestampManager.cpp
@@ -40,15 +16,13 @@ add_library(${PROJECT_NAME}
         src/Filesystem.cpp
         include/Filesystem.h )
 
-add_executable(${PROJECT_NAME}-node
+cs_add_executable(${PROJECT_NAME}-node
         src/Main.cpp
         )
 
 target_link_libraries(
         ${PROJECT_NAME}-node
-        ${catkin_LIBRARIES}
         ${PROJECT_NAME}
-
 )
 
 catkin_add_gtest(${PROJECT_NAME}-test
@@ -63,3 +37,6 @@ target_link_libraries(${PROJECT_NAME}-test
         ${catkin_LIBRARIES}
         gmock_main
         )
+
+cs_install()
+cs_export()
