@@ -3,10 +3,18 @@
 #include <sys/types.h>
 #include <pwd.h>
 #include "ros/ros.h"
-using namespace cv;
+#include "Node.h"
 
-int main() {
-
+int main(int argc, char **argv) {
+  ros::init( argc, argv, "cv_node");
+  Node node;
+  if (!node.Init()) {
+    return -1;
+  }
+  node.Start();
+  ros::spin();
+  return 0;
+/*
   struct passwd *pw = getpwuid(getuid());
   const char *homedir = pw->pw_dir;
 
@@ -29,4 +37,5 @@ int main() {
   destroyAllWindows();
   // Write the image in the same directory
   imwrite(path_to_img + "grayscale.jpg", img_grayscale);
+  */
 }
