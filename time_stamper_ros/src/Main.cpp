@@ -26,6 +26,7 @@ int main(int argc, char **argv) {
 
   if (!node.Init(frequency, false)) {
     ROS_FATAL("Failed to initialize node.");
+    return -1;
   }
   node.Start();
   return 0;
