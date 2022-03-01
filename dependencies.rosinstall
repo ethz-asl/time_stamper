@@ -1,0 +1,2 @@
+- git: {local-name: mav_tools, uri: 'git@github.com:ethz-asl/mav_tools.git'}
+- git: {local-name: catkin_simple, uri: 'git@github.com:catkin/catkin_simple.git', version: 0e62848}
