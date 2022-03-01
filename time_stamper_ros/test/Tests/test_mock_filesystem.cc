@@ -5,7 +5,7 @@
 
 using ::testing::Return;
 
-TEST(MockFileSystem, TestSetFrequencyInputValidation) {
+TEST(MockFileSystem, TestSetFrequencyInvalidInput) {
   //Precondition: Subsystem is in any valid state
   MockFilesystem mock_filesystem;
   SysfsPwm sysfs_pwm("/sys/class/pwm/pwmchip0", mock_filesystem);
@@ -15,13 +15,18 @@ TEST(MockFileSystem, TestSetFrequencyInputValidation) {
 
   bool setFrequencyResult = sysfs_pwm.SetFrequency(IPwmSubsystem::PWM_MAXSPEED_HZ + 1);
   EXPECT_EQ(setFrequencyResult, false);
-   setFrequencyResult = sysfs_pwm.SetFrequency(0);
+  setFrequencyResult = sysfs_pwm.SetFrequency(0);
   EXPECT_EQ(setFrequencyResult, false);
   setFrequencyResult = sysfs_pwm.SetFrequency(-1);
   EXPECT_EQ(setFrequencyResult, false);
+}
 
+TEST(MockFileSystem, TestSetFrequencyValidInputBasic) {
+  //Precondition: Subsystem is in any valid state
+  MockFilesystem mock_filesystem;
+  SysfsPwm sysfs_pwm("/sys/class/pwm/pwmchip0", mock_filesystem);
 
-
+  //Expectation: Subsystem should set dutycycle and period on valid input
   int hz = 1;
   int freq = (int) (1e9 / hz);
   EXPECT_CALL(mock_filesystem, Write("/sys/class/pwm/pwmchip0" + SysfsPwm::PWM_DUTYCYCLE, "0"))
@@ -33,13 +38,18 @@ TEST(MockFileSystem, TestSetFrequencyInputValidation) {
   EXPECT_CALL(mock_filesystem, Write("/sys/class/pwm/pwmchip0" + SysfsPwm::PWM_DUTYCYCLE, std::to_string(freq / 2)))
   .Times(1).WillOnce(Return(true));
 
-  setFrequencyResult = sysfs_pwm.SetFrequency(hz);
+  bool setFrequencyResult = sysfs_pwm.SetFrequency(hz);
   EXPECT_EQ(setFrequencyResult, true);
+}
 
+TEST(MockFileSystem, TestSetFrequencyValidInputLimit) {
+  //Precondition: Subsystem is in any valid state
+  MockFilesystem mock_filesystem;
+  SysfsPwm sysfs_pwm("/sys/class/pwm/pwmchip0", mock_filesystem);
 
-
-  hz = IPwmSubsystem::PWM_MAXSPEED_HZ;
-  freq = (int) (1e9 / hz);
+  //Expectation: Subsystem should set dutycycle and period on valid input
+  int hz = IPwmSubsystem::PWM_MAXSPEED_HZ;
+  int freq = (int) (1e9 / hz);
   EXPECT_CALL(mock_filesystem, Write("/sys/class/pwm/pwmchip0" + SysfsPwm::PWM_DUTYCYCLE, "0"))
   .Times(1).WillOnce(Return(true));
 
@@ -49,7 +59,7 @@ TEST(MockFileSystem, TestSetFrequencyInputValidation) {
   EXPECT_CALL(mock_filesystem, Write("/sys/class/pwm/pwmchip0" + SysfsPwm::PWM_DUTYCYCLE, std::to_string(freq / 2)))
   .Times(1).WillOnce(Return(true));
 
-  setFrequencyResult = sysfs_pwm.SetFrequency(hz);
+  bool setFrequencyResult = sysfs_pwm.SetFrequency(hz);
   EXPECT_EQ(setFrequencyResult, true);
 
 }
