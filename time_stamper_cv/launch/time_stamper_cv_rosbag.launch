@@ -1,0 +1,15 @@
+<launch>
+<arg name="scale" default="1.0" />
+<arg name="calib_path" default="$(find time_stamper_cv)/config/camchain-2022-03-15-16-17-06.yaml"/>
+
+  <node name="image_undistort_node" pkg="image_undistort" type="image_undistort_node" output="screen" clear_params="true">
+    <param name="input_camera_namespace" value="cam0"/>
+    <param name="input_camera_info_from_ros_params" value = "true"/>
+    <param name="scale" value="$(arg scale)"/>
+        <param name="publish_tf" value="false"/>
+    <rosparam file="$(arg calib_path)"/>
+    <remap from="input/image" to="/camera/image_raw"/>
+  </node>
+
+
+</launch>

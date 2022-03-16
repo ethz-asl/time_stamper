@@ -6,7 +6,7 @@
 #include "Node.h"
 
 int main(int argc, char **argv) {
-  ros::init( argc, argv, "cv_node");
+  ros::init(argc, argv, "cv_node");
   Node node;
   if (!node.Init()) {
     return -1;
@@ -14,6 +14,8 @@ int main(int argc, char **argv) {
   node.Start();
   ros::spin();
   return 0;
+
+
 /*
   struct passwd *pw = getpwuid(getuid());
   const char *homedir = pw->pw_dir;
