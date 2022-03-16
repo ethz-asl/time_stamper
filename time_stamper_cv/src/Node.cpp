@@ -24,7 +24,7 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
 
   // Filter by Area.
   params.filterByArea = true;
-  params.minArea = 150;
+  params.minArea = 10;
 
   // Filter by Circularity
   params.filterByCircularity = true;
@@ -50,6 +50,7 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
 
   if (keypoints.empty()) {
     ROS_WARN("Keypoints empty");
+    return;
   } else {
     std::cout << keypoints.size() << std::endl;
   }
@@ -57,9 +58,20 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
   //cv::Mat m_with_leds;
   //cv::drawKeypoints(input_mat, keypoints, m_with_leds, cv::Scalar(0, 0, 255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
 
+
+
+  std::vector<cv::Point> points{};
+
   for (const cv::KeyPoint &key_point : keypoints) {
     std::cout << "X: " << key_point.pt.x << " Y: " << key_point.pt.y << std::endl;
+    points.push_back(key_point.pt);
   }
+
+
+  std::vector<cv::Point> hull{};
+  cv::convexHull(points, hull, true);
+  cv::polylines(input_mat, hull, true, cv::Scalar(255, 0, 0));
+
   corner_leds corners = CalcCornerLeds(keypoints);
 
   edges.push_back(corners.upperLeft);
