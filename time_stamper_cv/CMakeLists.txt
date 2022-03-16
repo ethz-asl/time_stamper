@@ -22,5 +22,16 @@ target_link_libraries(
         ${PROJECT_NAME}
 )
 
+catkin_add_gtest(${PROJECT_NAME}-test
+        test/test_entry_point.cc
+        test/test_algorithms.cc
+        )
+
+target_link_libraries(
+        ${PROJECT_NAME}
+        ${catkin_LIBRARIES}
+        gmock_main
+)
+
 cs_install()
 cs_export()
