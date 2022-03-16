@@ -11,11 +11,5 @@
     <exec_depend>roscpp</exec_depend>
     <depend>cv_bridge</depend>
     <depend>sensor_msgs</depend>
-
-
-    <!-- The export tag contains other, unspecified, tags -->
-    <export>
-        <!-- Other tools can request additional information be placed here -->
-
-    </export>
+    <depend>image_undistort</depend>
 </package>

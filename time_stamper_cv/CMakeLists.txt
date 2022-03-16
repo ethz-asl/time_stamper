@@ -10,9 +10,15 @@ cs_add_library(${PROJECT_NAME}
         )
 cs_add_executable(${PROJECT_NAME}-node src/Main.cpp)
 
-
 target_link_libraries(
         ${PROJECT_NAME}-node
+        ${PROJECT_NAME}
+)
+
+cs_add_executable(${PROJECT_NAME}-blobtest src/BlobDetectionTest.cpp)
+
+target_link_libraries(
+        ${PROJECT_NAME}-blobtest
         ${PROJECT_NAME}
 )
 
