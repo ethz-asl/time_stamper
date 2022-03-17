@@ -15,6 +15,7 @@ cs_add_executable(${PROJECT_NAME}-node src/Main.cpp)
 target_link_libraries(
         ${PROJECT_NAME}-node
         ${PROJECT_NAME}
+        ${catkin_LIBRARIES}
 )
 
 cs_add_executable(${PROJECT_NAME}-blobtest src/BlobDetectionTest.cpp)
@@ -22,6 +23,7 @@ cs_add_executable(${PROJECT_NAME}-blobtest src/BlobDetectionTest.cpp)
 target_link_libraries(
         ${PROJECT_NAME}-blobtest
         ${PROJECT_NAME}
+        ${catkin_LIBRARIES}
 )
 
 catkin_add_gtest(${PROJECT_NAME}-test
