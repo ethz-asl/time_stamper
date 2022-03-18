@@ -22,6 +22,8 @@ class Node {
   void Start();
   ~Node();
 
+  static constexpr const char*  OPENCV_WINDOW = "Image window";
+
  private:
   /**
    * @param keypoints

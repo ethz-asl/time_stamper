@@ -1,6 +1,6 @@
 #include "Node.h"
+#include "Trigonometry.h"
 
-static const std::string OPENCV_WINDOW = "Image window";
 
 Node::Node() {
   //cv::namedWindow(OPENCV_WINDOW);
@@ -24,7 +24,7 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
 
   // Filter by Area.
   params.filterByArea = true;
-  params.minArea = 10;
+  params.minArea = 150;
 
   // Filter by Circularity
   params.filterByCircularity = true;
@@ -63,7 +63,7 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
   std::vector<cv::Point> points{};
 
   for (const cv::KeyPoint &key_point : keypoints) {
-    std::cout << "X: " << key_point.pt.x << " Y: " << key_point.pt.y << std::endl;
+    //std::cout << "X: " << key_point.pt.x << " Y: " << key_point.pt.y << std::endl;
     points.push_back(key_point.pt);
   }
 
@@ -71,6 +71,22 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
   std::vector<cv::Point> hull{};
   cv::convexHull(points, hull, true);
   cv::polylines(input_mat, hull, true, cv::Scalar(255, 0, 0));
+
+  cv::Point point_a = hull.at(hull.size() - 2);
+  cv::Point point_b = hull.at(hull.size() - 1);
+
+  std::vector<double> angles{};
+
+  for (const auto& point_c : hull) {
+    double angle = Trigonometry::CalcAngleCTriangle(point_a, point_c, point_b);
+    std::cout << " A: " << angle << std::endl;
+
+    cv::circle(input_mat, point_b, 30, cv::Scalar(255, 0, 0));
+    cv::putText(input_mat, std::to_string(angle), cvPoint(point_b.x, point_b.y - 40), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(200, 200, 250));
+    angles.push_back(angle);
+    point_a = point_b;
+    point_b = point_c;
+  }
 
   corner_leds corners = CalcCornerLeds(keypoints);
 
@@ -82,6 +98,8 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
   cv::Mat m_with_leds;
   cv::drawKeypoints(input_mat, edges, m_with_leds, cv::Scalar(0, 255, 0), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
 
+
+  //cv::circle()
 
   //cv::Mat m_with_fixed_leds;
   //cv::drawKeypoints(m_with_leds, edges, m_with_fixed_leds, cv::Scalar(255, 0, 0), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
