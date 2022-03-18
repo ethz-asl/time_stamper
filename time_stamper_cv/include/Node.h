@@ -22,6 +22,9 @@ class Node {
   void Start();
   ~Node();
 
+
+  static bool filter(double min, double max, double value);
+
   static constexpr const char*  OPENCV_WINDOW = "Image window";
 
  private:

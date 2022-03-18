@@ -1,7 +1,6 @@
 #include "Node.h"
 #include "Trigonometry.h"
 
-
 Node::Node() {
   //cv::namedWindow(OPENCV_WINDOW);
 }
@@ -24,7 +23,7 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
 
   // Filter by Area.
   params.filterByArea = true;
-  params.minArea = 150;
+  params.minArea = 50;
 
   // Filter by Circularity
   params.filterByCircularity = true;
@@ -46,8 +45,6 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
 
   detector->detect(input_mat, keypoints);
 
-
-
   if (keypoints.empty()) {
     ROS_WARN("Keypoints empty");
     return;
@@ -67,25 +64,48 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
     points.push_back(key_point.pt);
   }
 
-
   std::vector<cv::Point> hull{};
   cv::convexHull(points, hull, true);
   cv::polylines(input_mat, hull, true, cv::Scalar(255, 0, 0));
 
-  cv::Point point_a = hull.at(hull.size() - 2);
-  cv::Point point_b = hull.at(hull.size() - 1);
+  if (hull.size() > 3) {
 
-  std::vector<double> angles{};
+    cv::Point point_a = hull.at(hull.size() - 2);
+    cv::Point point_b = hull.at(hull.size() - 1);
 
-  for (const auto& point_c : hull) {
-    double angle = Trigonometry::CalcAngleCTriangle(point_a, point_c, point_b);
-    std::cout << " A: " << angle << std::endl;
+    std::vector<double> angles{};
 
-    cv::circle(input_mat, point_b, 30, cv::Scalar(255, 0, 0));
-    cv::putText(input_mat, std::to_string(angle), cvPoint(point_b.x, point_b.y - 40), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(200, 200, 250));
-    angles.push_back(angle);
-    point_a = point_b;
-    point_b = point_c;
+    for (const auto &point_c : hull) {
+      double angle = Trigonometry::CalcAngleCTriangle(point_a, point_c, point_b);
+
+      if (angle < 170 || angle > 190) {
+        std::cout << " A: " << angle << std::endl;
+        cv::circle(input_mat, point_b, 30, cv::Scalar(255, 0, 0));
+        cv::putText(input_mat, std::to_string(angle), cvPoint(point_b.x, point_b.y - 40),
+                    cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(200, 200, 250));
+        angles.push_back(angle);
+      }
+
+      point_a = point_b;
+      point_b = point_c;
+    }
+
+    if (angles.size() == 4) {
+      std::sort(angles.begin(), angles.end());
+
+      if (
+      filter(20, 40, angles.at(0)) &&
+      filter(80, 100, angles.at(1)) &&
+      filter(80, 100, angles.at(2)) &&
+      filter(140, 160, angles.at(3))
+      ) {
+        ROS_INFO("Form valid");
+      }
+
+    } else {
+      ROS_WARN("Invalid shape");
+    }
+
   }
 
   corner_leds corners = CalcCornerLeds(keypoints);
@@ -131,7 +151,7 @@ point2 Node::GetLeftCornerLeds(const std::vector<cv::KeyPoint> &keypoints) {
       continue;
     }
 
-    if (key_point.pt.x < point_2.second.pt.x  || point_2.first.pt.y == 0) {
+    if (key_point.pt.x < point_2.second.pt.x || point_2.first.pt.y == 0) {
       point_2.second = key_point;
       continue;
     }
@@ -140,7 +160,7 @@ point2 Node::GetLeftCornerLeds(const std::vector<cv::KeyPoint> &keypoints) {
   return point_2;
 }
 
-corner_leds Node::CalcCornerLeds(const std::vector<cv::KeyPoint>& keypoints) {
+corner_leds Node::CalcCornerLeds(const std::vector<cv::KeyPoint> &keypoints) {
   point2 point_2 = GetLeftCornerLeds(keypoints);
 
   corner_leds corners;
@@ -165,7 +185,7 @@ corner_leds Node::CalcCornerLeds(const std::vector<cv::KeyPoint>& keypoints) {
 
   float rowBoundary = (upperLeft.pt.y + lowerLeft.pt.y) / 2;
 
-  for (const cv::KeyPoint& key_point : keypoints) {
+  for (const cv::KeyPoint &key_point : keypoints) {
     if (key_point.pt.y > rowBoundary) {
       lowerRow.push_back(key_point);
     } else {
@@ -173,14 +193,13 @@ corner_leds Node::CalcCornerLeds(const std::vector<cv::KeyPoint>& keypoints) {
     }
   }
 
-
-  for (const cv::KeyPoint& key_point : upperRow) {
-      if (key_point.pt.x > upperRight.pt.x) {
-        upperRight = key_point;
-      }
+  for (const cv::KeyPoint &key_point : upperRow) {
+    if (key_point.pt.x > upperRight.pt.x) {
+      upperRight = key_point;
+    }
   }
 
-  for (const cv::KeyPoint& key_point : lowerRow) {
+  for (const cv::KeyPoint &key_point : lowerRow) {
     if (key_point.pt.x > lowerRight.pt.x) {
       lowerRight = key_point;
     }
@@ -191,6 +210,13 @@ corner_leds Node::CalcCornerLeds(const std::vector<cv::KeyPoint>& keypoints) {
   corners.upperRight = upperRight;
   corners.upperLeft = upperLeft;
   return corners;
+}
+
+bool Node::filter(double min, double max, double value) {
+  if (min > max) {
+    abort();
+  }
+  return value >= min || value <= max;
 }
 
 
