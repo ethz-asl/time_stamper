@@ -146,31 +146,26 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
 
       cv::transform(leds, leds_img, homography.inv());
 
-      int radius = 10;
       bool isrunning = false;
-      cv::Mat cropped;
+      float radius = 10.0f;
       for (const auto &led: leds_img) {
         if (isrunning) {
           continue;
         }
 
+        //Normalized led point
+        cv::Point2f led_pos{led.x / led.z, led.y / led.z};
 
-        if (led.x > 0 && led.y > 0) {
+        int row_begin = (int) (led_pos.x - (radius / 2.0f));
+        int col_begin = (int) (led_pos.y - (radius / 2.0f));
 
-          std::cout << "Test test" << led.x << " " << led.y << std::endl;
+        //Create 16x16 image
+        cv::Rect led_rect(row_begin, col_begin, 16, 16);
+        cv::Mat cropped = input_mat(led_rect);
+        isrunning = true;
+        cv::imshow(OPENCV_WINDOW + std::string(" cropped"), cropped);
 
-          int row_begin = (int) ((led.x / led.z) - (radius / 2.0));
-          int col_begin = (int) ((led.y / led.z) - (radius / 2.0));
-          std::cout << row_begin << " " << col_begin << std::endl;
-
-          cv::Rect led_rect(row_begin, col_begin, 16, 16);
-
-          cropped = input_mat(led_rect);
-          isrunning = true;
-          cv::imshow(OPENCV_WINDOW + std::string(" cropped"), cropped);
-
-        }
-        cv::circle(input_mat, cv::Point2f(led.x / led.z, led.y / led.z), radius, cv::Scalar(255, 0, 0));
+        cv::circle(input_mat, led_pos, (int) radius, cv::Scalar(255, 0, 0));
       }
 
       cv::imshow(OPENCV_WINDOW + std::string(" homography"), input_mat);
