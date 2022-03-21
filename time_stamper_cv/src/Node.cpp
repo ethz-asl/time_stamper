@@ -1,6 +1,7 @@
 #include "Node.h"
 #include "Trigonometry.h"
 #include "ShapeValidation.h"
+#include "map"
 
 Node::Node() {
   //cv::namedWindow(OPENCV_WINDOW);
@@ -66,6 +67,8 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
   }
 
   std::vector<cv::Point> hull{};
+
+  std::vector<PointAngle> angles;
   cv::convexHull(points, hull, false);
   cv::polylines(input_mat, hull, true, cv::Scalar(255, 0, 0));
 
@@ -74,9 +77,7 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
     cv::Point point_a = hull.at(hull.size() - 2);
     cv::Point point_b = hull.at(hull.size() - 1);
 
-    std::vector<double> angles{};
-
-    for (const auto &point_c : hull) {
+    for (auto &point_c : hull) {
       double angle = Trigonometry::CalcAngleCTriangle(point_a, point_c, point_b);
 
       if (angle < 170 || angle > 190) {
@@ -84,7 +85,9 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
         cv::circle(input_mat, point_b, 30, cv::Scalar(255, 0, 0));
         cv::putText(input_mat, std::to_string(angle), cvPoint(point_b.x, point_b.y - 40),
                     cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(200, 200, 250));
-        angles.push_back(angle);
+
+        PointAngle point_angle{point_c, angle};
+        angles.push_back(point_angle);
       }
 
       point_a = point_b;
@@ -92,9 +95,13 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
     }
 
     if (ShapeValidation::rotateVector(&angles)) {
-      ROS_INFO("Form valid");
-    } else {
-      ROS_WARN("Invalid shape");
+      if (!isShapeValid) {
+        isShapeValid = true;
+        ROS_INFO("Shape valid");
+      }
+    } else if (isShapeValid){
+      isShapeValid = false;
+      ROS_WARN("Shape invalid");
     }
   }
 
