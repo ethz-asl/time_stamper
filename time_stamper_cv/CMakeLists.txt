@@ -9,6 +9,7 @@ catkin_simple()
 cs_add_library(${PROJECT_NAME}
         src/Node.cpp
         src/Trigonometry.cpp
+        src/ShapeValidation.cpp
         )
 cs_add_executable(${PROJECT_NAME}-node src/Main.cpp)
 
@@ -29,6 +30,7 @@ target_link_libraries(
 catkin_add_gtest(${PROJECT_NAME}-test
         test/test_entry_point.cc
         test/test_trigonometry.cc
+        test/test_shape_validation.cc
         )
 
 target_link_libraries(
