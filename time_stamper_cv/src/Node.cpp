@@ -45,9 +45,16 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
   detector->detect(input_mat, keypoints);
 
   if (keypoints.empty()) {
-    ROS_WARN("Keypoints empty");
+    if (!isKeypointsEmpty) {
+      ROS_WARN("Keypoints empty");
+    }
+    isKeypointsEmpty = true;
     return;
   } else {
+    if (isKeypointsEmpty) {
+      ROS_INFO("Keypoints found");
+    }
+    isKeypointsEmpty = false;
     std::cout << keypoints.size() << std::endl;
   }
 
