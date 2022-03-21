@@ -160,8 +160,24 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
         int col_begin = (int) (led_pos.y - (radius / 2.0f));
 
         //Create 16x16 image
-        cv::Rect led_rect(row_begin, col_begin, 16, 16);
+        int size = 16;
+        int half_size = size / 2;
+
+        cv::Rect led_rect(row_begin, col_begin, size, size);
         cv::Mat cropped = input_mat(led_rect);
+
+        cv::Mat kernel = cv::Mat(size, size, CV_8UC1);
+        cv::circle(kernel, cv::Point(half_size, half_size), half_size,
+                   cv::Scalar(255, 255, 255), -1);
+
+        cv::Mat kernel2 = kernel / 255;
+
+        //Calculate average
+        cv::Scalar scalar = cv::sum(cropped.mul(kernel2) / cv::sum(kernel2));
+
+        double average_brightness = scalar.val[0];
+        std::cout << average_brightness << std::endl;
+
         isrunning = true;
         cv::imshow(OPENCV_WINDOW + std::string(" cropped"), cropped);
 
