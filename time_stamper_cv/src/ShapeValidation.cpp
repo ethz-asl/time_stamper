@@ -35,8 +35,8 @@ bool ShapeValidation::rotateVector(std::vector<double> *a) {
   if (count != 2) {
     return false;
   }
-
-  if (a->at(pos) > 80 && a->at(pos) < 100 && a->at(pos - 1) > 80, a->at(pos - 1) < 100) {
+  
+  if (Node::filter(80, 100, a->at(pos)) && Node::filter(80, 100, a->at(pos - 1))) {
     std::cout << "valid angles found" << std::endl;
   } else {
     return false;

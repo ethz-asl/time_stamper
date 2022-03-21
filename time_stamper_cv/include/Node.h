@@ -28,18 +28,7 @@ class Node {
   static constexpr const char*  OPENCV_WINDOW = "Image window";
 
  private:
-  /**
-   * @param keypoints
-   * @return greatest and 2nd greatest value
-   */
-  static point2 GetLeftCornerLeds(const std::vector<cv::KeyPoint>& keypoints);
-
-  /**
-   *
-   * @param keypoints
-   * @return
-   */
-  static corner_leds CalcCornerLeds(const std::vector<cv::KeyPoint>& keypoints);
+  bool isKeypointsEmpty = false;
   ros::NodeHandle nh_;
   ros::Subscriber img_sub_{};
   ros::Publisher img_pub_{};

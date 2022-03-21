@@ -1,5 +1,6 @@
 #include "Node.h"
 #include "Trigonometry.h"
+#include "ShapeValidation.h"
 
 Node::Node() {
   //cv::namedWindow(OPENCV_WINDOW);
@@ -40,8 +41,6 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
   cv::Ptr<cv::SimpleBlobDetector> detector = cv::SimpleBlobDetector::create(params);
 
   std::vector<cv::KeyPoint> keypoints;
-  std::vector<cv::KeyPoint> edges;
-  std::vector<cv::KeyPoint> leds;
 
   detector->detect(input_mat, keypoints);
 
@@ -52,11 +51,6 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
     std::cout << keypoints.size() << std::endl;
   }
 
-  //cv::Mat m_with_leds;
-  //cv::drawKeypoints(input_mat, keypoints, m_with_leds, cv::Scalar(0, 0, 255), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-
-
-
   std::vector<cv::Point> points{};
 
   for (const cv::KeyPoint &key_point : keypoints) {
@@ -65,7 +59,7 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
   }
 
   std::vector<cv::Point> hull{};
-  cv::convexHull(points, hull, true);
+  cv::convexHull(points, hull, false);
   cv::polylines(input_mat, hull, true, cv::Scalar(255, 0, 0));
 
   if (hull.size() > 3) {
@@ -90,49 +84,19 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
       point_b = point_c;
     }
 
-    if (angles.size() == 4) {
-      std::sort(angles.begin(), angles.end());
-
-      if (
-      filter(20, 40, angles.at(0)) &&
-      filter(80, 100, angles.at(1)) &&
-      filter(80, 100, angles.at(2)) &&
-      filter(140, 160, angles.at(3))
-      ) {
-        ROS_INFO("Form valid");
-      }
-
+    if (ShapeValidation::rotateVector(&angles)) {
+      ROS_INFO("Form valid");
     } else {
       ROS_WARN("Invalid shape");
     }
-
   }
 
-  corner_leds corners = CalcCornerLeds(keypoints);
-
-  edges.push_back(corners.upperLeft);
-  edges.push_back(corners.upperRight);
-  edges.push_back(corners.lowerLeft);
-  edges.push_back(corners.lowerRight);
-
-  cv::Mat m_with_leds;
-  cv::drawKeypoints(input_mat, edges, m_with_leds, cv::Scalar(0, 255, 0), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-
-
-  //cv::circle()
-
-  //cv::Mat m_with_fixed_leds;
-  //cv::drawKeypoints(m_with_leds, edges, m_with_fixed_leds, cv::Scalar(255, 0, 0), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-
-
-  //cv::imshow(OPENCV_WINDOW, cv_image->image);
-  //cv::waitKey(3);
-  cv::imshow(OPENCV_WINDOW, m_with_leds);
+  cv::imshow(OPENCV_WINDOW, input_mat);
   cv::waitKey(3);
   cv_bridge::CvImage out_msg;
   out_msg.header = cv_image->header;
   out_msg.encoding = cv_image->encoding;
-  out_msg.image = m_with_leds;
+  out_msg.image = input_mat;
   img_pub_.publish(out_msg.toImageMsg());
 }
 
@@ -140,83 +104,11 @@ Node::~Node() {
   //cv::destroyWindow(OPENCV_WINDOW);
 }
 
-point2 Node::GetLeftCornerLeds(const std::vector<cv::KeyPoint> &keypoints) {
-
-  std::pair<cv::KeyPoint, cv::KeyPoint> point_2{};
-  for (const cv::KeyPoint &key_point : keypoints) {
-
-    if (key_point.pt.x < point_2.first.pt.x || point_2.first.pt.x == 0) {
-      point_2.second = point_2.first;
-      point_2.first = key_point;
-      continue;
-    }
-
-    if (key_point.pt.x < point_2.second.pt.x || point_2.first.pt.y == 0) {
-      point_2.second = key_point;
-      continue;
-    }
-
-  }
-  return point_2;
-}
-
-corner_leds Node::CalcCornerLeds(const std::vector<cv::KeyPoint> &keypoints) {
-  point2 point_2 = GetLeftCornerLeds(keypoints);
-
-  corner_leds corners;
-
-  cv::KeyPoint upperLeft{};
-  cv::KeyPoint lowerLeft{};
-
-  cv::KeyPoint upperRight{};
-  cv::KeyPoint lowerRight{};
-
-  std::vector<cv::KeyPoint> upperRow;
-  std::vector<cv::KeyPoint> lowerRow;
-
-  //Lower row has bigger y
-  if (point_2.first.pt.y > point_2.second.pt.y) {
-    lowerLeft = point_2.first;
-    upperLeft = point_2.second;
-  } else {
-    upperLeft = point_2.first;
-    lowerLeft = point_2.second;
-  }
-
-  float rowBoundary = (upperLeft.pt.y + lowerLeft.pt.y) / 2;
-
-  for (const cv::KeyPoint &key_point : keypoints) {
-    if (key_point.pt.y > rowBoundary) {
-      lowerRow.push_back(key_point);
-    } else {
-      upperRow.push_back(key_point);
-    }
-  }
-
-  for (const cv::KeyPoint &key_point : upperRow) {
-    if (key_point.pt.x > upperRight.pt.x) {
-      upperRight = key_point;
-    }
-  }
-
-  for (const cv::KeyPoint &key_point : lowerRow) {
-    if (key_point.pt.x > lowerRight.pt.x) {
-      lowerRight = key_point;
-    }
-  }
-
-  corners.lowerRight = lowerRight;
-  corners.lowerLeft = lowerLeft;
-  corners.upperRight = upperRight;
-  corners.upperLeft = upperLeft;
-  return corners;
-}
-
 bool Node::filter(double min, double max, double value) {
   if (min > max) {
     abort();
   }
-  return value >= min || value <= max;
+  return value >= min && value <= max;
 }
 
 
