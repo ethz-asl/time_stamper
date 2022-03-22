@@ -20,10 +20,15 @@ class ConvexShape {
   bool isHullValid();
   PointAngleVector getPointAngles();
   Point2fVector getVirtualCorners(int multiplier = 1);
+  PointAngleVector getRotatedPointAngles();
 
-  static bool rotateVector(std::vector<PointAngle> *a);
-  static bool validateAngles(const std::vector<PointAngle>& a);
-  static bool validateVector(const std::vector<PointAngle>& a);
+  /**
+   * Move both rectangular angles to vec.begin() without changing vector order.
+   * @return
+   */
+  bool rotateVector();
+  bool validateInnerAngles();
+  bool validateInnerAngleSize();
   ~ConvexShape() = default;
 
  private:
@@ -33,6 +38,7 @@ class ConvexShape {
   PointVector raw_points_{};
   PointVector hull_{};
   PointAngleVector point_angles_{};
+  PointAngleVector point_angles_rotated_{};
 
   std::vector<cv::Point2f> virtualCorners{
     {0 , 0},

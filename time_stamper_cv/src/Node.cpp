@@ -107,19 +107,21 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
 
     std::vector<PointAngle> point_angles = convex_shape.getPointAngles();
 
-    if (ConvexShape::rotateVector(&point_angles)) {
+
+    if (convex_shape.rotateVector()) {
       if (!isShapeValid) {
         isShapeValid = true;
         ROS_INFO("Shape valid");
       }
-      visualizeCorners(visualization_mat, point_angles);
+      visualizeCorners(visualization_mat, convex_shape.getRotatedPointAngles());
 
     } else if (isShapeValid) {
       isShapeValid = false;
       ROS_WARN("Shape invalid");
     }
 
-    std::vector<cv::Point2f> physicalCorners = convertPointAngles(point_angles);
+    std::vector<PointAngle> rotated_point_angles = convex_shape.getRotatedPointAngles();
+    std::vector<cv::Point2f> physicalCorners = convertPointAngles(rotated_point_angles);
 
     if (physicalCorners.size() != 4) {
       return;
