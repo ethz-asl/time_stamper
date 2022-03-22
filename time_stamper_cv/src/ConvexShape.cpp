@@ -9,62 +9,21 @@ ConvexShape::ConvexShape(std::vector<cv::Point> raw_points) :
 
   //Order is important
   hull_ = calculateHull();
-  if (hull_.size() >= 4) {
+  if (isHullValid()) {
     point_angles_ = calculatePointAngles();
+    calculateRotatedVector();
   }
 }
 
-bool ConvexShape::validateInnerAngleSize() {
-  return point_angles_.size() == 4;
-}
+bool ConvexShape::isShapeValid() {
+  if (point_angles_rotated_.size() != 4) {
+    return false;
+  }
 
-bool ConvexShape::validateInnerAngles() {
   return Node::filter(80, 100, point_angles_rotated_.at(0).angle) &&
       Node::filter(80, 100, point_angles_rotated_.at(1).angle) &&
       Node::filter(140, 160, point_angles_rotated_.at(2).angle) &&
       Node::filter(20, 40, point_angles_rotated_.at(3).angle);
-}
-
-bool ConvexShape::rotateVector() {
-  if (!validateInnerAngleSize()) {
-    return false;
-  }
-  point_angles_rotated_ = point_angles_;
-
-  int count = 0;
-
-  int pos;
-  bool posSet = false;
-  for (int i = 0; i < point_angles_rotated_.size(); i++) {
-    if (Node::filter(80, 100, point_angles_rotated_.at(i).angle)) {
-      count++;
-    }
-
-    if (count == 2 && !posSet) {
-      posSet = true;
-      pos = i;
-    }
-  }
-
-  if (count != 2) {
-    point_angles_rotated_.clear();
-    return false;
-  }
-
-  if (!Node::filter(80, 100, point_angles_rotated_.at(pos).angle) && !Node::filter(80, 100, point_angles_rotated_.at(pos - 1).angle)) {
-    point_angles_rotated_.clear();
-    return false;
-  }
-
-  for (int j = 0; j < pos - 1; j++) {
-    std::rotate(point_angles_rotated_.begin(), point_angles_rotated_.begin() + 1, point_angles_rotated_.end());
-  }
-
-  if(!validateInnerAngles()) {
-    point_angles_rotated_.clear();
-    return false;
-  }
-  return true;
 }
 
 PointVector ConvexShape::getHull() {
@@ -74,6 +33,7 @@ PointVector ConvexShape::getHull() {
 PointAngleVector ConvexShape::getPointAngles() {
   return point_angles_;
 }
+
 bool ConvexShape::isHullValid() {
   return hull_.size() >= 4;
 }
@@ -118,7 +78,39 @@ PointAngleVector ConvexShape::calculatePointAngles() {
   return point_angles;
 }
 
+bool ConvexShape::calculateRotatedVector() {
+  point_angles_rotated_ = point_angles_;
+
+  int count = 0;
+
+  int pos;
+  bool posSet = false;
+  for (int i = 0; i < point_angles_rotated_.size(); i++) {
+    if (Node::filter(80, 100, point_angles_rotated_.at(i).angle)) {
+      count++;
+    }
+
+    if (count == 2 && !posSet) {
+      posSet = true;
+      pos = i;
+    }
+  }
+
+  if (count != 2) {
+    point_angles_rotated_.clear();
+    return false;
+  }
+
+  for (int j = 0; j < pos - 1; j++) {
+    std::rotate(point_angles_rotated_.begin(), point_angles_rotated_.begin() + 1, point_angles_rotated_.end());
+  }
+
+  return true;
+}
+
+
 PointAngleVector ConvexShape::getRotatedPointAngles() {
   return point_angles_rotated_;
 }
+
 

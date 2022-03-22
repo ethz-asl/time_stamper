@@ -103,32 +103,25 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
   cv::Mat visualization_mat = input_mat.clone();
   cv::polylines(visualization_mat, convex_shape.getHull(), true, cv::Scalar(255, 0, 0));
 
-  if (convex_shape.isHullValid()) {
-
-    std::vector<PointAngle> point_angles = convex_shape.getPointAngles();
-
-
-    if (convex_shape.rotateVector()) {
-      if (!isShapeValid) {
-        isShapeValid = true;
-        ROS_INFO("Shape valid");
-      }
-      visualizeCorners(visualization_mat, convex_shape.getRotatedPointAngles());
-
-    } else if (isShapeValid) {
-      isShapeValid = false;
-      ROS_WARN("Shape invalid");
+  if (convex_shape.isShapeValid()) {
+    if (!isShapeValid) {
+      isShapeValid = true;
+      ROS_INFO("Shape valid");
     }
+    visualizeCorners(visualization_mat, convex_shape.getRotatedPointAngles());
 
-    std::vector<PointAngle> rotated_point_angles = convex_shape.getRotatedPointAngles();
-    std::vector<cv::Point2f> physicalCorners = convertPointAngles(rotated_point_angles);
+  } else if (isShapeValid) {
+    isShapeValid = false;
+    ROS_WARN("Shape invalid");
+  }
 
-    if (physicalCorners.size() != 4) {
-      return;
-    }
+  std::vector<PointAngle> rotated_point_angles = convex_shape.getRotatedPointAngles();
+  std::vector<cv::Point2f> physicalCorners = convertPointAngles(rotated_point_angles);
 
+  unsigned long number = 0;
+
+  if (physicalCorners.size() == 4) {
     float multiplier = 5;
-
 
     std::vector<cv::Point3f> leds_bottom_row{};
     std::vector<cv::Point3f> leds_img_bottom_row{};
@@ -145,7 +138,7 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
     cv::transform(leds_bottom_row, leds_img_bottom_row, homography.inv());
 
     float radius = 10.0f;
-    unsigned long number = 0;
+
     for (int i = 0; i < leds_img_bottom_row.size(); i++) {
 
       cv::Point3_<float> led_img = leds_img_bottom_row.at(i);
@@ -182,25 +175,24 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
         cv::circle(input_mat, led_pos, (int) radius, cv::Scalar(255, 0, 0));
       }
     }
-
-    cv::Size s = visualization_mat.size();
-
-    std::string shape_status = isShapeValid ? "Valid" : "Invalid";
-    std::string shape_text = "Shape: " + shape_status;
-    std::string counter_text = "counter: " + std::to_string(number);
-
-    if (!isShapeValid) {
-      counter_text = "counter: " + std::string(" ---");
-    }
-
-
-    cv::putText(visualization_mat, shape_text, cv::Point(s.width * 0.05, s.height * 0.85),
-                cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(255, 0, 0));
-    cv::putText(visualization_mat, counter_text, cv::Point(s.width * 0.05, s.height * 0.9),
-                cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(255, 0, 0));
-
-    cv::imshow(OPENCV_WINDOW + std::string(" homography"), input_mat);
   }
+
+  cv::Size s = visualization_mat.size();
+
+  std::string shape_status = isShapeValid ? "Valid" : "Invalid";
+  std::string shape_text = "Shape: " + shape_status;
+  std::string counter_text = "counter: " + std::to_string(number);
+
+  if (!isShapeValid || number == 0) {
+    counter_text = "counter: " + std::string(" ---");
+  }
+
+  cv::putText(visualization_mat, shape_text, cv::Point(s.width * 0.05, s.height * 0.85),
+              cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(255, 0, 0));
+  cv::putText(visualization_mat, counter_text, cv::Point(s.width * 0.05, s.height * 0.9),
+              cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(255, 0, 0));
+
+  cv::imshow(OPENCV_WINDOW + std::string(" homography"), input_mat);
 
   cv::imshow(OPENCV_WINDOW + std::string(" Visualization"), visualization_mat);
 

@@ -26,14 +26,14 @@ class ConvexShape {
    * Move both rectangular angles to vec.begin() without changing vector order.
    * @return
    */
-  bool rotateVector();
-  bool validateInnerAngles();
-  bool validateInnerAngleSize();
+
+  bool isShapeValid();
   ~ConvexShape() = default;
 
  private:
   PointVector calculateHull();
   PointAngleVector calculatePointAngles();
+  bool calculateRotatedVector();
 
   PointVector raw_points_{};
   PointVector hull_{};
