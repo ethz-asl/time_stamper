@@ -5,7 +5,12 @@
 #include "Trigonometry.h"
 
 ConvexShape::ConvexShape(std::vector<cv::Point> raw_points) :
-    raw_points_(std::move(raw_points)) {}
+    raw_points_(std::move(raw_points)) {
+
+  //Order is important
+  hull_ = calculateHull();
+  point_angles_ = calculatePointAngles();
+}
 
 bool ConvexShape::validateVector(const std::vector<PointAngle> &angles) {
   return angles.size() == 4;
@@ -54,21 +59,43 @@ bool ConvexShape::rotateVector(std::vector<PointAngle> *a) {
 }
 
 PointVector ConvexShape::getHull() {
+  return hull_;
+}
+
+PointAngleVector ConvexShape::getPointAngles() {
+  return point_angles_;
+}
+bool ConvexShape::isHullValid() {
+  return hull_.size() >= 4;
+}
+
+Point2fVector ConvexShape::getVirtualCorners(int multiplier) {
+  Point2fVector virtualCorners_multiplied;
+  virtualCorners_multiplied.reserve(virtualCorners.size());
+
+  std::transform(virtualCorners.begin(), virtualCorners.end(),
+                 std::back_inserter(virtualCorners_multiplied),
+                 [&multiplier](cv::Point2f &point) {
+                   return cv::Point2f(point.x * multiplier, point.y * multiplier);
+                 }
+  );
+
+  return virtualCorners_multiplied;
+}
+
+PointVector ConvexShape::calculateHull() {
   PointVector hull{};
   cv::convexHull(raw_points_, hull, false);
   return hull;
 }
 
-
-
-PointAngleVector ConvexShape::getPointAngles() {
-  PointVector hull = getHull();
+PointAngleVector ConvexShape::calculatePointAngles() {
   PointAngleVector point_angles;
 
-  cv::Point point_a = hull.at(hull.size() - 2);
-  cv::Point point_b = hull.at(hull.size() - 1);
+  cv::Point point_a = hull_.at(hull_.size() - 2);
+  cv::Point point_b = hull_.at(hull_.size() - 1);
 
-  for (auto &point_c : hull) {
+  for (auto &point_c : hull_) {
     double angle = Trigonometry::CalcAngleCTriangle(point_a, point_c, point_b);
 
     if (angle < 170 || angle > 190) {
@@ -80,21 +107,5 @@ PointAngleVector ConvexShape::getPointAngles() {
   }
 
   return point_angles;
-}
-bool ConvexShape::isHullValid() {
-  return getHull().size() >= 4;
-}
-
-Point2fVector ConvexShape::getVirtualCorners(int multiplier) {
-  Point2fVector virtualCorners_multiplied;
-  virtualCorners_multiplied.reserve(virtualCorners.size());
-
-  std::transform(virtualCorners.begin(), virtualCorners.end(),
-                 std::back_inserter(virtualCorners_multiplied),
-                 [&multiplier](cv::Point2f &point){
-                   return cv::Point2f(point.x * multiplier, point.y * multiplier);}
-  );
-
-  return virtualCorners_multiplied;
 }
 

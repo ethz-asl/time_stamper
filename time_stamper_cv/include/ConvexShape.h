@@ -27,7 +27,12 @@ class ConvexShape {
   ~ConvexShape() = default;
 
  private:
+  PointVector calculateHull();
+  PointAngleVector calculatePointAngles();
+
   PointVector raw_points_{};
+  PointVector hull_{};
+  PointAngleVector point_angles_{};
 
   std::vector<cv::Point2f> virtualCorners{
     {0 , 0},
