@@ -113,4 +113,17 @@ PointAngleVector ConvexShape::getRotatedPointAngles() {
   return point_angles_rotated_;
 }
 
+Point2fVector ConvexShape::getRotatedPointAngles2f() {
+  Point2fVector points;
+  points.reserve(point_angles_rotated_.size());
+
+  std::transform(point_angles_rotated_.begin(),
+                 point_angles_rotated_.end(),
+                 std::back_inserter(points),
+                 [](PointAngle &point_angle) { return point_angle.point; }
+                 );
+
+  return points;
+}
+
 

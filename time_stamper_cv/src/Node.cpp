@@ -27,19 +27,6 @@ std::vector<cv::Point> Node::convertKeyPoints(std::vector<cv::KeyPoint> &keypoin
   return points;
 }
 
-std::vector<cv::Point2f> Node::convertPointAngles(std::vector<PointAngle> &point_angles) {
-  std::vector<cv::Point2f> points{};
-  points.reserve(point_angles.size());
-
-  std::transform(point_angles.begin(),
-                 point_angles.end(),
-                 std::back_inserter(points),
-                 [](PointAngle &point_angle) { return point_angle.point; }
-  );
-
-  return points;
-}
-
 cv::Ptr<cv::SimpleBlobDetector> Node::createBlobDetectorPtr() {
   cv::SimpleBlobDetector::Params params;
   params.blobColor = 255;
@@ -115,8 +102,7 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
     ROS_WARN("Shape invalid");
   }
 
-  std::vector<PointAngle> rotated_point_angles = convex_shape.getRotatedPointAngles();
-  std::vector<cv::Point2f> physicalCorners = convertPointAngles(rotated_point_angles);
+  std::vector<cv::Point2f> physicalCorners = convex_shape.getRotatedPointAngles2f();
 
   unsigned long number = 0;
 

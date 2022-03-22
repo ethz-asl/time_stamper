@@ -20,7 +20,6 @@ class Node {
 
  private:
   static std::vector<cv::Point> convertKeyPoints(std::vector<cv::KeyPoint>&);
-  static std::vector<cv::Point2f> convertPointAngles(std::vector<PointAngle>&);
   static cv::Ptr<cv::SimpleBlobDetector> createBlobDetectorPtr();
 
   void visualizeCorners(cv::Mat visualization_mat, std::vector<PointAngle> corners);

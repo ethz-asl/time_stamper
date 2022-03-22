@@ -21,6 +21,7 @@ class ConvexShape {
   PointAngleVector getPointAngles();
   Point2fVector getVirtualCorners(int multiplier = 1);
   PointAngleVector getRotatedPointAngles();
+  Point2fVector getRotatedPointAngles2f();
 
   /**
    * Move both rectangular angles to vec.begin() without changing vector order.
