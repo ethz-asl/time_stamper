@@ -16,14 +16,27 @@ void Node::Start() {
   img_sub_ = nh_.subscribe("output/image", 1, &Node::CallbackRawImage, this);
 }
 
-std::vector<cv::Point> Node::convertKeyPoints(std::vector<cv::KeyPoint> keypoints) {
+std::vector<cv::Point> Node::convertKeyPoints(std::vector<cv::KeyPoint> &keypoints) {
   std::vector<cv::Point> points{};
   points.reserve(keypoints.size());
 
   std::transform(keypoints.begin(),
                  keypoints.end(),
                  std::back_inserter(points),
-                 [](cv::KeyPoint &kp) { return kp.pt;});
+                 [](cv::KeyPoint &kp) { return kp.pt; });
+  return points;
+}
+
+std::vector<cv::Point2f> Node::convertPointAngles(std::vector<PointAngle> &point_angles) {
+  std::vector<cv::Point2f> points{};
+  points.reserve(point_angles.size());
+
+  std::transform(point_angles.begin(),
+                 point_angles.end(),
+                 std::back_inserter(points),
+                 [](PointAngle &point_angle) { return point_angle.point; }
+  );
+
   return points;
 }
 
@@ -66,7 +79,6 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
   cv_bridge::CvImageConstPtr cv_image = cv_bridge::toCvCopy(image);
   cv::Mat input_mat = cv_image->image.clone();
 
-
   std::vector<cv::KeyPoint> keypoints;
 
   cv::Ptr<cv::SimpleBlobDetector> detector = createBlobDetectorPtr();
@@ -87,14 +99,13 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
 
   std::vector<cv::Point> points = convertKeyPoints(keypoints);
 
-
   std::vector<cv::Point> hull{};
-  std::vector<PointAngle> angles;
+  std::vector<PointAngle> point_angles;
   cv::convexHull(points, hull, false);
   cv::Mat visualization_mat = input_mat.clone();
   cv::polylines(visualization_mat, hull, true, cv::Scalar(255, 0, 0));
 
-  if (hull.size() > 3) {
+  if (hull.size() >= 4) {
 
     cv::Point point_a = hull.at(hull.size() - 2);
     cv::Point point_b = hull.at(hull.size() - 1);
@@ -103,71 +114,70 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
       double angle = Trigonometry::CalcAngleCTriangle(point_a, point_c, point_b);
 
       if (angle < 170 || angle > 190) {
-        PointAngle point_angle{point_b, angle};
-        angles.push_back(point_angle);
+        point_angles.push_back({point_b, angle});
       }
 
       point_a = point_b;
       point_b = point_c;
     }
 
-    if (ShapeValidation::rotateVector(&angles)) {
+    if (ShapeValidation::rotateVector(&point_angles)) {
       if (!isShapeValid) {
         isShapeValid = true;
         ROS_INFO("Shape valid");
       }
-
-      visualizeCorners(visualization_mat, angles);
-
+      visualizeCorners(visualization_mat, point_angles);
 
     } else if (isShapeValid) {
       isShapeValid = false;
       ROS_WARN("Shape invalid");
     }
 
-    std::vector<cv::Point2f> a;
-    for (const PointAngle &point_angle: angles) {
-      a.push_back(point_angle.point);
+    std::vector<cv::Point2f> physicalCorners = convertPointAngles(point_angles);
+
+    if (physicalCorners.size() != 4) {
+      return;
     }
 
-    if (a.size() == 4) {
-      float multiplier = 5;
-      std::vector<cv::Point2f> b{
+    float multiplier = 5;
+    std::vector<cv::Point2f> dstCorners{
+        {0 * multiplier, 0 * multiplier},
+        {0 * multiplier, 17 * multiplier},
+        {66 * multiplier, 17 * multiplier},
+        {102 * multiplier, 0 * multiplier},
+    };
 
-          {0 * multiplier, 0 * multiplier},
-          {0 * multiplier, 17 * multiplier},
-          {66 * multiplier, 17 * multiplier},
-          {102 * multiplier, 0 * multiplier},
+    std::vector<cv::Point3f> leds{};
+    std::vector<cv::Point3f> leds_img{};
+    for (int i = 1; i <= 16; i++) {
+      leds.emplace_back(6.0f * (float) i * multiplier, 0, 1);
+      leds_img.emplace_back(0, 0, 1);
+    }
 
-      };
+    cv::Mat homography = cv::findHomography(physicalCorners, dstCorners, 0);
+    cv::Mat result = cv::Mat::zeros(input_mat.size(), CV_8UC1);
 
-      std::vector<cv::Point3f> leds{};
-      std::vector<cv::Point3f> leds_img{};
-      for (int i = 1; i <= 16; i++) {
-        leds.emplace_back(6.0f * (float) i * multiplier, 0, 1);
-        leds_img.emplace_back(0, 0, 1);
-      }
+    cv::warpPerspective(input_mat, result, homography, input_mat.size());
 
-      cv::Mat homography = cv::findHomography(a, b, 0);
-      cv::Mat result = cv::Mat::zeros(input_mat.size(), CV_8UC1);
+    cv::transform(leds, leds_img, homography.inv());
 
-      cv::warpPerspective(input_mat, result, homography, input_mat.size());
+    float radius = 10.0f;
+    unsigned long number = 0;
+    for (int i = 0; i < leds_img.size(); i++) {
 
-      cv::transform(leds, leds_img, homography.inv());
+      cv::Point3_<float> led_img = leds_img.at(i);
 
-      float radius = 10.0f;
-      unsigned long number = 0;
-      for (int i = 0; i < leds_img.size(); i++) {
+      //Normalized led point
+      cv::Point2f led_pos{led_img.x / led_img.z, led_img.y / led_img.z};
 
-        //Normalized led point
-        cv::Point2f led_pos{leds_img.at(i).x / leds_img.at(i).z, leds_img.at(i).y / leds_img.at(i).z};
+      int row_begin = (int) (led_pos.x - (radius / 2.0f));
+      int col_begin = (int) (led_pos.y - (radius / 2.0f));
 
-        int row_begin = (int) (led_pos.x - (radius / 2.0f));
-        int col_begin = (int) (led_pos.y - (radius / 2.0f));
+      //Create 16x16 image
+      int size = 16;
+      int half_size = size / 2;
 
-        //Create 16x16 image
-        int size = 16;
-        int half_size = size / 2;
+      if (row_begin > 0 && col_begin > 0) {
 
         cv::Rect led_rect(row_begin, col_begin, size, size);
         cv::Mat cropped = input_mat(led_rect);
@@ -188,10 +198,26 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
 
         cv::circle(input_mat, led_pos, (int) radius, cv::Scalar(255, 0, 0));
       }
-      std::cout << number << std::endl;
-
-      cv::imshow(OPENCV_WINDOW + std::string(" homography"), input_mat);
     }
+
+    cv::Size s = visualization_mat.size();
+
+    std::string shape_status = isShapeValid ? "Valid" : "Invalid";
+    std::stringstream ss1;
+    std::string counter_text = "counter: " + std::to_string(number);
+    ss1 << "Shape: " << shape_status;
+
+    if (!isShapeValid) {
+      counter_text = "counter: " + std::string(" ---");
+    }
+
+
+    cv::putText(visualization_mat, ss1.str(), cv::Point(s.width * 0.05, s.height * 0.85),
+                cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(255, 0, 0));
+    cv::putText(visualization_mat, counter_text, cv::Point(s.width * 0.05, s.height * 0.9),
+                cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(255, 0, 0));
+
+    cv::imshow(OPENCV_WINDOW + std::string(" homography"), input_mat);
   }
 
   cv::imshow(OPENCV_WINDOW + std::string(" Visualization"), visualization_mat);
@@ -214,3 +240,4 @@ bool Node::filter(double min, double max, double value) {
   }
   return value >= min && value <= max;
 }
+
