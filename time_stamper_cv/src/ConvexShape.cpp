@@ -1,18 +1,18 @@
-#include "ShapeValidation.h"
+#include "ConvexShape.h"
 #include "Node.h"
 
-bool ShapeValidation::validateVector(const std::vector<PointAngle>& angles) {
+bool ConvexShape::validateVector(const std::vector<PointAngle>& angles) {
   return angles.size() == 4;
 }
 
-bool ShapeValidation::validateAngles(const std::vector<PointAngle>& a) {
+bool ConvexShape::validateAngles(const std::vector<PointAngle>& a) {
   return Node::filter(80, 100, a.at(0).angle) &&
   Node::filter(80, 100, a.at(1).angle) &&
   Node::filter(140, 160, a.at(2).angle) &&
   Node::filter(20, 40, a.at(3).angle);
 }
 
-bool ShapeValidation::rotateVector(std::vector<PointAngle> *a) {
+bool ConvexShape::rotateVector(std::vector<PointAngle> *a) {
   if (!validateVector(*a)) {
     return false;
   }
@@ -36,8 +36,7 @@ bool ShapeValidation::rotateVector(std::vector<PointAngle> *a) {
     return false;
   }
 
-  if (Node::filter(80, 100, a->at(pos).angle) && Node::filter(80, 100, a->at(pos - 1).angle)) {
-  } else {
+  if (!Node::filter(80, 100, a->at(pos).angle) && !Node::filter(80, 100, a->at(pos - 1).angle)) {
     return false;
   }
 

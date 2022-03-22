@@ -9,7 +9,7 @@ catkin_simple()
 cs_add_library(${PROJECT_NAME}
         src/Node.cpp
         src/Trigonometry.cpp
-        src/ShapeValidation.cpp
+        src/ConvexShape.cpp
         )
 cs_add_executable(${PROJECT_NAME}-node src/Main.cpp)
 

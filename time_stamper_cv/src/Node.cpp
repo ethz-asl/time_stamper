@@ -1,6 +1,6 @@
 #include "Node.h"
 #include "Trigonometry.h"
-#include "ShapeValidation.h"
+#include "ConvexShape.h"
 #include "map"
 
 Node::Node() {
@@ -121,7 +121,7 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
       point_b = point_c;
     }
 
-    if (ShapeValidation::rotateVector(&point_angles)) {
+    if (ConvexShape::rotateVector(&point_angles)) {
       if (!isShapeValid) {
         isShapeValid = true;
         ROS_INFO("Shape valid");
@@ -147,11 +147,11 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
         {102 * multiplier, 0 * multiplier},
     };
 
-    std::vector<cv::Point3f> leds{};
-    std::vector<cv::Point3f> leds_img{};
+    std::vector<cv::Point3f> leds_bottom_row{};
+    std::vector<cv::Point3f> leds_img_bottom_row{};
     for (int i = 1; i <= 16; i++) {
-      leds.emplace_back(6.0f * (float) i * multiplier, 0, 1);
-      leds_img.emplace_back(0, 0, 1);
+      leds_bottom_row.emplace_back(6.0f * (float) i * multiplier, 0, 1);
+      leds_img_bottom_row.emplace_back(0, 0, 1);
     }
 
     cv::Mat homography = cv::findHomography(physicalCorners, dstCorners, 0);
@@ -159,13 +159,13 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
 
     cv::warpPerspective(input_mat, result, homography, input_mat.size());
 
-    cv::transform(leds, leds_img, homography.inv());
+    cv::transform(leds_bottom_row, leds_img_bottom_row, homography.inv());
 
     float radius = 10.0f;
     unsigned long number = 0;
-    for (int i = 0; i < leds_img.size(); i++) {
+    for (int i = 0; i < leds_img_bottom_row.size(); i++) {
 
-      cv::Point3_<float> led_img = leds_img.at(i);
+      cv::Point3_<float> led_img = leds_img_bottom_row.at(i);
 
       //Normalized led point
       cv::Point2f led_pos{led_img.x / led_img.z, led_img.y / led_img.z};
@@ -186,10 +186,10 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
         cv::circle(kernel, cv::Point(half_size, half_size), half_size,
                    cv::Scalar(255, 255, 255), -1);
 
-        cv::Mat kernel2 = kernel / 255;
+        cv::Mat kernel_normalized = kernel / 255;
 
         //Calculate average
-        cv::Scalar scalar = cv::sum(cropped.mul(kernel2) / cv::sum(kernel2));
+        cv::Scalar scalar = cv::sum(cropped.mul(kernel_normalized) / cv::sum(kernel_normalized));
 
         double average_brightness = scalar.val[0];
         if (average_brightness > 40) {
@@ -203,16 +203,15 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
     cv::Size s = visualization_mat.size();
 
     std::string shape_status = isShapeValid ? "Valid" : "Invalid";
-    std::stringstream ss1;
+    std::string shape_text = "Shape: " + shape_status;
     std::string counter_text = "counter: " + std::to_string(number);
-    ss1 << "Shape: " << shape_status;
 
     if (!isShapeValid) {
       counter_text = "counter: " + std::string(" ---");
     }
 
 
-    cv::putText(visualization_mat, ss1.str(), cv::Point(s.width * 0.05, s.height * 0.85),
+    cv::putText(visualization_mat, shape_text, cv::Point(s.width * 0.05, s.height * 0.85),
                 cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(255, 0, 0));
     cv::putText(visualization_mat, counter_text, cv::Point(s.width * 0.05, s.height * 0.9),
                 cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(255, 0, 0));

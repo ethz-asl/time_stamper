@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "ShapeValidation.h"
+#include "ConvexShape.h"
 
 TEST(VectorRotation, TestInvalidValues) {
 
@@ -11,7 +11,7 @@ TEST(VectorRotation, TestInvalidValues) {
       {{0, 0}, 159.141},
   };
 
-  ASSERT_EQ(ShapeValidation::rotateVector(&a), false);
+  ASSERT_EQ(ConvexShape::rotateVector(&a), false);
 }
 
 
@@ -25,7 +25,7 @@ TEST(VectorRotation, TestCounterclockwiseValues) {
       {{0, 0}, 155.71}
   };
 
-  ASSERT_EQ(ShapeValidation::rotateVector(&a), false);
+  ASSERT_EQ(ConvexShape::rotateVector(&a), false);
 }
 
 TEST(VectorRotation, TestValidValuesWithOneRotation) {
@@ -37,7 +37,7 @@ TEST(VectorRotation, TestValidValuesWithOneRotation) {
     {{0, 0}, 154.402}
   };
 
-  bool res = ShapeValidation::rotateVector(&a);
+  bool res = ConvexShape::rotateVector(&a);
   ASSERT_EQ(res, true);
 
   ASSERT_DOUBLE_EQ(a.at(0).angle, 89.2481);
@@ -56,7 +56,7 @@ TEST(VectorRotation, TestValidValuesWithTwoRotations) {
   };
   std::vector<double> out{};
 
-  bool res = ShapeValidation::rotateVector(&a);
+  bool res = ConvexShape::rotateVector(&a);
   ASSERT_EQ(res, true);
 
   ASSERT_DOUBLE_EQ(a.at(0).angle, 89.2481);
