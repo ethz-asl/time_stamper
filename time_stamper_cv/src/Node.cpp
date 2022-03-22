@@ -16,10 +16,18 @@ void Node::Start() {
   img_sub_ = nh_.subscribe("output/image", 1, &Node::CallbackRawImage, this);
 }
 
-void Node::CallbackRawImage(const sensor_msgs::Image &image) {
-  cv_bridge::CvImageConstPtr cv_image = cv_bridge::toCvCopy(image);
-  cv::Mat input_mat = cv_image->image.clone();
+std::vector<cv::Point> Node::convertKeyPoints(std::vector<cv::KeyPoint> keypoints) {
+  std::vector<cv::Point> points{};
+  points.reserve(keypoints.size());
 
+  std::transform(keypoints.begin(),
+                 keypoints.end(),
+                 std::back_inserter(points),
+                 [](cv::KeyPoint &kp) { return kp.pt;});
+  return points;
+}
+
+cv::Ptr<cv::SimpleBlobDetector> Node::createBlobDetectorPtr() {
   cv::SimpleBlobDetector::Params params;
   params.blobColor = 255;
 
@@ -39,10 +47,29 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
   params.filterByInertia = false;
   params.minInertiaRatio = 0.01;
 
-  cv::Ptr<cv::SimpleBlobDetector> detector = cv::SimpleBlobDetector::create(params);
+  return cv::SimpleBlobDetector::create(params);
+}
+
+void Node::visualizeCorners(cv::Mat visualization_mat, std::vector<PointAngle> corners) {
+  for (int i = 0; i < corners.size(); i++) {
+    cv::Scalar color_circle(255, 0, 0);
+    cv::Scalar color_text(255, 0, 0);
+
+    cv::Point corner = corners.at(i).point;
+    cv::circle(visualization_mat, corner, 30, color_circle);
+    cv::putText(visualization_mat, labels.at(i), cvPoint(corner.x, corner.y - 40),
+                cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, color_text);
+  }
+}
+
+void Node::CallbackRawImage(const sensor_msgs::Image &image) {
+  cv_bridge::CvImageConstPtr cv_image = cv_bridge::toCvCopy(image);
+  cv::Mat input_mat = cv_image->image.clone();
+
 
   std::vector<cv::KeyPoint> keypoints;
 
+  cv::Ptr<cv::SimpleBlobDetector> detector = createBlobDetectorPtr();
   detector->detect(input_mat, keypoints);
 
   if (keypoints.empty()) {
@@ -58,20 +85,14 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
     isKeypointsEmpty = false;
   }
 
-  std::vector<cv::Point> points{};
+  std::vector<cv::Point> points = convertKeyPoints(keypoints);
 
-  for (const cv::KeyPoint &key_point : keypoints) {
-    //std::cout << "X: " << key_point.pt.x << " Y: " << key_point.pt.y << std::endl;
-    points.push_back(key_point.pt);
-  }
 
   std::vector<cv::Point> hull{};
-
   std::vector<PointAngle> angles;
   cv::convexHull(points, hull, false);
   cv::Mat visualization_mat = input_mat.clone();
   cv::polylines(visualization_mat, hull, true, cv::Scalar(255, 0, 0));
-  cv::polylines(input_mat, hull, true, cv::Scalar(255, 0, 0));
 
   if (hull.size() > 3) {
 
@@ -95,21 +116,9 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
         isShapeValid = true;
         ROS_INFO("Shape valid");
       }
-      cv::circle(visualization_mat, angles.at(0).point, 30, cv::Scalar(255, 0, 0));
-      cv::putText(visualization_mat, "Bottom Left", cvPoint(angles.at(0).point.x, angles.at(0).point.y - 40),
-                  cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(200, 200, 250));
 
-      cv::circle(visualization_mat, angles.at(1).point, 30, cv::Scalar(255, 0, 0));
-      cv::putText(visualization_mat, "Top Left", cvPoint(angles.at(1).point.x, angles.at(1).point.y - 40),
-                  cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(200, 200, 250));
+      visualizeCorners(visualization_mat, angles);
 
-      cv::circle(visualization_mat, angles.at(2).point, 30, cv::Scalar(255, 0, 0));
-      cv::putText(visualization_mat, "Top Right", cvPoint(angles.at(2).point.x, angles.at(2).point.y - 40),
-                  cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(200, 200, 250));
-
-      cv::circle(visualization_mat, angles.at(3).point, 30, cv::Scalar(255, 0, 0));
-      cv::putText(visualization_mat, "Bottom Right", cvPoint(angles.at(3).point.x, angles.at(3).point.y - 40),
-                  cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(200, 200, 250));
 
     } else if (isShapeValid) {
       isShapeValid = false;
@@ -173,11 +182,9 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
         cv::Scalar scalar = cv::sum(cropped.mul(kernel2) / cv::sum(kernel2));
 
         double average_brightness = scalar.val[0];
-       if (average_brightness > 40) {
-         number |= 1UL << i;
-       }
-
-        cv::imshow(OPENCV_WINDOW + std::string(" cropped"), cropped);
+        if (average_brightness > 40) {
+          number |= 1UL << i;
+        }
 
         cv::circle(input_mat, led_pos, (int) radius, cv::Scalar(255, 0, 0));
       }
@@ -207,6 +214,3 @@ bool Node::filter(double min, double max, double value) {
   }
   return value >= min && value <= max;
 }
-
-
-
