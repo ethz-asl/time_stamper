@@ -146,15 +146,12 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
 
       cv::transform(leds, leds_img, homography.inv());
 
-      bool isrunning = false;
       float radius = 10.0f;
-      for (const auto &led: leds_img) {
-        if (isrunning) {
-          continue;
-        }
+      unsigned long number = 0;
+      for (int i = 0; i < leds_img.size(); i++) {
 
         //Normalized led point
-        cv::Point2f led_pos{led.x / led.z, led.y / led.z};
+        cv::Point2f led_pos{leds_img.at(i).x / leds_img.at(i).z, leds_img.at(i).y / leds_img.at(i).z};
 
         int row_begin = (int) (led_pos.x - (radius / 2.0f));
         int col_begin = (int) (led_pos.y - (radius / 2.0f));
@@ -176,13 +173,15 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
         cv::Scalar scalar = cv::sum(cropped.mul(kernel2) / cv::sum(kernel2));
 
         double average_brightness = scalar.val[0];
-        std::cout << average_brightness << std::endl;
+       if (average_brightness > 40) {
+         number |= 1UL << i;
+       }
 
-        isrunning = true;
         cv::imshow(OPENCV_WINDOW + std::string(" cropped"), cropped);
 
         cv::circle(input_mat, led_pos, (int) radius, cv::Scalar(255, 0, 0));
       }
+      std::cout << number << std::endl;
 
       cv::imshow(OPENCV_WINDOW + std::string(" homography"), input_mat);
     }
