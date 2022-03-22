@@ -98,28 +98,14 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
   }
 
   std::vector<cv::Point> points = convertKeyPoints(keypoints);
+  ConvexShape convex_shape(points);
 
-  std::vector<cv::Point> hull{};
-  std::vector<PointAngle> point_angles;
-  cv::convexHull(points, hull, false);
   cv::Mat visualization_mat = input_mat.clone();
-  cv::polylines(visualization_mat, hull, true, cv::Scalar(255, 0, 0));
+  cv::polylines(visualization_mat, convex_shape.getHull(), true, cv::Scalar(255, 0, 0));
 
-  if (hull.size() >= 4) {
+  if (convex_shape.isHullValid()) {
 
-    cv::Point point_a = hull.at(hull.size() - 2);
-    cv::Point point_b = hull.at(hull.size() - 1);
-
-    for (auto &point_c : hull) {
-      double angle = Trigonometry::CalcAngleCTriangle(point_a, point_c, point_b);
-
-      if (angle < 170 || angle > 190) {
-        point_angles.push_back({point_b, angle});
-      }
-
-      point_a = point_b;
-      point_b = point_c;
-    }
+    std::vector<PointAngle> point_angles = convex_shape.getPointAngles();
 
     if (ConvexShape::rotateVector(&point_angles)) {
       if (!isShapeValid) {
@@ -140,12 +126,7 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
     }
 
     float multiplier = 5;
-    std::vector<cv::Point2f> dstCorners{
-        {0 * multiplier, 0 * multiplier},
-        {0 * multiplier, 17 * multiplier},
-        {66 * multiplier, 17 * multiplier},
-        {102 * multiplier, 0 * multiplier},
-    };
+
 
     std::vector<cv::Point3f> leds_bottom_row{};
     std::vector<cv::Point3f> leds_img_bottom_row{};
@@ -154,7 +135,7 @@ void Node::CallbackRawImage(const sensor_msgs::Image &image) {
       leds_img_bottom_row.emplace_back(0, 0, 1);
     }
 
-    cv::Mat homography = cv::findHomography(physicalCorners, dstCorners, 0);
+    cv::Mat homography = cv::findHomography(physicalCorners, convex_shape.getVirtualCorners(multiplier), 0);
     cv::Mat result = cv::Mat::zeros(input_mat.size(), CV_8UC1);
 
     cv::warpPerspective(input_mat, result, homography, input_mat.size());
