@@ -12,14 +12,16 @@ class Calibration {
 
  private:
   cv::Mat ConvertToCvImage();
-  static std::vector<cv::Point> ConvertKeyPoints(std::vector<cv::KeyPoint> &keypoints);
+  std::vector<cv::Point> ConvertKeyPoints();
   void VisualizeCorners(cv::Mat visualization_mat, std::vector<PointAngle> corners);
+  void SetKeypointStatus();
 
+  std::vector<cv::KeyPoint> keypoints_{};
   cv::Ptr<cv::SimpleBlobDetector> detector_;
   int tolerance_;
   bool visualization_ = false;
   sensor_msgs::Image image_;
   bool isKeypointsEmpty = false;
-  bool isShapeValid = false;static constexpr const char*  OPENCV_WINDOW = "Image window";
+  bool lastShapeValid = false;static constexpr const char*  OPENCV_WINDOW = "Image window";
   std::vector<std::string> labels{"Bottom Left", "Top Left", "Top Right", "Bottom Right"};
 };

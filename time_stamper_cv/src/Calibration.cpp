@@ -9,40 +9,31 @@ cv_bridge::CvImage Calibration::ProcessImage(const sensor_msgs::Image& image) {
   image_ = image;
   cv::Mat input_mat = ConvertToCvImage();
   cv::Mat visualization_mat = input_mat.clone();
-  std::vector<cv::KeyPoint> keypoints;
-  detector_->detect(input_mat, keypoints);
+  detector_->detect(input_mat, keypoints_);
 
-  if (keypoints.empty()) {
-    if (!isKeypointsEmpty) {
-      ROS_WARN("Keypoints empty");
-    }
-    isKeypointsEmpty = true;
+  SetKeypointStatus();
+  if (isKeypointsEmpty) {
     cv_bridge::CvImage out_msg;
     out_msg.header = image_.header;
     out_msg.encoding = image_.encoding;
     out_msg.image = input_mat;
     return out_msg;
-  } else {
-    if (isKeypointsEmpty) {
-      ROS_INFO("Keypoints found");
-    }
-    isKeypointsEmpty = false;
   }
 
-  std::vector<cv::Point> points = ConvertKeyPoints(keypoints);
+  std::vector<cv::Point> points = ConvertKeyPoints();
   ConvexShape convex_shape(points);
 
   cv::polylines(visualization_mat, convex_shape.getHull(), true, cv::Scalar(255, 0, 0));
 
   if (convex_shape.isShapeValid()) {
-    if (!isShapeValid) {
-      isShapeValid = true;
+    if (!lastShapeValid) {
+      lastShapeValid = true;
       ROS_INFO("Shape valid");
     }
     VisualizeCorners(visualization_mat, convex_shape.getRotatedPointAngles());
 
-  } else if (isShapeValid) {
-    isShapeValid = false;
+  } else if (lastShapeValid) {
+    lastShapeValid = false;
     ROS_WARN("Shape invalid");
   }
 
@@ -109,11 +100,11 @@ cv_bridge::CvImage Calibration::ProcessImage(const sensor_msgs::Image& image) {
 
   cv::Size s = visualization_mat.size();
 
-  std::string shape_status = isShapeValid ? "Valid" : "Invalid";
+  std::string shape_status = lastShapeValid ? "Valid" : "Invalid";
   std::string shape_text = "Shape: " + shape_status;
   std::string counter_text = "counter: " + std::to_string(number);
 
-  if (!isShapeValid || number == 0) {
+  if (!lastShapeValid || number == 0) {
     counter_text = "counter: " + std::string(" ---");
   }
 
@@ -145,15 +136,33 @@ cv::Mat Calibration::ConvertToCvImage() {
   return input_mat;
 }
 
-std::vector<cv::Point> Calibration::ConvertKeyPoints(std::vector<cv::KeyPoint> &keypoints) {
+std::vector<cv::Point> Calibration::ConvertKeyPoints() {
   std::vector<cv::Point> points{};
-  points.reserve(keypoints.size());
+  points.reserve(keypoints_.size());
 
-  std::transform(keypoints.begin(),
-                 keypoints.end(),
+  std::transform(keypoints_.begin(),
+                 keypoints_.end(),
                  std::back_inserter(points),
                  [](cv::KeyPoint &kp) { return kp.pt; });
   return points;
+}
+
+void Calibration::SetKeypointStatus() {
+  if (keypoints_.empty()) {
+    if (!isKeypointsEmpty) {
+      ROS_WARN("Keypoints empty");
+    }
+    isKeypointsEmpty = true;
+  } else {
+    if (isKeypointsEmpty) {
+      ROS_INFO("Keypoints found");
+    }
+    isKeypointsEmpty = false;
+  }
+}
+
+void Calibration::Visualize(cv::Mat input_mat) {
+
 }
 
 void Calibration::VisualizeCorners(cv::Mat visualization_mat, std::vector<PointAngle> corners) {
@@ -167,5 +176,8 @@ void Calibration::VisualizeCorners(cv::Mat visualization_mat, std::vector<PointA
                 cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, color_text);
   }
 }
+
+
+
 
 
