@@ -1,15 +1,7 @@
 #pragma once
 #include <vector>
 #include <opencv2/core/types.hpp>
-
-struct PointAngle {
-  cv::Point point;
-  double angle;
-};
-
-typedef std::vector<cv::Point> PointVector;
-typedef std::vector<cv::Point2f> Point2fVector;
-typedef std::vector<PointAngle> PointAngleVector;
+#include "Common.h"
 
 class ConvexShape {
  public:
@@ -36,7 +28,7 @@ class ConvexShape {
   PointVector hull_{};
   PointAngleVector point_angles_sorted_{};
 
-  std::vector<cv::Point2f> virtualCorners{
+  Point2fVector virtualCorners{
     {0 , 0},
     {0, 17},
     {66, 17},

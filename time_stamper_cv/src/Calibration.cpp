@@ -21,7 +21,7 @@ cv_bridge::CvImage Calibration::ProcessImage(const sensor_msgs::Image &image) {
     return out_msg;
   }
 
-  std::vector<cv::Point> points = ConvertKeyPoints();
+  PointVector points = ConvertKeyPoints();
   convex_shape_->Process(points);
   SetShapeStatus();
 
@@ -48,8 +48,8 @@ cv::Mat Calibration::ConvertToCvImage() {
   return input_mat;
 }
 
-std::vector<cv::Point> Calibration::ConvertKeyPoints() {
-  std::vector<cv::Point> points{};
+PointVector Calibration::ConvertKeyPoints() {
+  PointVector points{};
   points.reserve(keypoints_.size());
 
   std::transform(keypoints_.begin(),
@@ -111,7 +111,7 @@ void Calibration::Visualize(const cv::Mat &visualization_mat, int number) {
   cv::imshow(OPENCV_WINDOW + std::string(" Visualization"), visualization_mat);
 }
 
-void Calibration::VisualizeCorners(cv::Mat visualization_mat, std::vector<PointAngle> corners) {
+void Calibration::VisualizeCorners(cv::Mat visualization_mat, PointAngleVector corners) {
   for (int i = 0; i < corners.size(); i++) {
     cv::Scalar color_circle(255, 0, 0);
     cv::Scalar color_text(255, 0, 0);
@@ -123,9 +123,9 @@ void Calibration::VisualizeCorners(cv::Mat visualization_mat, std::vector<PointA
   }
 }
 
-std::vector<cv::Point3f> Calibration::GenerateLedRow(
+Point3fVector Calibration::GenerateLedRow(
     const cv::Point2f &first_led_pos, const cv::Vec2i &next_led, int amount, float multiplier) {
-  std::vector<cv::Point3f> led_row;
+  Point3fVector led_row;
   for (int i = 1; i <= amount; i++) {
     led_row.emplace_back((first_led_pos.x + (next_led.val[0] * (i * 1.0)) * multiplier),
                          (first_led_pos.y + (next_led.val[1] * (i * 1.0)) * multiplier),
@@ -138,8 +138,8 @@ int Calibration::GetLedCounter(const cv::Mat &input_mat, cv::Mat visualization_m
 
   int number = 0;
   float multiplier = 1;
-  std::vector<cv::Point3f> leds_bottom_row = GenerateLedRow({0, 0}, {6, 0}, 16);
-  std::vector<cv::Point3f> leds_img_bottom_row = GenerateLedRow({0, 0}, {0, 0}, 16);
+  Point3fVector leds_bottom_row = GenerateLedRow({0, 0}, {6, 0}, 16);
+  Point3fVector leds_img_bottom_row = GenerateLedRow({0, 0}, {0, 0}, 16);
 
   cv::Mat homography =
       cv::findHomography(convex_shape_->getPhysicalCorners(), convex_shape_->getVirtualCorners(multiplier), 0);
