@@ -45,7 +45,7 @@ TEST(CalcAngleCTriangle, TestPointsBasic) {
   point_c.x = 0;
   point_c.y = 0;
 
-  ASSERT_FLOAT_EQ(Trigonometry::CalcAngleCTriangle(point_a, point_b, point_c), 90);
+  ASSERT_FLOAT_EQ(Trigonometry::CalcInnerAngle(point_a, point_b, point_c), 90);
 }
 
 TEST(CalcAngleCTriangle, TestDistanceBasic) {
@@ -55,5 +55,5 @@ TEST(CalcAngleCTriangle, TestDistanceBasic) {
   float c = 8;
 
 
-  ASSERT_FLOAT_EQ(Trigonometry::CalcAngleCTriangle(a, b, c), 62.181862);
+  ASSERT_FLOAT_EQ(Trigonometry::LawOfCos(a, b, c), 62.181862);
 }
