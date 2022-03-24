@@ -18,14 +18,13 @@ class Node {
   ~Node();
 
   static bool filter(double min, double max, double value);
-  static constexpr const char*  OPENCV_WINDOW = "Image window";
 
  private:
   CalibrationConfig GetConfiguration();
 
   ros::NodeHandle nh_;
   ros::NodeHandle nh_private_{"~"};
+  ros::Subscriber img_sub_{};
   ros::Publisher img_pub_{};
-  std::vector<std::string> labels{"Bottom Left", "Top Left", "Top Right", "Bottom Right"};
   Calibration* calibration_;
 };

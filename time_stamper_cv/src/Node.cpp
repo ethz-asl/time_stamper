@@ -12,7 +12,8 @@ bool Node::Init() {
 }
 
 void Node::Start() {
-  nh_.subscribe("output/image", 1, &Node::CallbackRawImage, this);
+  img_sub_ = nh_.subscribe("output/image", 1, &Node::CallbackRawImage, this);
+  ROS_INFO("Node started");
 }
 
 void Node::CallbackRawImage(const sensor_msgs::Image &image) {
@@ -24,6 +25,7 @@ Node::~Node() {
   delete calibration_;
 }
 
+//TODO move to Calibration
 bool Node::filter(double min, double max, double value) {
   if (min > max) {
     abort();
