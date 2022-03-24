@@ -1,6 +1,5 @@
 #include "ConvexShape.h"
 #include <utility>
-#include "Node.h"
 #include "opencv2/opencv.hpp"
 #include "Trigonometry.h"
 
@@ -18,15 +17,23 @@ void ConvexShape::Process(PointVector raw_points) {
   }
 }
 
+bool ConvexShape::Filter(double min, double max, double value) {
+  if (min > max) {
+    abort();
+  }
+  return value >= min && value <= max;
+}
+
+
 bool ConvexShape::isShapeValid() {
   if (point_angles_sorted_.size() != 4) {
     return false;
   }
 
-  return Node::filter(80, 100, point_angles_sorted_.at(0).angle) &&
-      Node::filter(80, 100, point_angles_sorted_.at(1).angle) &&
-      Node::filter(140, 160, point_angles_sorted_.at(2).angle) &&
-      Node::filter(20, 40, point_angles_sorted_.at(3).angle);
+  return Filter(80, 100, point_angles_sorted_.at(0).angle) &&
+      Filter(80, 100, point_angles_sorted_.at(1).angle) &&
+      Filter(140, 160, point_angles_sorted_.at(2).angle) &&
+      Filter(20, 40, point_angles_sorted_.at(3).angle);
 }
 
 PointVector ConvexShape::getHull() {
@@ -83,7 +90,7 @@ bool ConvexShape::calculateRotatedVector() {
   int pos;
   bool posSet = false;
   for (int i = 0; i < point_angles_sorted_.size(); i++) {
-    if (Node::filter(80, 100, point_angles_sorted_.at(i).angle)) {
+    if (Filter(80, 100, point_angles_sorted_.at(i).angle)) {
       count++;
     }
 

@@ -25,14 +25,6 @@ Node::~Node() {
   delete calibration_;
 }
 
-//TODO move to Calibration
-bool Node::filter(double min, double max, double value) {
-  if (min > max) {
-    abort();
-  }
-  return value >= min && value <= max;
-}
-
 CalibrationConfig Node::GetConfiguration() {
   CalibrationConfig cfg;
   cv::SimpleBlobDetector::Params params;

@@ -1,4 +1,5 @@
 #include "Calibration.h"
+#include "ros/ros.h"
 
 Calibration::Calibration(CalibrationConfig cfg) {
   convex_shape_ = new ConvexShape(cfg.tolerance);
@@ -177,8 +178,7 @@ int Calibration::GetLedCounter(const cv::Mat &input_mat, cv::Mat visualization_m
 
       cv::Mat kernel_normalized = kernel / 255;
 
-      //Calculate average
-      // todo: check if cv::sum(...) > 0
+      //Calculate average - cv::sum(...) is always > 0
       double normalization = 1.0 / cv::sum(kernel_normalized)[0];
       cv::Scalar average = cv::sum(cropped.mul(kernel_normalized) * normalization);
 

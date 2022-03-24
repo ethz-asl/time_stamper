@@ -2,8 +2,6 @@
 #include "ros/ros.h"
 #include "cv_bridge/cv_bridge.h"
 #include "sensor_msgs/Image.h"
-#include "opencv2/opencv.hpp"
-#include "ConvexShape.h"
 #include "Calibration.h"
 #include "Configuration.h"
 
@@ -16,8 +14,6 @@ class Node {
   bool Init();
   void Start();
   ~Node();
-
-  static bool filter(double min, double max, double value);
 
  private:
   CalibrationConfig GetConfiguration();

@@ -6,7 +6,6 @@ struct PointAngle {
   cv::Point point;
   double angle;
 };
-#include "Node.h"
 
 typedef std::vector<cv::Point> PointVector;
 typedef std::vector<cv::Point2f> Point2fVector;
@@ -22,9 +21,10 @@ class ConvexShape {
   Point2fVector getVirtualCorners(int multiplier = 1);
   PointAngleVector getSortedPointAngles();
   Point2fVector getPhysicalCorners();
-
   bool isShapeValid();
   ~ConvexShape() = default;
+
+  static bool Filter(double min, double max, double value);
 
  private:
   void calculateHull();
