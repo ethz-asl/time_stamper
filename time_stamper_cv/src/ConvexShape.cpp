@@ -113,7 +113,7 @@ PointAngleVector ConvexShape::getRotatedPointAngles() {
   return point_angles_rotated_;
 }
 
-Point2fVector ConvexShape::getRotatedPointAngles2f() {
+Point2fVector ConvexShape::getPhysicalCorners() {
   Point2fVector points;
   points.reserve(point_angles_rotated_.size());
 
