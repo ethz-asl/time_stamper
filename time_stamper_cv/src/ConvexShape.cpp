@@ -17,6 +17,10 @@ void ConvexShape::Process(PointVector raw_points) {
   }
 }
 
+bool ConvexShape::ToleranceFilter(int expected_value, double actual_value) const {
+  return Filter(expected_value - tolerance_, expected_value + tolerance_, actual_value);
+}
+
 bool ConvexShape::Filter(double min, double max, double value) {
   if (min > max) {
     abort();
@@ -30,10 +34,10 @@ bool ConvexShape::isShapeValid() {
     return false;
   }
 
-  return Filter(80, 100, point_angles_sorted_.at(0).angle) &&
-      Filter(80, 100, point_angles_sorted_.at(1).angle) &&
-      Filter(140, 160, point_angles_sorted_.at(2).angle) &&
-      Filter(20, 40, point_angles_sorted_.at(3).angle);
+  return ToleranceFilter(90, point_angles_sorted_.at(0).angle) &&
+      ToleranceFilter(90, point_angles_sorted_.at(1).angle) &&
+      ToleranceFilter(150, point_angles_sorted_.at(2).angle) &&
+      ToleranceFilter(30, point_angles_sorted_.at(3).angle);
 }
 
 PointVector ConvexShape::getHull() {

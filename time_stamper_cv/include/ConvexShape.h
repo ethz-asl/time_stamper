@@ -14,14 +14,14 @@ class ConvexShape {
   PointAngleVector getSortedPointAngles();
   Point2fVector getPhysicalCorners();
   bool isShapeValid();
+  bool ToleranceFilter(int expected_value, double actual_value) const;
   ~ConvexShape() = default;
-
-  static bool Filter(double min, double max, double value);
 
  private:
   void calculateHull();
   PointAngleVector calculatePointAngles();
   bool calculateRotatedVector();
+  static bool Filter(double min, double max, double value);
 
   int tolerance_;
   PointVector raw_points_{};
