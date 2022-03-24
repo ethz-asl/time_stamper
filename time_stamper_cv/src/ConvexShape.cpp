@@ -4,34 +4,33 @@
 #include "opencv2/opencv.hpp"
 #include "Trigonometry.h"
 
-ConvexShape::ConvexShape(std::vector<cv::Point> raw_points) :
-    raw_points_(std::move(raw_points)) {
+ConvexShape::ConvexShape(int tolerance)
+: tolerance_(tolerance) {}
 
-  //Order is important
-  hull_ = calculateHull();
+void ConvexShape::Process(PointVector raw_points) {
+  hull_.clear();
+  point_angles_sorted_.clear();
+  raw_points_ = std::move(raw_points);
+
+  calculateHull();
   if (isHullValid()) {
-    point_angles_ = calculatePointAngles();
     calculateRotatedVector();
   }
 }
 
 bool ConvexShape::isShapeValid() {
-  if (point_angles_rotated_.size() != 4) {
+  if (point_angles_sorted_.size() != 4) {
     return false;
   }
 
-  return Node::filter(80, 100, point_angles_rotated_.at(0).angle) &&
-      Node::filter(80, 100, point_angles_rotated_.at(1).angle) &&
-      Node::filter(140, 160, point_angles_rotated_.at(2).angle) &&
-      Node::filter(20, 40, point_angles_rotated_.at(3).angle);
+  return Node::filter(80, 100, point_angles_sorted_.at(0).angle) &&
+      Node::filter(80, 100, point_angles_sorted_.at(1).angle) &&
+      Node::filter(140, 160, point_angles_sorted_.at(2).angle) &&
+      Node::filter(20, 40, point_angles_sorted_.at(3).angle);
 }
 
 PointVector ConvexShape::getHull() {
   return hull_;
-}
-
-PointAngleVector ConvexShape::getPointAngles() {
-  return point_angles_;
 }
 
 bool ConvexShape::isHullValid() {
@@ -52,10 +51,8 @@ Point2fVector ConvexShape::getVirtualCorners(int multiplier) {
   return virtualCorners_multiplied;
 }
 
-PointVector ConvexShape::calculateHull() {
-  PointVector hull{};
-  cv::convexHull(raw_points_, hull, false);
-  return hull;
+void ConvexShape::calculateHull() {
+  cv::convexHull(raw_points_, hull_, false);
 }
 
 PointAngleVector ConvexShape::calculatePointAngles() {
@@ -79,14 +76,14 @@ PointAngleVector ConvexShape::calculatePointAngles() {
 }
 
 bool ConvexShape::calculateRotatedVector() {
-  point_angles_rotated_ = point_angles_;
+  point_angles_sorted_ = calculatePointAngles();
 
   int count = 0;
 
   int pos;
   bool posSet = false;
-  for (int i = 0; i < point_angles_rotated_.size(); i++) {
-    if (Node::filter(80, 100, point_angles_rotated_.at(i).angle)) {
+  for (int i = 0; i < point_angles_sorted_.size(); i++) {
+    if (Node::filter(80, 100, point_angles_sorted_.at(i).angle)) {
       count++;
     }
 
@@ -97,33 +94,31 @@ bool ConvexShape::calculateRotatedVector() {
   }
 
   if (count != 2) {
-    point_angles_rotated_.clear();
+    point_angles_sorted_.clear();
     return false;
   }
 
   for (int j = 0; j < pos - 1; j++) {
-    std::rotate(point_angles_rotated_.begin(), point_angles_rotated_.begin() + 1, point_angles_rotated_.end());
+    std::rotate(point_angles_sorted_.begin(), point_angles_sorted_.begin() + 1, point_angles_sorted_.end());
   }
 
   return true;
 }
 
 
-PointAngleVector ConvexShape::getRotatedPointAngles() {
-  return point_angles_rotated_;
+PointAngleVector ConvexShape::getSortedPointAngles() {
+  return point_angles_sorted_;
 }
 
 Point2fVector ConvexShape::getPhysicalCorners() {
   Point2fVector points;
-  points.reserve(point_angles_rotated_.size());
+  points.reserve(point_angles_sorted_.size());
 
-  std::transform(point_angles_rotated_.begin(),
-                 point_angles_rotated_.end(),
+  std::transform(point_angles_sorted_.begin(),
+                 point_angles_sorted_.end(),
                  std::back_inserter(points),
                  [](PointAngle &point_angle) { return point_angle.point; }
                  );
 
   return points;
 }
-
-

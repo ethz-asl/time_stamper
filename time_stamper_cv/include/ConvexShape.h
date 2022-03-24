@@ -14,27 +14,27 @@ typedef std::vector<PointAngle> PointAngleVector;
 
 class ConvexShape {
  public:
-  explicit ConvexShape(std::vector<cv::Point> raw_points);
+  explicit ConvexShape(int tolerance);
 
+  void Process(PointVector raw_points);
   PointVector getHull();
   bool isHullValid();
-  PointAngleVector getPointAngles();
   Point2fVector getVirtualCorners(int multiplier = 1);
-  PointAngleVector getRotatedPointAngles();
+  PointAngleVector getSortedPointAngles();
   Point2fVector getPhysicalCorners();
 
   bool isShapeValid();
   ~ConvexShape() = default;
 
  private:
-  PointVector calculateHull();
+  void calculateHull();
   PointAngleVector calculatePointAngles();
   bool calculateRotatedVector();
 
+  int tolerance_;
   PointVector raw_points_{};
   PointVector hull_{};
-  PointAngleVector point_angles_{};
-  PointAngleVector point_angles_rotated_{};
+  PointAngleVector point_angles_sorted_{};
 
   std::vector<cv::Point2f> virtualCorners{
     {0 , 0},

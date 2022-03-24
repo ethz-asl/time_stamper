@@ -1,7 +1,7 @@
 #include "Calibration.h"
 
 Calibration::Calibration(CalibrationConfig cfg) {
-  tolerance_ = cfg.tolerance;
+  convex_shape_ = new ConvexShape(cfg.tolerance);
   detector_ = cv::SimpleBlobDetector::create(cfg.params);
 }
 
@@ -21,23 +21,16 @@ cv_bridge::CvImage Calibration::ProcessImage(const sensor_msgs::Image &image) {
   }
 
   std::vector<cv::Point> points = ConvertKeyPoints();
-  ConvexShape convex_shape(points);
-
-  if (convex_shape.isShapeValid()) {
-    if (!lastShapeValid) {
-      lastShapeValid = true;
-      ROS_INFO("Shape valid");
-    }
-  } else if (lastShapeValid) {
-    lastShapeValid = false;
-    ROS_WARN("Shape invalid");
-  }
+  convex_shape_->Process(points);
+  SetShapeStatus();
 
   int number = -1;
-  if (convex_shape.isShapeValid()) {
-    number = GetLedCounter(convex_shape, input_mat, visualization_mat);
+  if (convex_shape_->isShapeValid()) {
+    number = GetLedCounter(input_mat, visualization_mat);
   }
-  Visualize(visualization_mat, convex_shape, number);
+  if (visualization_) {
+    Visualize(visualization_mat, number);
+  }
 
   cv::waitKey(3);
   out_msg.image = input_mat;
@@ -79,18 +72,30 @@ void Calibration::SetKeypointStatus() {
   }
 }
 
-void Calibration::Visualize(const cv::Mat &visualization_mat, ConvexShape convex_shape, int number) {
+void Calibration::SetShapeStatus() {
+  if (convex_shape_->isShapeValid()) {
+    if (!lastShapeValid) {
+      lastShapeValid = true;
+      ROS_INFO("Shape valid");
+    }
+  } else if (lastShapeValid) {
+    lastShapeValid = false;
+    ROS_WARN("Shape invalid");
+  }
+}
 
-  cv::polylines(visualization_mat, convex_shape.getHull(), true, cv::Scalar(255, 0, 0));
-  if (convex_shape.isShapeValid()) {
-    VisualizeCorners(visualization_mat, convex_shape.getRotatedPointAngles());
+void Calibration::Visualize(const cv::Mat &visualization_mat, int number) {
+
+  cv::polylines(visualization_mat, convex_shape_->getHull(), true, cv::Scalar(255, 0, 0));
+  if (convex_shape_->isShapeValid()) {
+    VisualizeCorners(visualization_mat, convex_shape_->getSortedPointAngles());
   }
   cv::Size s = visualization_mat.size();
 
   std::string shape_text("Shape: ");
   std::string counter_text("Counter: ");
 
-  if (convex_shape.isShapeValid()) {
+  if (convex_shape_->isShapeValid()) {
     shape_text += "Valid";
     counter_text += std::to_string(number);
   } else {
@@ -118,7 +123,7 @@ void Calibration::VisualizeCorners(cv::Mat visualization_mat, std::vector<PointA
 }
 
 std::vector<cv::Point3f> Calibration::GenerateLedRow(
-    const cv::Point2f &first_led_pos, const cv::Vec2i& next_led, int amount, float multiplier) {
+    const cv::Point2f &first_led_pos, const cv::Vec2i &next_led, int amount, float multiplier) {
   std::vector<cv::Point3f> led_row;
   for (int i = 1; i <= amount; i++) {
     led_row.emplace_back((first_led_pos.x + (next_led.val[0] * (i * 1.0)) * multiplier),
@@ -128,7 +133,7 @@ std::vector<cv::Point3f> Calibration::GenerateLedRow(
   return led_row;
 }
 
-int Calibration::GetLedCounter(ConvexShape convex_shape, const cv::Mat &input_mat, cv::Mat visualization_mat) {
+int Calibration::GetLedCounter(const cv::Mat &input_mat, cv::Mat visualization_mat) {
 
   int number = 0;
   float multiplier = 1;
@@ -136,7 +141,7 @@ int Calibration::GetLedCounter(ConvexShape convex_shape, const cv::Mat &input_ma
   std::vector<cv::Point3f> leds_img_bottom_row = GenerateLedRow({0, 0}, {0, 0}, 16);
 
   cv::Mat homography =
-      cv::findHomography(convex_shape.getPhysicalCorners(), convex_shape.getVirtualCorners(multiplier), 0);
+      cv::findHomography(convex_shape_->getPhysicalCorners(), convex_shape_->getVirtualCorners(multiplier), 0);
 
   cv::Mat result = cv::Mat::zeros(input_mat.size(), CV_8UC1);
 
@@ -187,4 +192,8 @@ int Calibration::GetLedCounter(ConvexShape convex_shape, const cv::Mat &input_ma
     }
   }
   return number;
+}
+
+Calibration::~Calibration() {
+  delete convex_shape_;
 }
