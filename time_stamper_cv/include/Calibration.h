@@ -4,6 +4,8 @@
 #include "Configuration.h"
 #include "cv_bridge/cv_bridge.h"
 
+class ConvexShape;
+
 class Calibration {
  public:
   explicit Calibration(CalibrationConfig cfg);
@@ -13,6 +15,7 @@ class Calibration {
  private:
   cv::Mat ConvertToCvImage();
   std::vector<cv::Point> ConvertKeyPoints();
+  void Visualize(const cv::Mat& visualization_mat, ConvexShape convex_shape, int number);
   void VisualizeCorners(cv::Mat visualization_mat, std::vector<PointAngle> corners);
   void SetKeypointStatus();
 

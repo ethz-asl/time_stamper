@@ -1,11 +1,11 @@
 #include "Calibration.h"
 
 Calibration::Calibration(CalibrationConfig cfg) {
-    tolerance_ = cfg.tolerance;
-    detector_ = cv::SimpleBlobDetector::create(cfg.params);
+  tolerance_ = cfg.tolerance;
+  detector_ = cv::SimpleBlobDetector::create(cfg.params);
 }
 
-cv_bridge::CvImage Calibration::ProcessImage(const sensor_msgs::Image& image) {
+cv_bridge::CvImage Calibration::ProcessImage(const sensor_msgs::Image &image) {
   image_ = image;
   cv::Mat input_mat = ConvertToCvImage();
   cv::Mat visualization_mat = input_mat.clone();
@@ -23,23 +23,17 @@ cv_bridge::CvImage Calibration::ProcessImage(const sensor_msgs::Image& image) {
   std::vector<cv::Point> points = ConvertKeyPoints();
   ConvexShape convex_shape(points);
 
-  cv::polylines(visualization_mat, convex_shape.getHull(), true, cv::Scalar(255, 0, 0));
-
   if (convex_shape.isShapeValid()) {
     if (!lastShapeValid) {
       lastShapeValid = true;
       ROS_INFO("Shape valid");
     }
-    VisualizeCorners(visualization_mat, convex_shape.getRotatedPointAngles());
-
   } else if (lastShapeValid) {
     lastShapeValid = false;
     ROS_WARN("Shape invalid");
   }
 
-
-
-  unsigned long number = 0;
+ int number = 0;
 
   if (convex_shape.isShapeValid()) {
     float multiplier = 5;
@@ -51,7 +45,8 @@ cv_bridge::CvImage Calibration::ProcessImage(const sensor_msgs::Image& image) {
       leds_img_bottom_row.emplace_back(0, 0, 1);
     }
 
-    cv::Mat homography = cv::findHomography(convex_shape.getPhysicalCorners(), convex_shape.getVirtualCorners(multiplier), 0);
+    cv::Mat homography =
+        cv::findHomography(convex_shape.getPhysicalCorners(), convex_shape.getVirtualCorners(multiplier), 0);
     cv::Mat result = cv::Mat::zeros(input_mat.size(), CV_8UC1);
 
     cv::warpPerspective(input_mat, result, homography, input_mat.size());
@@ -90,7 +85,7 @@ cv_bridge::CvImage Calibration::ProcessImage(const sensor_msgs::Image& image) {
 
         double average_brightness = scalar.val[0];
         if (average_brightness > 40) {
-          number |= 1UL << i;
+          number |= 1 << i;
         }
 
         cv::circle(input_mat, led_pos, (int) radius, cv::Scalar(255, 0, 0));
@@ -98,24 +93,8 @@ cv_bridge::CvImage Calibration::ProcessImage(const sensor_msgs::Image& image) {
     }
   }
 
-  cv::Size s = visualization_mat.size();
-
-  std::string shape_status = lastShapeValid ? "Valid" : "Invalid";
-  std::string shape_text = "Shape: " + shape_status;
-  std::string counter_text = "counter: " + std::to_string(number);
-
-  if (!lastShapeValid || number == 0) {
-    counter_text = "counter: " + std::string(" ---");
-  }
-
-  cv::putText(visualization_mat, shape_text, cv::Point(s.width * 0.05, s.height * 0.85),
-              cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(255, 0, 0));
-  cv::putText(visualization_mat, counter_text, cv::Point(s.width * 0.05, s.height * 0.9),
-              cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(255, 0, 0));
-
   cv::imshow(OPENCV_WINDOW + std::string(" homography"), input_mat);
-
-  cv::imshow(OPENCV_WINDOW + std::string(" Visualization"), visualization_mat);
+  Visualize(visualization_mat, convex_shape, number);
 
   cv::waitKey(3);
 
@@ -161,8 +140,30 @@ void Calibration::SetKeypointStatus() {
   }
 }
 
-void Calibration::Visualize(cv::Mat input_mat) {
+void Calibration::Visualize(const cv::Mat &visualization_mat, ConvexShape convex_shape, int number) {
 
+  cv::polylines(visualization_mat, convex_shape.getHull(), true, cv::Scalar(255, 0, 0));
+  if (convex_shape.isShapeValid()) {
+    VisualizeCorners(visualization_mat, convex_shape.getRotatedPointAngles());
+  }
+  cv::Size s = visualization_mat.size();
+
+  std::string shape_text("Shape: ");
+  std::string counter_text("Counter: ");
+
+  if (convex_shape.isShapeValid()) {
+    shape_text += "Valid";
+    counter_text += std::to_string(number);
+  } else {
+    shape_text += "Invalid";
+    counter_text += "---";
+  }
+
+  cv::putText(visualization_mat, shape_text, cv::Point(s.width * 0.05, s.height * 0.85),
+              cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(255, 0, 0));
+  cv::putText(visualization_mat, counter_text, cv::Point(s.width * 0.05, s.height * 0.9),
+              cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(255, 0, 0));
+  cv::imshow(OPENCV_WINDOW + std::string(" Visualization"), visualization_mat);
 }
 
 void Calibration::VisualizeCorners(cv::Mat visualization_mat, std::vector<PointAngle> corners) {
@@ -176,7 +177,6 @@ void Calibration::VisualizeCorners(cv::Mat visualization_mat, std::vector<PointA
                 cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, color_text);
   }
 }
-
 
 
 
