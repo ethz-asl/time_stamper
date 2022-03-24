@@ -6,6 +6,9 @@ Calibration::Calibration(CalibrationConfig cfg) {
 }
 
 cv_bridge::CvImage Calibration::ProcessImage(const sensor_msgs::Image &image) {
+  cv_bridge::CvImage out_msg;
+  out_msg.header = image_.header;
+  out_msg.encoding = image_.encoding;
   image_ = image;
   cv::Mat input_mat = ConvertToCvImage();
   cv::Mat visualization_mat = input_mat.clone();
@@ -13,9 +16,6 @@ cv_bridge::CvImage Calibration::ProcessImage(const sensor_msgs::Image &image) {
 
   SetKeypointStatus();
   if (isKeypointsEmpty) {
-    cv_bridge::CvImage out_msg;
-    out_msg.header = image_.header;
-    out_msg.encoding = image_.encoding;
     out_msg.image = input_mat;
     return out_msg;
   }
@@ -33,70 +33,13 @@ cv_bridge::CvImage Calibration::ProcessImage(const sensor_msgs::Image &image) {
     ROS_WARN("Shape invalid");
   }
 
- int number = 0;
-
+  int number = -1;
   if (convex_shape.isShapeValid()) {
-    float multiplier = 5;
-
-    std::vector<cv::Point3f> leds_bottom_row = GenerateLedRow(6, 0, 16, multiplier);
-    std::vector<cv::Point3f> leds_img_bottom_row = GenerateLedRow(0, 0, 16, multiplier);
-
-    cv::Mat homography =
-        cv::findHomography(convex_shape.getPhysicalCorners(), convex_shape.getVirtualCorners(multiplier), 0);
-    cv::Mat result = cv::Mat::zeros(input_mat.size(), CV_8UC1);
-
-    cv::warpPerspective(input_mat, result, homography, input_mat.size());
-
-    cv::transform(leds_bottom_row, leds_img_bottom_row, homography.inv());
-
-    float radius = 10.0f;
-
-    for (int i = 0; i < leds_img_bottom_row.size(); i++) {
-
-      cv::Point3_<float> led_img = leds_img_bottom_row.at(i);
-
-      //Normalized led point
-      cv::Point2f led_pos{led_img.x / led_img.z, led_img.y / led_img.z};
-
-      int row_begin = (int) (led_pos.x - (radius / 2.0f));
-      int col_begin = (int) (led_pos.y - (radius / 2.0f));
-
-      //Create 16x16 image
-      int size = 16;
-      int half_size = size / 2;
-
-      if (row_begin > 0 && col_begin > 0) {
-
-        //TODO test if coordinates are in image
-        cv::Rect led_rect(row_begin, col_begin, size, size);
-        cv::Mat cropped = input_mat(led_rect);
-
-        cv::Mat kernel = cv::Mat(size, size, CV_8UC1);
-        cv::circle(kernel, cv::Point(half_size, half_size), half_size,
-                   cv::Scalar(255, 255, 255), -1);
-
-        cv::Mat kernel_normalized = kernel / 255;
-
-        //Calculate average
-        cv::Scalar scalar = cv::sum(cropped.mul(kernel_normalized) / cv::sum(kernel_normalized));
-
-        double average_brightness = scalar.val[0];
-        if (average_brightness > 40) {
-          number |= 1 << i;
-        }
-
-        //TODO Move to Visualize()
-        cv::circle(visualization_mat, led_pos, (int) radius, cv::Scalar(255, 0, 0));
-      }
-    }
+    number = GetLedCounter(convex_shape, input_mat, visualization_mat);
   }
   Visualize(visualization_mat, convex_shape, number);
 
   cv::waitKey(3);
-
-  cv_bridge::CvImage out_msg;
-  out_msg.header = image_.header;
-  out_msg.encoding = image_.encoding;
   out_msg.image = input_mat;
   return out_msg;
 }
@@ -173,13 +116,73 @@ void Calibration::VisualizeCorners(cv::Mat visualization_mat, std::vector<PointA
                 cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, color_text);
   }
 }
-std::vector<cv::Point3f> Calibration::GenerateLedRow(int led_gap_x, int led_gap_y, int amount, float multiplier) {
+
+std::vector<cv::Point3f> Calibration::GenerateLedRow(
+    const cv::Point2f &first_led_pos, const cv::Vec2i& next_led, int amount, float multiplier) {
   std::vector<cv::Point3f> led_row;
   for (int i = 1; i <= amount; i++) {
-    led_row.emplace_back((led_gap_x * (i * 1.0) * multiplier), (led_gap_y * (i * 1.0) * multiplier), 1);
+    led_row.emplace_back((first_led_pos.x + (next_led.val[0] * (i * 1.0)) * multiplier),
+                         (first_led_pos.y + (next_led.val[1] * (i * 1.0)) * multiplier),
+                         1);
   }
   return led_row;
 }
 
+int Calibration::GetLedCounter(ConvexShape convex_shape, const cv::Mat &input_mat, cv::Mat visualization_mat) {
 
+  int number = 0;
+  float multiplier = 1;
+  std::vector<cv::Point3f> leds_bottom_row = GenerateLedRow({0, 0}, {6, 0}, 16);
+  std::vector<cv::Point3f> leds_img_bottom_row = GenerateLedRow({0, 0}, {0, 0}, 16);
 
+  cv::Mat homography =
+      cv::findHomography(convex_shape.getPhysicalCorners(), convex_shape.getVirtualCorners(multiplier), 0);
+
+  cv::Mat result = cv::Mat::zeros(input_mat.size(), CV_8UC1);
+
+  cv::warpPerspective(input_mat, result, homography, input_mat.size());
+
+  cv::transform(leds_bottom_row, leds_img_bottom_row, homography.inv());
+
+  float radius = 10.0f;
+
+  for (int i = 0; i < leds_img_bottom_row.size(); i++) {
+
+    cv::Point3_<float> led_img = leds_img_bottom_row.at(i);
+
+    //Normalized led point
+    cv::Point2f led_pos{led_img.x / led_img.z, led_img.y / led_img.z};
+
+    int row_begin = (int) (led_pos.x - (radius / 2.0f));
+    int col_begin = (int) (led_pos.y - (radius / 2.0f));
+
+    //Create 16x16 image
+    int size = 16;
+    int half_size = size / 2;
+
+    if (row_begin > 0 && col_begin > 0) {
+
+      //TODO test if coordinates are in image
+      cv::Rect led_rect(row_begin, col_begin, size, size);
+      cv::Mat cropped = input_mat(led_rect);
+
+      cv::Mat kernel = cv::Mat(size, size, CV_8UC1);
+      cv::circle(kernel, cv::Point(half_size, half_size), half_size,
+                 cv::Scalar(255, 255, 255), -1);
+
+      cv::Mat kernel_normalized = kernel / 255;
+
+      //Calculate average
+      cv::Scalar average = cv::sum(cropped.mul(kernel_normalized) / cv::sum(kernel_normalized));
+
+      if (average.val[0] > 40) {
+        number |= 1 << i;
+      }
+
+      //TODO Move to Visualize()
+      cv::circle(visualization_mat, led_pos, (int) radius, cv::Scalar(255, 0, 0));
+
+    }
+  }
+  return number;
+}

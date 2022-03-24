@@ -11,6 +11,7 @@ class Calibration {
   explicit Calibration(CalibrationConfig cfg);
   cv_bridge::CvImage ProcessImage(const sensor_msgs::Image& image);
   void SetVisualization(bool visualization);
+  int GetLedCounter(ConvexShape convex_shape, const cv::Mat& input_mat, cv::Mat visualization_mat);
 
  private:
   cv::Mat ConvertToCvImage();
@@ -18,7 +19,8 @@ class Calibration {
   void Visualize(const cv::Mat& visualization_mat, ConvexShape convex_shape, int number);
   void VisualizeCorners(cv::Mat visualization_mat, std::vector<PointAngle> corners);
   void SetKeypointStatus();
-  std::vector<cv::Point3f> GenerateLedRow(int led_gap_x, int led_gap_y, int amount, float multiplier);
+  std::vector<cv::Point3f> GenerateLedRow(
+      const cv::Point2f& first_Led_Pos, const cv::Vec2i& next_led,int amount, float multiplier = 1);
 
   std::vector<cv::KeyPoint> keypoints_{};
   cv::Ptr<cv::SimpleBlobDetector> detector_;
