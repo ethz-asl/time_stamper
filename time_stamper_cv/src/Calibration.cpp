@@ -173,7 +173,9 @@ int Calibration::GetLedCounter(ConvexShape convex_shape, const cv::Mat &input_ma
       cv::Mat kernel_normalized = kernel / 255;
 
       //Calculate average
-      cv::Scalar average = cv::sum(cropped.mul(kernel_normalized) / cv::sum(kernel_normalized));
+      // todo: check if cv::sum(...) > 0
+      double normalization = 1.0 / cv::sum(kernel_normalized)[0];
+      cv::Scalar average = cv::sum(cropped.mul(kernel_normalized) * normalization);
 
       if (average.val[0] > 40) {
         number |= 1 << i;

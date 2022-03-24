@@ -6,6 +6,9 @@ find_package(catkin_simple REQUIRED)
 
 catkin_simple()
 
+# Add manually for Ubuntu 18.04.
+find_package(OpenCV REQUIRED)
+
 cs_add_library(${PROJECT_NAME}
         src/Node.cpp
         src/Trigonometry.cpp
@@ -18,6 +21,7 @@ target_link_libraries(
         ${PROJECT_NAME}-node
         ${PROJECT_NAME}
         ${catkin_LIBRARIES}
+        ${OpenCV_LIBRARIES}
 )
 
 cs_add_executable(${PROJECT_NAME}-blobtest src/BlobDetectionTest.cpp)
@@ -26,6 +30,7 @@ target_link_libraries(
         ${PROJECT_NAME}-blobtest
         ${PROJECT_NAME}
         ${catkin_LIBRARIES}
+        ${OpenCV_LIBRARIES}
 )
 
 catkin_add_gtest(${PROJECT_NAME}-test
@@ -38,6 +43,7 @@ target_link_libraries(
         ${PROJECT_NAME}-test
         ${PROJECT_NAME}
         ${catkin_LIBRARIES}
+        ${OpenCV_LIBRARIES}
         gmock_main
 )
 
