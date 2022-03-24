@@ -1,0 +1,25 @@
+#pragma once
+#include "opencv2/opencv.hpp"
+#include "ConvexShape.h"
+#include "Configuration.h"
+#include "cv_bridge/cv_bridge.h"
+
+class Calibration {
+ public:
+  explicit Calibration(CalibrationConfig cfg);
+  cv_bridge::CvImage ProcessImage(const sensor_msgs::Image& image);
+  void SetVisualization(bool visualization);
+
+ private:
+  cv::Mat ConvertToCvImage();
+  static std::vector<cv::Point> ConvertKeyPoints(std::vector<cv::KeyPoint> &keypoints);
+  void VisualizeCorners(cv::Mat visualization_mat, std::vector<PointAngle> corners);
+
+  cv::Ptr<cv::SimpleBlobDetector> detector_;
+  int tolerance_;
+  bool visualization_ = false;
+  sensor_msgs::Image image_;
+  bool isKeypointsEmpty = false;
+  bool isShapeValid = false;static constexpr const char*  OPENCV_WINDOW = "Image window";
+  std::vector<std::string> labels{"Bottom Left", "Top Left", "Top Right", "Bottom Right"};
+};

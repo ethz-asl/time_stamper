@@ -4,8 +4,10 @@
 #include "sensor_msgs/Image.h"
 #include "opencv2/opencv.hpp"
 #include "ConvexShape.h"
+#include "Calibration.h"
+#include "Configuration.h"
 
-
+class Calibration;
 class Node {
  public:
   Node();
@@ -19,15 +21,11 @@ class Node {
   static constexpr const char*  OPENCV_WINDOW = "Image window";
 
  private:
-  static std::vector<cv::Point> convertKeyPoints(std::vector<cv::KeyPoint>&);
-  static cv::Ptr<cv::SimpleBlobDetector> createBlobDetectorPtr();
+  CalibrationConfig GetConfiguration();
 
-  void visualizeCorners(cv::Mat visualization_mat, std::vector<PointAngle> corners);
-
-  bool isKeypointsEmpty = false;
-  bool isShapeValid = false;
   ros::NodeHandle nh_;
-  ros::Subscriber img_sub_{};
+  ros::NodeHandle nh_private_{"~"};
   ros::Publisher img_pub_{};
   std::vector<std::string> labels{"Bottom Left", "Top Left", "Top Right", "Bottom Right"};
+  Calibration* calibration_;
 };
