@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 #include "ConvexShape.h"
-
+/*
 TEST(VectorRotation, TestInvalidValues) {
 
   //Ignore Point values
@@ -64,3 +64,4 @@ TEST(VectorRotation, TestValidValuesWithTwoRotations) {
   ASSERT_DOUBLE_EQ(a.at(2).angle, 154.402);
   ASSERT_DOUBLE_EQ(a.at(3).angle, 26.5729);
 }
+ */
