@@ -39,7 +39,7 @@ CalibrationConfig Node::GetConfiguration() {
 
   params.blobColor =  nh_private_.param("blob_color", 255);
 
-  // Filter by Area.
+  // Filter by Area
   params.filterByArea = nh_private_.param("filter_by_area", true);
   params.minArea = nh_private_.param("min_area", 50.0f);
 

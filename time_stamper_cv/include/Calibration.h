@@ -18,6 +18,7 @@ class Calibration {
   void Visualize(const cv::Mat& visualization_mat, ConvexShape convex_shape, int number);
   void VisualizeCorners(cv::Mat visualization_mat, std::vector<PointAngle> corners);
   void SetKeypointStatus();
+  std::vector<cv::Point3f> GenerateLedRow(int led_gap_x, int led_gap_y, int amount, float multiplier);
 
   std::vector<cv::KeyPoint> keypoints_{};
   cv::Ptr<cv::SimpleBlobDetector> detector_;
@@ -25,6 +26,7 @@ class Calibration {
   bool visualization_ = false;
   sensor_msgs::Image image_;
   bool isKeypointsEmpty = false;
-  bool lastShapeValid = false;static constexpr const char*  OPENCV_WINDOW = "Image window";
+  bool lastShapeValid = false;
+  static constexpr const char*  OPENCV_WINDOW = "Image window";
   std::vector<std::string> labels{"Bottom Left", "Top Left", "Top Right", "Bottom Right"};
 };

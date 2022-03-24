@@ -38,12 +38,8 @@ cv_bridge::CvImage Calibration::ProcessImage(const sensor_msgs::Image &image) {
   if (convex_shape.isShapeValid()) {
     float multiplier = 5;
 
-    std::vector<cv::Point3f> leds_bottom_row{};
-    std::vector<cv::Point3f> leds_img_bottom_row{};
-    for (int i = 1; i <= 16; i++) {
-      leds_bottom_row.emplace_back(6.0f * (float) i * multiplier, 0, 1);
-      leds_img_bottom_row.emplace_back(0, 0, 1);
-    }
+    std::vector<cv::Point3f> leds_bottom_row = GenerateLedRow(6, 0, 16, multiplier);
+    std::vector<cv::Point3f> leds_img_bottom_row = GenerateLedRow(0, 0, 16, multiplier);
 
     cv::Mat homography =
         cv::findHomography(convex_shape.getPhysicalCorners(), convex_shape.getVirtualCorners(multiplier), 0);
@@ -71,6 +67,7 @@ cv_bridge::CvImage Calibration::ProcessImage(const sensor_msgs::Image &image) {
 
       if (row_begin > 0 && col_begin > 0) {
 
+        //TODO test if coordinates are in image
         cv::Rect led_rect(row_begin, col_begin, size, size);
         cv::Mat cropped = input_mat(led_rect);
 
@@ -88,12 +85,11 @@ cv_bridge::CvImage Calibration::ProcessImage(const sensor_msgs::Image &image) {
           number |= 1 << i;
         }
 
-        cv::circle(input_mat, led_pos, (int) radius, cv::Scalar(255, 0, 0));
+        //TODO Move to Visualize()
+        cv::circle(visualization_mat, led_pos, (int) radius, cv::Scalar(255, 0, 0));
       }
     }
   }
-
-  cv::imshow(OPENCV_WINDOW + std::string(" homography"), input_mat);
   Visualize(visualization_mat, convex_shape, number);
 
   cv::waitKey(3);
@@ -177,7 +173,13 @@ void Calibration::VisualizeCorners(cv::Mat visualization_mat, std::vector<PointA
                 cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, color_text);
   }
 }
-
+std::vector<cv::Point3f> Calibration::GenerateLedRow(int led_gap_x, int led_gap_y, int amount, float multiplier) {
+  std::vector<cv::Point3f> led_row;
+  for (int i = 1; i <= amount; i++) {
+    led_row.emplace_back((led_gap_x * (i * 1.0) * multiplier), (led_gap_y * (i * 1.0) * multiplier), 1);
+  }
+  return led_row;
+}
 
 
 
