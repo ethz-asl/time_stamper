@@ -1,5 +1,6 @@
 #include "Calibration.h"
 #include "ros/ros.h"
+#include "LedParser.h"
 
 Calibration::Calibration(CalibrationConfig cfg) {
   convex_shape_ = new ConvexShape(cfg.tolerance);
@@ -135,62 +136,21 @@ Point3fVector Calibration::GenerateLedRow(
 
 int Calibration::GetLedCounter(const cv::Mat &input_mat, cv::Mat visualization_mat) {
 
-  int number = 0;
-  float multiplier = 1;
-  Point3fVector leds_bottom_row = GenerateLedRow({0, 0}, {6, 0}, 16);
-  Point3fVector leds_img_bottom_row = GenerateLedRow({0, 0}, {0, 0}, 16);
 
   cv::Mat homography =
-      cv::findHomography(convex_shape_->getPhysicalCorners(), convex_shape_->getVirtualCorners(multiplier), 0);
+      cv::findHomography(convex_shape_->getPhysicalCorners(), convex_shape_->getVirtualCorners(1), 0);
+  LedRowConfig led_row_config{{0, 0}, {6, 0}, 16};
+  LedParser led_parser(led_row_config, input_mat);
 
-  cv::Mat result = cv::Mat::zeros(input_mat.size(), CV_8UC1);
+  led_parser.TransformLedRow(homography.inv());
+   Point3fVector led_row_transformed = led_parser.GetLedRow();
 
-  cv::warpPerspective(input_mat, result, homography, input_mat.size());
-
-  cv::transform(leds_bottom_row, leds_img_bottom_row, homography.inv());
-
-  float radius = 10.0f;
-
-  for (int i = 0; i < leds_img_bottom_row.size(); i++) {
-
-    cv::Point3_<float> led_img = leds_img_bottom_row.at(i);
-
-    //Normalized led point
-    cv::Point2f led_pos{led_img.x / led_img.z, led_img.y / led_img.z};
-
-    int row_begin = (int) (led_pos.x - (radius / 2.0f));
-    int col_begin = (int) (led_pos.y - (radius / 2.0f));
-
-    //Create 16x16 image
-    int size = 16;
-    int half_size = size / 2;
-
-    if (row_begin > 0 && col_begin > 0) {
-
-      //TODO test if coordinates are in image
-      cv::Rect led_rect(row_begin, col_begin, size, size);
-      cv::Mat cropped = input_mat(led_rect);
-
-      cv::Mat kernel = cv::Mat(size, size, CV_8UC1);
-      cv::circle(kernel, cv::Point(half_size, half_size), half_size,
-                 cv::Scalar(255, 255, 255), -1);
-
-      cv::Mat kernel_normalized = kernel / 255;
-
-      //Calculate average - cv::sum(...) is always > 0
-      double normalization = 1.0 / cv::sum(kernel_normalized)[0];
-      cv::Scalar average = cv::sum(cropped.mul(kernel_normalized) * normalization);
-
-      if (average.val[0] > 40) {
-        number |= 1 << i;
-      }
-
-      //TODO Move to Visualize()
-      cv::circle(visualization_mat, led_pos, (int) radius, cv::Scalar(255, 0, 0));
-
-    }
-  }
-  return number;
+   for (const auto& led: led_parser.GetLedRow()) {
+     //TODO Move to Visualize()
+     cv::Point2f led_pos = LedParser::Normalize(led);
+     cv::circle(visualization_mat, led_pos, (int) 10, cv::Scalar(255, 0, 0));
+   }
+  return led_parser.GetLedBinaryCounter();
 }
 
 Calibration::~Calibration() {

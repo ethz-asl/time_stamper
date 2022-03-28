@@ -14,6 +14,7 @@ cs_add_library(${PROJECT_NAME}
         src/Trigonometry.cpp
         src/ConvexShape.cpp
         src/Calibration.cpp
+        src/LedParser.cpp
         )
 cs_add_executable(${PROJECT_NAME}-node src/Main.cpp)
 

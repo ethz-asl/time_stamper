@@ -1,4 +1,5 @@
 #pragma once
+#include "opencv2/opencv.hpp"
 
 struct PointAngle {
   cv::Point point;

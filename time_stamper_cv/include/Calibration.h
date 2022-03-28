@@ -6,6 +6,7 @@
 
 class ConvexShape;
 
+//TODO refactoring
 class Calibration {
  public:
   explicit Calibration(CalibrationConfig cfg);
