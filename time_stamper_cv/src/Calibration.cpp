@@ -1,10 +1,10 @@
 #include "Calibration.h"
 #include "ros/ros.h"
-#include "LedParser.h"
 
-Calibration::Calibration(CalibrationConfig cfg) {
+Calibration::Calibration(const CalibrationConfig &cfg) {
   convex_shape_ = new ConvexShape(cfg.tolerance);
   detector_ = cv::SimpleBlobDetector::create(cfg.params);
+  led_parser_ = new LedParser(cfg.led_row_config);
 }
 
 cv_bridge::CvImage Calibration::ProcessImage(const sensor_msgs::Image &image) {
@@ -28,7 +28,16 @@ cv_bridge::CvImage Calibration::ProcessImage(const sensor_msgs::Image &image) {
 
   int number = -1;
   if (convex_shape_->isShapeValid()) {
-    number = GetLedCounter(input_mat, visualization_mat);
+    led_parser_->ProcessImage(input_mat);
+    cv::Mat inv_homography =
+        cv::findHomography(convex_shape_->getPhysicalCorners(),
+                           convex_shape_->getVirtualCorners(1),0).inv();
+
+    led_parser_->TransformLedRow(inv_homography);
+    Point3fVector led_row_transformed = led_parser_->GetLedRow();
+
+    number = led_parser_->GetLedBinaryCounter();
+    std::cout << number << std::endl;
   }
   if (visualization_) {
     Visualize(visualization_mat, number);
@@ -103,6 +112,11 @@ void Calibration::Visualize(const cv::Mat &visualization_mat, int number) {
     counter_text += "---";
   }
 
+  for (const auto &led: led_parser_->GetLedRow()) {
+    cv::Point2f led_pos = LedParser::Normalize(led);
+    cv::circle(visualization_mat, led_pos, (int) 10, cv::Scalar(255, 0, 0));
+  }
+
   cv::putText(visualization_mat, shape_text, cv::Point(s.width * 0.05, s.height * 0.85),
               cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(255, 0, 0));
   cv::putText(visualization_mat, counter_text, cv::Point(s.width * 0.05, s.height * 0.9),
@@ -121,36 +135,6 @@ void Calibration::VisualizeCorners(cv::Mat visualization_mat, PointAngleVector c
     cv::putText(visualization_mat, labels.at(i), cvPoint(corner.x, corner.y - 40),
                 cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, color_text);
   }
-}
-
-Point3fVector Calibration::GenerateLedRow(
-    const cv::Point2f &first_led_pos, const cv::Vec2i &next_led, int amount, float multiplier) {
-  Point3fVector led_row;
-  for (int i = 1; i <= amount; i++) {
-    led_row.emplace_back((first_led_pos.x + (next_led.val[0] * (i * 1.0)) * multiplier),
-                         (first_led_pos.y + (next_led.val[1] * (i * 1.0)) * multiplier),
-                         1);
-  }
-  return led_row;
-}
-
-int Calibration::GetLedCounter(const cv::Mat &input_mat, cv::Mat visualization_mat) {
-
-
-  cv::Mat homography =
-      cv::findHomography(convex_shape_->getPhysicalCorners(), convex_shape_->getVirtualCorners(1), 0);
-  LedRowConfig led_row_config{{0, 0}, {6, 0}, 16};
-  LedParser led_parser(led_row_config, input_mat);
-
-  led_parser.TransformLedRow(homography.inv());
-   Point3fVector led_row_transformed = led_parser.GetLedRow();
-
-   for (const auto& led: led_parser.GetLedRow()) {
-     //TODO Move to Visualize()
-     cv::Point2f led_pos = LedParser::Normalize(led);
-     cv::circle(visualization_mat, led_pos, (int) 10, cv::Scalar(255, 0, 0));
-   }
-  return led_parser.GetLedBinaryCounter();
 }
 
 Calibration::~Calibration() {

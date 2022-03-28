@@ -2,9 +2,8 @@
 
 #include <utility>
 
-LedParser::LedParser(const LedRowConfig& led_row_config, cv::Mat image, int image_crop_size)
-:  image_(std::move(image)), size_(image_crop_size) {
-  led_row_ = GenerateLedRow(led_row_config);
+LedParser::LedParser(LedRowConfig  led_row_config, int image_crop_size)
+: led_row_config_(std::move(led_row_config)), size_(image_crop_size) {
 
   cv::Mat kernel = cv::Mat(image_crop_size, image_crop_size, CV_8UC1);
 
@@ -13,6 +12,12 @@ LedParser::LedParser(const LedRowConfig& led_row_config, cv::Mat image, int imag
              cv::Scalar(255, 255, 255), -1);
 
  kernel_normalized_ = kernel / 255;
+}
+
+void LedParser::ProcessImage(cv::Mat image) {
+  led_row_.clear();
+  led_row_ = GenerateLedRow(led_row_config_);
+  image_ = std::move(image);
 }
 
 Point3fVector LedParser::GenerateLedRow(const LedRowConfig& cfg) {
@@ -81,5 +86,6 @@ int LedParser::GetLedBinaryCounter() {
 cv::Point2f LedParser::Normalize(const cv::Point3_<float>& pt) {
   return {pt.x/pt.z, pt.y/pt.z};
 }
+
 
 
