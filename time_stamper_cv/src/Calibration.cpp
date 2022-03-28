@@ -32,8 +32,6 @@ cv_bridge::CvImage Calibration::ProcessImage(const sensor_msgs::Image &image) {
   if (visualization_) {
     Visualize(visualization_mat, number);
   }
-
-  cv::waitKey(3);
   out_msg.image = input_mat;
   return out_msg;
 }
@@ -75,12 +73,12 @@ void Calibration::SetKeypointStatus() {
 
 void Calibration::SetShapeStatus() {
   if (convex_shape_->isShapeValid()) {
-    if (!lastShapeValid) {
-      lastShapeValid = true;
+    if (!isLastShapeValid) {
+      isLastShapeValid = true;
       ROS_INFO("Shape valid");
     }
-  } else if (lastShapeValid) {
-    lastShapeValid = false;
+  } else if (isLastShapeValid) {
+    isLastShapeValid = false;
     ROS_WARN("Shape invalid");
   }
 }
@@ -109,6 +107,7 @@ void Calibration::Visualize(const cv::Mat &visualization_mat, int number) {
   cv::putText(visualization_mat, counter_text, cv::Point(s.width * 0.05, s.height * 0.9),
               cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(255, 0, 0));
   cv::imshow(OPENCV_WINDOW + std::string(" Visualization"), visualization_mat);
+  cv::waitKey(3);
 }
 
 void Calibration::VisualizeCorners(cv::Mat visualization_mat, PointAngleVector corners) {

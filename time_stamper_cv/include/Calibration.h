@@ -29,7 +29,7 @@ class Calibration {
   bool visualization_ = false;
   sensor_msgs::Image image_;
   bool isKeypointsEmpty = false;
-  bool lastShapeValid = false;
+  bool isLastShapeValid = false;
   static constexpr const char *OPENCV_WINDOW = "Image window";
   std::vector<std::string> labels{"Bottom Left", "Top Left", "Top Right", "Bottom Right"};
   ConvexShape *convex_shape_;

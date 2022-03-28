@@ -2,7 +2,7 @@
 #include "Node.h"
 
 int main(int argc, char **argv) {
-  ros::init(argc, argv, "cv_node");
+  ros::init(argc, argv, "time_stamper_cv_node");
   Node node;
   if (!node.Init()) {
     return -1;
