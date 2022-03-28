@@ -24,15 +24,6 @@ target_link_libraries(
         ${OpenCV_LIBRARIES}
 )
 
-cs_add_executable(${PROJECT_NAME}-blobtest src/BlobDetectionTest.cpp)
-
-target_link_libraries(
-        ${PROJECT_NAME}-blobtest
-        ${PROJECT_NAME}
-        ${catkin_LIBRARIES}
-        ${OpenCV_LIBRARIES}
-)
-
 catkin_add_gtest(${PROJECT_NAME}-test
         test/test_entry_point.cc
         test/test_trigonometry.cc
