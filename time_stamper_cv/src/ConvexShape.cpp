@@ -94,7 +94,7 @@ bool ConvexShape::calculateSortedPointAngles() {
   int pos;
   bool posSet = false;
   for (int i = 0; i < point_angles_sorted_.size(); i++) {
-    if (Filter(80, 100, point_angles_sorted_.at(i).angle)) {
+    if (ToleranceFilter(90, point_angles_sorted_.at(i).angle)) {
       count++;
     }
 
