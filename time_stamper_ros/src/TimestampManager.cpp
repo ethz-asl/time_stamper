@@ -30,6 +30,7 @@ bool TimestampManager::Poll() {
 
   return true;
 }
+
 double TimestampManager::GetLastTimestamp() const {
   return last_timestamp_;
 }

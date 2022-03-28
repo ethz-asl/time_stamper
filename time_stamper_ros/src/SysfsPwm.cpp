@@ -1,6 +1,5 @@
 #include <SysfsPwm.h>
 #include <unistd.h>
-#include <iostream>
 
 SysfsPwm::SysfsPwm(std::string pwmchip_path, IFileSystem &file_system)
     : pwm_chip_path_(std::move(pwmchip_path)), fs_(file_system) {}
@@ -53,6 +52,7 @@ bool SysfsPwm::IsRunning() {
 bool SysfsPwm::Start() {
   return fs_.Write(pwm_chip_path_ + PWM_ENABLE, "1");
 }
+
 bool SysfsPwm::Stop() {
   return fs_.Write(pwm_chip_path_ + PWM_ENABLE, "0");
 }
@@ -94,6 +94,7 @@ bool SysfsPwm::ChangeDutyCycleRaw(int value) {
   std::string value_str = std::to_string(value);
   return fs_.Write(pwm_chip_path_ + PWM_DUTYCYCLE, value_str);
 }
+
 bool SysfsPwm::GetFrequency(void *buffer, ssize_t size) {
   return fs_.Read(pwm_chip_path_ + PWM_PERIOD, buffer, size);
 }

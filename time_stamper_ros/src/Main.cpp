@@ -1,4 +1,3 @@
-#include <iostream>
 #include <csignal>
 #include "ros/ros.h"
 #include "Node.h"
