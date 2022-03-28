@@ -36,7 +36,7 @@ target_link_libraries(
 catkin_add_gtest(${PROJECT_NAME}-test
         test/test_entry_point.cc
         test/test_trigonometry.cc
-        test/test_shape_validation.cc
+        test/test_convex_shape.cc
         )
 
 target_link_libraries(

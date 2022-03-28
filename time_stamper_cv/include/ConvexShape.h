@@ -16,11 +16,12 @@ class ConvexShape {
   bool isShapeValid();
   bool ToleranceFilter(int expected_value, double actual_value) const;
   ~ConvexShape() = default;
+  friend class ConvexShapeTest;
 
  private:
   void calculateHull();
   PointAngleVector calculatePointAngles();
-  bool calculateRotatedVector();
+  bool calculateSortedPointAngles();
   static bool Filter(double min, double max, double value);
 
   int tolerance_;

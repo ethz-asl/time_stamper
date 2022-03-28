@@ -13,7 +13,7 @@ void ConvexShape::Process(PointVector raw_points) {
 
   calculateHull();
   if (isHullValid()) {
-    calculateRotatedVector();
+    calculateSortedPointAngles();
   }
 }
 
@@ -86,7 +86,7 @@ PointAngleVector ConvexShape::calculatePointAngles() {
   return point_angles;
 }
 
-bool ConvexShape::calculateRotatedVector() {
+bool ConvexShape::calculateSortedPointAngles() {
   point_angles_sorted_ = calculatePointAngles();
 
   int count = 0;
