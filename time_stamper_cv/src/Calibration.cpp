@@ -37,7 +37,6 @@ cv_bridge::CvImage Calibration::ProcessImage(const sensor_msgs::Image &image) {
     Point3fVector led_row_transformed = led_parser_->GetLedRow();
 
     number = led_parser_->GetLedBinaryCounter();
-    std::cout << number << std::endl;
   }
   if (visualization_) {
     Visualize(visualization_mat, number);
@@ -107,14 +106,15 @@ void Calibration::Visualize(const cv::Mat &visualization_mat, int number) {
   if (convex_shape_->isShapeValid()) {
     shape_text += "Valid";
     counter_text += std::to_string(number);
+
+    for (const auto &led: led_parser_->GetLedRow()) {
+      cv::Point2f led_pos = LedParser::Normalize(led);
+      cv::circle(visualization_mat, led_pos, (int) 10, cv::Scalar(255, 0, 0));
+    }
+
   } else {
     shape_text += "Invalid";
     counter_text += "---";
-  }
-
-  for (const auto &led: led_parser_->GetLedRow()) {
-    cv::Point2f led_pos = LedParser::Normalize(led);
-    cv::circle(visualization_mat, led_pos, (int) 10, cv::Scalar(255, 0, 0));
   }
 
   cv::putText(visualization_mat, shape_text, cv::Point(s.width * 0.05, s.height * 0.85),
