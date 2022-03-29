@@ -29,6 +29,7 @@ catkin_add_gtest(${PROJECT_NAME}-test
         test/test_entry_point.cc
         test/test_trigonometry.cc
         test/test_convex_shape.cc
+        test/test_led_parser.cc
         )
 
 target_link_libraries(
