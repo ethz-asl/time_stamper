@@ -75,7 +75,7 @@ PointAngleVector ConvexShape::calculatePointAngles() {
   for (auto &point_c : hull_) {
     double angle = Trigonometry::CalcInnerAngle(point_a, point_c, point_b);
 
-    if (angle < 170 || angle > 190) {
+    if (angle < (180 - tolerance_)) {
       point_angles.push_back({point_b, angle});
     }
 
