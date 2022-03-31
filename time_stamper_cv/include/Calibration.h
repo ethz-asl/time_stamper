@@ -10,9 +10,28 @@ class ConvexShape;
 //TODO refactoring
 class Calibration {
  public:
+  /**
+   * Creates a new Calibration object.
+   * @param cfg See Configuration.h for more details
+   */
   explicit Calibration(const CalibrationConfig& cfg);
+
+  /**
+   * Process a ros image.
+   * @param image
+   * @returns cv_bride::Image which can be published in ROS after calling toImageMsg().
+   */
   cv_bridge::CvImage ProcessImage(const sensor_msgs::Image &image);
+
+  /**
+   * If set to true a window for visualization is opened and updated every frame
+   * @param visualization
+   */
   void SetVisualization(bool visualization);
+
+  /**
+   * Default destructor
+   */
   ~Calibration();
 
  private:
