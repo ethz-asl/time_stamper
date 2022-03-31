@@ -39,13 +39,12 @@ void LedParser::TransformLedRow(const cv::Mat& homography) {
   led_row_ = empty_row;
 }
 
-double LedParser::GetLedBrightness(int index, float radius) {
+double LedParser::GetLedBrightness(int index) {
   cv::Point3_<float> led_transformed = led_row_.at(index);
 
-  //Normalized led point
-  cv::Point2f led_pos{led_transformed.x / led_transformed.z, led_transformed.y / led_transformed.z};
-  int row_begin = (int) (led_pos.x - (radius / 2.0f));
-  int col_begin = (int) (led_pos.y - (radius / 2.0f));
+  cv::Point2f led_pos = Normalize(led_transformed);
+  int row_begin = (int) (led_pos.x - (size_ / 2.0));
+  int col_begin = (int) (led_pos.y - (size_ / 2.0));
 
   if ((col_begin + size_) > image_.rows || row_begin + size_ > image_.cols) {
     return -1;
@@ -65,8 +64,11 @@ double LedParser::GetLedBrightness(int index, float radius) {
   return -1;
 }
 
-bool LedParser::isLedOn(int index, float radius, int min_brightness) {
-  double a = GetLedBrightness(index, radius);
+bool LedParser::isLedOn(int index, int min_brightness) {
+  if (min_brightness > 255) {
+    return false;
+  }
+  double a = GetLedBrightness(index);
   return a > min_brightness;
 }
 
@@ -74,7 +76,7 @@ const Point3fVector &LedParser::GetLedRow() const {
   return led_row_;
 }
 
-int LedParser::GetLedBinaryCounter() {
+int LedParser::GetBinaryValue() {
   int count = 0;
   for (int i = 0; i < led_row_.size(); i++) {
     if (isLedOn(i)) {

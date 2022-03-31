@@ -36,7 +36,7 @@ cv_bridge::CvImage Calibration::ProcessImage(const sensor_msgs::Image &image) {
     led_parser_->TransformLedRow(inv_homography);
     Point3fVector led_row_transformed = led_parser_->GetLedRow();
 
-    number = led_parser_->GetLedBinaryCounter();
+    number = led_parser_->GetBinaryValue();
   }
   if (visualization_) {
     Visualize(visualization_mat, number);

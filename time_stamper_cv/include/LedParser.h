@@ -5,18 +5,62 @@
 
 class LedParser {
  public:
-  explicit LedParser(LedRowConfig  led_row_config, int image_crop_size = 16);
-  static Point3fVector GenerateLedRow(const LedRowConfig& cfg);
-  static cv::Point2f Normalize(const cv::Point3_<float>& pt);
+  explicit LedParser(LedRowConfig led_row_config, int image_crop_size = 16);
 
+  /**
+   * Generate a point3f vector from LedRowConfig, where the z value is 1.
+   * Used for some matrix operations.
+   * @param cfg See Configuration.h
+   */
+  static Point3fVector GenerateLedRow(const LedRowConfig &cfg);
+
+  /**
+   * Converts point3f to point2f.
+   * @param pt
+   * @return normalized point
+   */
+  static cv::Point2f Normalize(const cv::Point3_<float> &pt);
+
+  /**
+   * Processes new image. Overrides previous led_row.
+   * @param image
+   */
   void ProcessImage(cv::Mat image);
-  void TransformLedRow(const cv::Mat& homography);
-  double GetLedBrightness(int index, float radius = 10.0f);
-  bool isLedOn(int index, float radius = 10.0f, int min_brightness = 40);
-  const Point3fVector &GetLedRow() const;
-  int GetLedBinaryCounter();
 
+  /**
+   * Transforms LED row with homography.
+   * @param homography
+   */
+  void TransformLedRow(const cv::Mat &homography);
+
+  /**
+   * Creates an (size_ * size_) sub-image and calculates average pixel brightness.
+   * @param index LED index
+   * @return value between 0 and 255 or -1 on error.
+   */
+  double GetLedBrightness(int index);
+
+  /**
+   * Checks if LED at specific index is on.
+   * @param index LED row index
+   * @param min_brightness Minimum brightness, value between 1 and 255.
+   * @return true if average pixel brightness > min_brightness, otherwise false.
+   */
+  bool isLedOn(int index, int min_brightness = 40);
+
+  /**
+   * Get the binary value of the LED row
+   * @return
+   */
+  int GetBinaryValue();
+
+  /**
+   * Default destructor
+   */
   ~LedParser() = default;
+
+  //!Public getter
+  const Point3fVector &GetLedRow() const;
 
  private:
   LedRowConfig led_row_config_;
