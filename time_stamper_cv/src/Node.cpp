@@ -7,7 +7,7 @@ Node::Node() {
 
 bool Node::Init() {
   img_pub_ = nh_.advertise<sensor_msgs::Image>("time_stamper_cv_image", 1);
-  calibration_->SetVisualization(true);
+  calibration_->SetVisualization(nh_private_.param("show_visualization", true));
   return true;
 }
 
