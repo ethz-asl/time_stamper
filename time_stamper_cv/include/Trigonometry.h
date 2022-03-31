@@ -21,6 +21,8 @@ class Trigonometry {
    */
   static double CalcInnerAngle(const cv::Point &a, const cv::Point &b, const cv::Point &target);
 
- private:
+  //TODO implement friend class and make LawOfCos private
+  //For testing
+  friend class TestTrigonometry;
   static double LawOfCos(double a, double b, double c);
 };
