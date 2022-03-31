@@ -7,7 +7,7 @@
  * Position of the first LED in a 2D coordinate system.
  *
  * @param next_led
- * Vector from previous to next led, thus every LED in a row has the same vector to the next LED.
+ * Vector from previous to next LED, thus every LED in a row has the same vector to the next LED.
  *
  * @param amount
  * Amount of LEDs in a row.
