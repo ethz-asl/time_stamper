@@ -2,9 +2,9 @@
 #include "ros/ros.h"
 
 Calibration::Calibration(const CalibrationConfig &cfg) {
-  convex_shape_ = new ConvexShape(cfg.tolerance);
+  convex_shape_ = std::make_shared<ConvexShape>(ConvexShape(cfg.tolerance));
   detector_ = cv::SimpleBlobDetector::create(cfg.params);
-  led_parser_ = new LedParser(cfg.led_row_config);
+  led_parser_ = std::make_shared<LedParser>(LedParser(cfg.led_row_config));
 }
 
 cv_bridge::CvImage Calibration::ProcessImage(const sensor_msgs::Image &image) {
@@ -135,8 +135,4 @@ void Calibration::VisualizeCorners(const cv::Mat &visualization_mat, PointAngleV
     cv::putText(visualization_mat, labels.at(i), cvPoint(corner.x, corner.y - 40),
                 cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, color_text);
   }
-}
-
-Calibration::~Calibration() {
-  delete convex_shape_;
 }

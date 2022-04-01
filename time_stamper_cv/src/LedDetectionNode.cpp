@@ -2,7 +2,7 @@
 #include "Trigonometry.h"
 
 LedDetectionNode::LedDetectionNode() {
-  calibration_ = new Calibration(GetConfiguration());
+  calibration_ = std::make_shared<Calibration>(Calibration(GetConfiguration()));
 }
 
 void LedDetectionNode::Init() {
@@ -18,10 +18,6 @@ void LedDetectionNode::Start() {
 void LedDetectionNode::CallbackRawImage(const sensor_msgs::Image &image) const {
   cv_bridge::CvImage out_msg = calibration_->ProcessImage(image);
   img_pub_.publish(out_msg.toImageMsg());
-}
-
-LedDetectionNode::~LedDetectionNode() {
-  delete calibration_;
 }
 
 CalibrationConfig LedDetectionNode::GetConfiguration() const {

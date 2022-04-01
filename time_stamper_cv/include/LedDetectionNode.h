@@ -25,7 +25,11 @@ class LedDetectionNode {
    * Starts the node.
    */
   void Start();
-  ~LedDetectionNode();
+
+  /**
+   * Default destructor
+   */
+  ~LedDetectionNode() = default;
 
  private:
   CalibrationConfig GetConfiguration() const;
@@ -34,5 +38,5 @@ class LedDetectionNode {
   ros::NodeHandle nh_private_{"~"};
   __attribute__((unused)) ros::Subscriber img_sub_{};
   ros::Publisher img_pub_{};
-  Calibration* calibration_{};
+  std::shared_ptr<Calibration> calibration_{};
 };

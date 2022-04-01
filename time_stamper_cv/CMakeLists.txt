@@ -10,7 +10,7 @@ catkin_simple()
 find_package(OpenCV REQUIRED)
 
 cs_add_library(${PROJECT_NAME}
-        src/Node.cpp
+        src/LedDetectionNode.cpp
         src/Trigonometry.cpp
         src/ConvexShape.cpp
         src/Calibration.cpp

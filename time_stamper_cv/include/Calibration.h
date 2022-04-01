@@ -29,7 +29,7 @@ class Calibration {
   /**
    * Default destructor
    */
-  ~Calibration();
+  ~Calibration() = default;
 
  private:
   cv::Mat ConvertToCvImage() const;
@@ -48,6 +48,6 @@ class Calibration {
   static constexpr const char *OPENCV_WINDOW{"Image window"};
   std::vector<std::string> labels{"Bottom Left", "Top Left", "Top Right", "Bottom Right"};
 
-  ConvexShape *convex_shape_{};
-  LedParser *led_parser_{};
+  std::shared_ptr<ConvexShape> convex_shape_{};
+  std::shared_ptr<LedParser> led_parser_{};
 };
