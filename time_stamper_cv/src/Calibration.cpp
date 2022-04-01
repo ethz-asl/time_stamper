@@ -22,7 +22,7 @@ cv_bridge::CvImage Calibration::ProcessImage(const sensor_msgs::Image &image) {
     return out_msg;
   }
 
-  PointVector points = ConvertKeyPoints();
+  PointVector points(keypoints_);
   convex_shape_->Process(points);
   SetShapeStatus();
 
@@ -53,17 +53,6 @@ cv::Mat Calibration::ConvertToCvImage() const {
   cv_bridge::CvImageConstPtr cv_image = cv_bridge::toCvCopy(image_);
   cv::Mat input_mat = cv_image->image.clone();
   return input_mat;
-}
-
-PointVector Calibration::ConvertKeyPoints() {
-  PointVector points{};
-  points.reserve(keypoints_.size());
-
-  std::transform(keypoints_.begin(),
-                 keypoints_.end(),
-                 std::back_inserter(points),
-                 [](cv::KeyPoint &kp) { return kp.pt; });
-  return points;
 }
 
 void Calibration::SetKeypointStatus() {
