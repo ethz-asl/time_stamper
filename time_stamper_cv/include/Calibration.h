@@ -5,9 +5,6 @@
 #include "cv_bridge/cv_bridge.h"
 #include "LedParser.h"
 
-class ConvexShape;
-
-//TODO refactoring
 class Calibration {
  public:
   /**

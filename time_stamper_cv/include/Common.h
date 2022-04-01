@@ -6,9 +6,6 @@ struct PointAngle {
   double angle;
 };
 
-//Forward declarations
-class ConvexShape;
-
 //Typedefs
 typedef std::vector<cv::Point> PointVector;
 typedef std::vector<cv::Point2f> Point2fVector;
