@@ -35,10 +35,10 @@ class Calibration {
   ~Calibration();
 
  private:
-  cv::Mat ConvertToCvImage();
+  cv::Mat ConvertToCvImage() const;
   PointVector ConvertKeyPoints();
-  void Visualize(const cv::Mat &visualization_mat, int number);
-  void VisualizeCorners(cv::Mat visualization_mat, PointAngleVector corners);
+  void Visualize(const cv::Mat &visualization_mat, int number) const;
+  void VisualizeCorners(const cv::Mat &visualization_mat, PointAngleVector corners) const;
   void SetKeypointStatus();
   void SetShapeStatus();
 

@@ -16,7 +16,7 @@ void Node::Start() {
   ROS_INFO("Node started");
 }
 
-void Node::CallbackRawImage(const sensor_msgs::Image &image) {
+void Node::CallbackRawImage(const sensor_msgs::Image &image) const {
   cv_bridge::CvImage out_msg = calibration_->ProcessImage(image);
   img_pub_.publish(out_msg.toImageMsg());
 }
@@ -25,15 +25,15 @@ Node::~Node() {
   delete calibration_;
 }
 
-CalibrationConfig Node::GetConfiguration() {
+CalibrationConfig Node::GetConfiguration() const {
   CalibrationConfig cfg;
   cv::SimpleBlobDetector::Params params;
 
-  params.blobColor =  nh_private_.param("blob_color", 255);
+  params.blobColor = nh_private_.param("blob_color", 255);
 
   // Filter by Area
   params.filterByArea = nh_private_.param("filter_by_area", true);
-  params.minArea = nh_private_.param("min_area", 50.0f);
+  params.minArea = nh_private_.param("min_area", 80.0f);
 
   // Filter by Circularity
   params.filterByCircularity = nh_private_.param("filter_by_circularity", true);
@@ -47,7 +47,7 @@ CalibrationConfig Node::GetConfiguration() {
   params.filterByInertia = nh_private_.param("filter_by_inertia", false);
   params.minInertiaRatio = nh_private_.param("min_inertia_ratio", 0.01f);
 
-  cfg.tolerance = nh_private_.param("tolerance" , 10);
+  cfg.tolerance = nh_private_.param("tolerance", 10);
   cfg.params = params;
   return cfg;
 }

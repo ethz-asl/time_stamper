@@ -27,13 +27,13 @@ class ConvexShape {
    * Get all points which define the convex shape.
    * @return
    */
-  PointVector getHull();
+  PointVector getHull() const;
 
   /**
    * Checks if hull is valid.
    * @return true if hull has expected size, otherwise false.
    */
-  bool isHullValid();
+  bool isHullValid() const;
 
   /**
    * Used to get scaled virtualCorners.
@@ -46,7 +46,7 @@ class ConvexShape {
    * Get points which define convex shape. Starting with bottom left clockwise.
    * @return Points if IsShapeValid() returns true, otherwise an empty vector is returned.
    */
-  PointAngleVector getSortedPointAngles();
+  PointAngleVector getSortedPointAngles() const;
 
   /**
    * Get all points in image coordinates
@@ -58,7 +58,7 @@ class ConvexShape {
    * Checks if shape on image is expected size and checks whether the inner angles are in tolerance.
    * @return true if expected size and the inner angles are in tolerance, otherwise false.
    */
-  bool isShapeValid();
+  bool isShapeValid() const;
 
   /**
    * Checks whether a value is in tolerance.

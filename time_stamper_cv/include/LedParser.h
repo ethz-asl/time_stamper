@@ -25,7 +25,7 @@ class LedParser {
    * Processes new image. Overrides previous led_row.
    * @param image
    */
-  void ProcessImage(cv::Mat image);
+  void ProcessImage(const cv::Mat &image);
 
   /**
    * Transforms LED row with homography.
@@ -38,7 +38,7 @@ class LedParser {
    * @param index LED index
    * @return value between 0 and 255 or -1 on error.
    */
-  double GetLedBrightness(int index);
+  double GetLedBrightness(int index) const;
 
   /**
    * Checks if LED at specific index is on.
@@ -46,13 +46,13 @@ class LedParser {
    * @param min_brightness Minimum brightness, value between 1 and 255.
    * @return true if average pixel brightness > min_brightness, otherwise false.
    */
-  bool isLedOn(int index, int min_brightness = 40);
+  bool isLedOn(int index, int min_brightness = 40) const;
 
   /**
    * Get the binary value of the LED row
    * @return
    */
-  int GetBinaryValue();
+  int GetBinaryValue() const;
 
   /**
    * Default destructor

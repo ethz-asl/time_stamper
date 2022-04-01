@@ -29,7 +29,7 @@ bool ConvexShape::Filter(double min, double max, double value) {
 }
 
 
-bool ConvexShape::isShapeValid() {
+bool ConvexShape::isShapeValid() const {
   if (point_angles_sorted_.size() != 4) {
     return false;
   }
@@ -40,11 +40,11 @@ bool ConvexShape::isShapeValid() {
       ToleranceFilter(30, point_angles_sorted_.at(3).angle);
 }
 
-PointVector ConvexShape::getHull() {
+PointVector ConvexShape::getHull() const {
   return hull_;
 }
 
-bool ConvexShape::isHullValid() {
+bool ConvexShape::isHullValid() const {
   return hull_.size() >= 4;
 }
 
@@ -117,7 +117,7 @@ bool ConvexShape::calculateSortedPointAngles() {
 }
 
 
-PointAngleVector ConvexShape::getSortedPointAngles() {
+PointAngleVector ConvexShape::getSortedPointAngles() const {
   return point_angles_sorted_;
 }
 

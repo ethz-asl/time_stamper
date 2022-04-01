@@ -14,7 +14,7 @@ class Node {
    * Called when an image is published on a subscribed node.
    * @param image
    */
-  void CallbackRawImage(const sensor_msgs::Image& image);
+  void CallbackRawImage(const sensor_msgs::Image& image) const;
 
   /**
    * Initializes the node.
@@ -29,7 +29,7 @@ class Node {
   ~Node();
 
  private:
-  CalibrationConfig GetConfiguration();
+  CalibrationConfig GetConfiguration() const;
 
   ros::NodeHandle nh_;
   ros::NodeHandle nh_private_{"~"};

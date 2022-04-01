@@ -49,7 +49,7 @@ void Calibration::SetVisualization(bool visualization) {
   visualization_ = visualization;
 }
 
-cv::Mat Calibration::ConvertToCvImage() {
+cv::Mat Calibration::ConvertToCvImage() const {
   cv_bridge::CvImageConstPtr cv_image = cv_bridge::toCvCopy(image_);
   cv::Mat input_mat = cv_image->image.clone();
   return input_mat;
@@ -92,7 +92,7 @@ void Calibration::SetShapeStatus() {
   }
 }
 
-void Calibration::Visualize(const cv::Mat &visualization_mat, int number) {
+void Calibration::Visualize(const cv::Mat &visualization_mat, int number) const {
 
   cv::polylines(visualization_mat, convex_shape_->getHull(), true, cv::Scalar(255, 0, 0));
   if (convex_shape_->isShapeValid()) {
@@ -125,7 +125,7 @@ void Calibration::Visualize(const cv::Mat &visualization_mat, int number) {
   cv::waitKey(3);
 }
 
-void Calibration::VisualizeCorners(cv::Mat visualization_mat, PointAngleVector corners) {
+void Calibration::VisualizeCorners(const cv::Mat &visualization_mat, PointAngleVector corners) const {
   for (int i = 0; i < corners.size(); i++) {
     cv::Scalar color_circle(255, 0, 0);
     cv::Scalar color_text(255, 0, 0);

@@ -2,8 +2,8 @@
 
 #include <utility>
 
-LedParser::LedParser(LedRowConfig  led_row_config, int image_crop_size)
-: led_row_config_(std::move(led_row_config)), size_(image_crop_size) {
+LedParser::LedParser(LedRowConfig led_row_config, int image_crop_size)
+    : led_row_config_(std::move(led_row_config)), size_(image_crop_size) {
 
   cv::Mat kernel = cv::Mat(image_crop_size, image_crop_size, CV_8UC1);
 
@@ -11,16 +11,16 @@ LedParser::LedParser(LedRowConfig  led_row_config, int image_crop_size)
   cv::circle(kernel, cv::Point(half_size, half_size), half_size,
              cv::Scalar(255, 255, 255), -1);
 
- kernel_normalized_ = kernel / 255;
+  kernel_normalized_ = kernel / 255;
 }
 
-void LedParser::ProcessImage(cv::Mat image) {
+void LedParser::ProcessImage(const cv::Mat &image) {
   led_row_.clear();
   led_row_ = GenerateLedRow(led_row_config_);
-  image_ = std::move(image);
+  image_ = image;
 }
 
-Point3fVector LedParser::GenerateLedRow(const LedRowConfig& cfg) {
+Point3fVector LedParser::GenerateLedRow(const LedRowConfig &cfg) {
 
   Point3fVector led_row;
   cv::Point2f led_pos = cfg.first_led_pos;
@@ -33,13 +33,13 @@ Point3fVector LedParser::GenerateLedRow(const LedRowConfig& cfg) {
   return led_row;
 }
 
-void LedParser::TransformLedRow(const cv::Mat& homography) {
+void LedParser::TransformLedRow(const cv::Mat &homography) {
   Point3fVector empty_row;
   cv::transform(led_row_, empty_row, homography);
   led_row_ = empty_row;
 }
 
-double LedParser::GetLedBrightness(int index) {
+double LedParser::GetLedBrightness(int index) const {
   cv::Point3_<float> led_transformed = led_row_.at(index);
 
   cv::Point2f led_pos = Normalize(led_transformed);
@@ -64,7 +64,7 @@ double LedParser::GetLedBrightness(int index) {
   return -1;
 }
 
-bool LedParser::isLedOn(int index, int min_brightness) {
+bool LedParser::isLedOn(int index, int min_brightness) const {
   if (min_brightness > 255) {
     return false;
   }
@@ -76,7 +76,7 @@ const Point3fVector &LedParser::GetLedRow() const {
   return led_row_;
 }
 
-int LedParser::GetBinaryValue() {
+int LedParser::GetBinaryValue() const{
   int count = 0;
   for (int i = 0; i < led_row_.size(); i++) {
     if (isLedOn(i)) {
@@ -85,8 +85,9 @@ int LedParser::GetBinaryValue() {
   }
   return count;
 }
-cv::Point2f LedParser::Normalize(const cv::Point3_<float>& pt) {
-  return {pt.x/pt.z, pt.y/pt.z};
+
+cv::Point2f LedParser::Normalize(const cv::Point3_<float> &pt) {
+  return {pt.x / pt.z, pt.y / pt.z};
 }
 
 
