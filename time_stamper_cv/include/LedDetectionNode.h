@@ -6,9 +6,9 @@
 #include "Configuration.h"
 
 class Calibration;
-class Node {
+class LedDetectionNode {
  public:
-  Node();
+  LedDetectionNode();
 
   /**
    * Called when an image is published on a subscribed node.
@@ -20,13 +20,13 @@ class Node {
    * Initializes the node.
    * @return true if successful, otherwise false.
    */
-  bool Init();
+  void Init();
 
   /**
    * Starts the node.
    */
   void Start();
-  ~Node();
+  ~LedDetectionNode();
 
  private:
   CalibrationConfig GetConfiguration() const;

@@ -1,31 +1,30 @@
-#include "Node.h"
+#include "LedDetectionNode.h"
 #include "Trigonometry.h"
 
-Node::Node() {
+LedDetectionNode::LedDetectionNode() {
   calibration_ = new Calibration(GetConfiguration());
 }
 
-bool Node::Init() {
+void LedDetectionNode::Init() {
   img_pub_ = nh_.advertise<sensor_msgs::Image>("time_stamper_cv_image", 1);
   calibration_->SetVisualization(nh_private_.param("show_visualization", true));
-  return true;
 }
 
-void Node::Start() {
-  img_sub_ = nh_.subscribe("output/image", 1, &Node::CallbackRawImage, this);
+void LedDetectionNode::Start() {
+  img_sub_ = nh_.subscribe("output/image", 1, &LedDetectionNode::CallbackRawImage, this);
   ROS_INFO("Node started");
 }
 
-void Node::CallbackRawImage(const sensor_msgs::Image &image) const {
+void LedDetectionNode::CallbackRawImage(const sensor_msgs::Image &image) const {
   cv_bridge::CvImage out_msg = calibration_->ProcessImage(image);
   img_pub_.publish(out_msg.toImageMsg());
 }
 
-Node::~Node() {
+LedDetectionNode::~LedDetectionNode() {
   delete calibration_;
 }
 
-CalibrationConfig Node::GetConfiguration() const {
+CalibrationConfig LedDetectionNode::GetConfiguration() const {
   CalibrationConfig cfg;
   cv::SimpleBlobDetector::Params params;
 
