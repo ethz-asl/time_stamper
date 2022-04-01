@@ -67,28 +67,16 @@ PointVector Calibration::ConvertKeyPoints() {
 }
 
 void Calibration::SetKeypointStatus() {
-  if (keypoints_.empty()) {
-    if (!isKeypointsEmpty) {
-      ROS_WARN("Keypoints empty");
-    }
-    isKeypointsEmpty = true;
-  } else {
-    if (isKeypointsEmpty) {
-      ROS_INFO("Keypoints found");
-    }
-    isKeypointsEmpty = false;
+  if (keypoints_.empty() != isKeypointsEmpty) {
+    std::string v = keypoints_.empty() ? "empty" : "found";
+    ROS_INFO_STREAM("Shape " << v);
   }
 }
 
 void Calibration::SetShapeStatus() {
-  if (convex_shape_->isShapeValid()) {
-    if (!isLastShapeValid) {
-      isLastShapeValid = true;
-      ROS_INFO("Shape valid");
-    }
-  } else if (isLastShapeValid) {
-    isLastShapeValid = false;
-    ROS_WARN("Shape invalid");
+  if (convex_shape_->isShapeValid() != isLastShapeValid) {
+    std::string v = convex_shape_->isShapeValid() ? "Valid" : "Invalid";
+    ROS_INFO_STREAM("Shape " << v);
   }
 }
 
