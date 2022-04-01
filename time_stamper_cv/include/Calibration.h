@@ -43,14 +43,14 @@ class Calibration {
   void SetShapeStatus();
 
   std::vector<cv::KeyPoint> keypoints_{};
-  cv::Ptr<cv::SimpleBlobDetector> detector_;
-  bool visualization_ = false;
-  sensor_msgs::Image image_;
-  bool isKeypointsEmpty = false;
-  bool isLastShapeValid = false;
-  static constexpr const char *OPENCV_WINDOW = "Image window";
+  cv::Ptr<cv::SimpleBlobDetector> detector_{};
+  bool visualization_{false};
+  sensor_msgs::Image image_{};
+  bool isKeypointsEmpty{false};
+  bool isLastShapeValid{false};
+  static constexpr const char *OPENCV_WINDOW{"Image window"};
   std::vector<std::string> labels{"Bottom Left", "Top Left", "Top Right", "Bottom Right"};
 
-  ConvexShape *convex_shape_;
-  LedParser *led_parser_;
+  ConvexShape *convex_shape_{};
+  LedParser *led_parser_{};
 };

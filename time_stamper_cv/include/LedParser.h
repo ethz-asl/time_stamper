@@ -63,9 +63,9 @@ class LedParser {
   const Point3fVector &GetLedRow() const;
 
  private:
-  LedRowConfig led_row_config_;
-  cv::Mat image_;
-  int size_;
+  LedRowConfig led_row_config_{};
+  cv::Mat image_{};
+  int size_{};
   Point3fVector led_row_{};
-  cv::Mat kernel_normalized_;
+  cv::Mat kernel_normalized_{};
 };

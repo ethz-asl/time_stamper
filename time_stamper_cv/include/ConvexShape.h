@@ -83,7 +83,7 @@ class ConvexShape {
   bool calculateSortedPointAngles();
   static bool Filter(double min, double max, double value);
 
-  int tolerance_;
+  int tolerance_{};
   PointVector raw_points_{};
   PointVector hull_{};
   PointAngleVector point_angles_sorted_{};

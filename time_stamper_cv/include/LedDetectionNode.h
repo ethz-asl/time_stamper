@@ -18,7 +18,6 @@ class LedDetectionNode {
 
   /**
    * Initializes the node.
-   * @return true if successful, otherwise false.
    */
   void Init();
 
@@ -31,9 +30,9 @@ class LedDetectionNode {
  private:
   CalibrationConfig GetConfiguration() const;
 
-  ros::NodeHandle nh_;
+  ros::NodeHandle nh_{};
   ros::NodeHandle nh_private_{"~"};
   __attribute__((unused)) ros::Subscriber img_sub_{};
   ros::Publisher img_pub_{};
-  Calibration* calibration_;
+  Calibration* calibration_{};
 };
