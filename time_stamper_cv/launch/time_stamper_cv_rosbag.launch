@@ -11,5 +11,5 @@
     <remap from="input/image" to="/camera/image_raw"/>
   </node>
 
-
+  <node name="time_stamper_cv_node" pkg="time_stamper_cv" type="time_stamper_cv-node" output="screen"/>
 </launch>
