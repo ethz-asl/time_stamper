@@ -46,7 +46,7 @@ class LedParser {
    * @param min_brightness Minimum brightness, value between 1 and 255.
    * @return true if average pixel brightness > min_brightness, otherwise false.
    */
-  bool isLedOn(int index, int min_brightness = 40) const;
+  bool isLedOn(int index, float min_brightness = 40.0) const;
 
   /**
    * Get the binary value of the LED row

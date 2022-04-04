@@ -17,27 +17,19 @@ void ConvexShape::Process(PointVector raw_points) {
   }
 }
 
-bool ConvexShape::ToleranceFilter(int expected_value, double actual_value) const {
-  return Filter(expected_value - tolerance_, expected_value + tolerance_, actual_value);
+bool ConvexShape::isInRange(double value1, double value2) const {
+  return Common::Filter(value1 - tolerance_, value1 + tolerance_, value2);
 }
-
-bool ConvexShape::Filter(double min, double max, double value) {
-  if (min > max) {
-    abort();
-  }
-  return value >= min && value <= max;
-}
-
 
 bool ConvexShape::isShapeValid() const {
   if (point_angles_sorted_.size() != 4) {
     return false;
   }
 
-  return ToleranceFilter(90, point_angles_sorted_.at(0).angle) &&
-      ToleranceFilter(90, point_angles_sorted_.at(1).angle) &&
-      ToleranceFilter(150, point_angles_sorted_.at(2).angle) &&
-      ToleranceFilter(30, point_angles_sorted_.at(3).angle);
+  return isInRange(90, point_angles_sorted_.at(0).angle) &&
+      isInRange(90, point_angles_sorted_.at(1).angle) &&
+      isInRange(150, point_angles_sorted_.at(2).angle) &&
+      isInRange(30, point_angles_sorted_.at(3).angle);
 }
 
 PointVector ConvexShape::getHull() const {
@@ -48,14 +40,14 @@ bool ConvexShape::isHullValid() const {
   return hull_.size() >= 4;
 }
 
-Point2fVector ConvexShape::getVirtualCorners(int multiplier) {
+Point2fVector ConvexShape::getVirtualCorners(float scaling) {
   Point2fVector virtualCorners_multiplied;
   virtualCorners_multiplied.reserve(virtualCorners.size());
 
   std::transform(virtualCorners.begin(), virtualCorners.end(),
                  std::back_inserter(virtualCorners_multiplied),
-                 [&multiplier](cv::Point2f &point) {
-                   return cv::Point2f(point.x * multiplier, point.y * multiplier);
+                 [&scaling](cv::Point2f &point) {
+                   return cv::Point2f(point.x * scaling, point.y * scaling);
                  }
   );
 
@@ -75,6 +67,7 @@ PointAngleVector ConvexShape::calculatePointAngles() {
   for (auto &point_c : hull_) {
     double angle = Trigonometry::CalcInnerAngle(point_a, point_c, point_b);
 
+    //Sort out points on lines
     if (angle < (180 - tolerance_)) {
       point_angles.push_back({point_b, angle});
     }
@@ -94,7 +87,7 @@ bool ConvexShape::calculateSortedPointAngles() {
   int pos;
   bool posSet = false;
   for (int i = 0; i < point_angles_sorted_.size(); i++) {
-    if (ToleranceFilter(90, point_angles_sorted_.at(i).angle)) {
+    if (isInRange(90, point_angles_sorted_.at(i).angle)) {
       count++;
     }
 
@@ -104,6 +97,7 @@ bool ConvexShape::calculateSortedPointAngles() {
     }
   }
 
+  // Pattern not found
   if (count != 2) {
     point_angles_sorted_.clear();
     return false;
@@ -140,4 +134,8 @@ void ConvexShape::pollShapeStatus(const std::function<void(std::string)> &functi
     is_last_shape_valid_ = isShapeValid();
     function("Shape " + v);
   }
+}
+
+cv::Mat ConvexShape::getInvHomography() {
+  return cv::findHomography(getPhysicalCorners(), getVirtualCorners(1)).inv();
 }

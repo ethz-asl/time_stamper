@@ -11,7 +11,7 @@ LedParser::LedParser(LedRowConfig led_row_config, int image_crop_size)
   cv::circle(kernel, cv::Point(half_size, half_size), half_size,
              cv::Scalar(255, 255, 255), -1);
 
-  kernel_normalized_ = kernel / 255;
+  kernel_normalized_ = 1.0 / (kernel / 255);
 }
 
 void LedParser::ProcessImage(const cv::Mat &image) {
@@ -26,8 +26,8 @@ Point3fVector LedParser::GenerateLedRow(const LedRowConfig &cfg) {
   cv::Point2f led_pos = cfg.first_led_pos;
 
   for (int i = 1; i <= cfg.amount; i++) {
-    led_row.emplace_back((led_pos.x + (cfg.next_led.val[0] * (i * 1.0)) * cfg.multiplier),
-                         (led_pos.y + (cfg.next_led.val[1] * (i * 1.0)) * cfg.multiplier),
+    led_row.emplace_back((led_pos.x + ((float) cfg.next_led.val[0] * (float) i) * (float) cfg.multiplier),
+                         (led_pos.y + ((float) cfg.next_led.val[1] * (float) i) * (float) cfg.multiplier),
                          1);
   }
   return led_row;
@@ -43,28 +43,26 @@ double LedParser::GetLedBrightness(int index) const {
   cv::Point3_<float> led_transformed = led_row_.at(index);
 
   cv::Point2f led_pos = Normalize(led_transformed);
-  int row_begin = (int) (led_pos.x - (size_ / 2.0));
-  int col_begin = (int) (led_pos.y - (size_ / 2.0));
 
-  if ((col_begin + size_) > image_.rows || row_begin + size_ > image_.cols) {
+  cv::Point begin(
+      (int) (led_pos.x - (size_ / 2.0)),
+      (int) (led_pos.y - (size_ / 2.0)));
+
+  if ((begin.y + size_) > image_.rows || begin.x + size_ > image_.cols ||
+      (begin.x < 0 && begin.y < 0)) {
     return -1;
   }
 
-  if (row_begin > 0 && col_begin > 0) {// &&row_begin + size_ < image_.rows && col_begin + size_ < image_.cols) {
+  cv::Rect led_rect(begin, cv::Point(begin.x + size_, begin.y + size_));
+  cv::Mat cropped = image_(led_rect);
 
-    cv::Rect led_rect(row_begin, col_begin, size_, size_);
-    cv::Mat cropped = image_(led_rect);
+  //average - cv::sum(...) > 0 is always true
+  cv::Scalar average = cv::sum(cropped.mul(kernel_normalized_));
 
-    //average - cv::sum(...) > 0 is always true
-    double normalization = 1.0 / cv::sum(kernel_normalized_)[0];
-    cv::Scalar average = cv::sum(cropped.mul(kernel_normalized_) * normalization);
-
-    return average.val[0];
-  }
-  return -1;
+  return average.val[0];
 }
 
-bool LedParser::isLedOn(int index, int min_brightness) const {
+bool LedParser::isLedOn(int index, float min_brightness) const {
   if (min_brightness > 255) {
     return false;
   }
@@ -76,7 +74,7 @@ const Point3fVector &LedParser::GetLedRow() const {
   return led_row_;
 }
 
-int LedParser::GetBinaryValue() const{
+int LedParser::GetBinaryValue() const {
   int count = 0;
   for (int i = 0; i < led_row_.size(); i++) {
     if (isLedOn(i)) {

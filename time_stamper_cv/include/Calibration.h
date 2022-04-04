@@ -33,17 +33,16 @@ class Calibration {
   ~Calibration() = default;
 
  private:
-  cv::Mat ConvertToCvImage() const;
+  static cv::Mat ConvertToCvImage(const sensor_msgs::Image &image) ;
   void Visualize(const cv::Mat &visualization_mat, int number) const;
   void VisualizeCorners(const cv::Mat &visualization_mat, PointAngleVector corners) const;
   static void Log(const std::string&);
 
   std::shared_ptr<Detector> detector_;
-  bool visualization_{false};
-  sensor_msgs::Image image_{};
-  static constexpr const char *OPENCV_WINDOW{"Image window"};
-  std::vector<std::string> labels{"Bottom Left", "Top Left", "Top Right", "Bottom Right"};
-
   std::shared_ptr<ConvexShape> convex_shape_{};
   std::shared_ptr<LedParser> led_parser_{};
+
+  bool visualization_{false};
+  static constexpr const char *OPENCV_WINDOW{"Visualization"};
+  std::vector<std::string> labels{"Bottom Left", "Top Left", "Top Right", "Bottom Right"};
 };

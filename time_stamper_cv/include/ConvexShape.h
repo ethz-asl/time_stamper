@@ -4,6 +4,9 @@
 #include "Common.h"
 
 /**
+ * This class is used to detect a given convex shape. First, a convex hull is calculated out of all keypoints.
+ * Thereupon, it calculates if the convex hull match the given convex shape.
+ *
  * At the moment only hardcoded shape (@var virtualCorners) is supported.
  * ConvexShape should support all polygons in future.
  */
@@ -12,7 +15,7 @@ class ConvexShape {
  public:
   /**
    * Creates ConvexShape object
-   * @param tolerance is used for ToleranceFilter().
+   * @param tolerance is used for isInRange().
    */
   explicit ConvexShape(int tolerance);
 
@@ -37,10 +40,10 @@ class ConvexShape {
 
   /**
    * Used to get scaled virtualCorners.
-   * @param multiplier
+   * @param scaling
    * @return Scaled virtualCorners
    */
-  Point2fVector getVirtualCorners(int multiplier = 1);
+  Point2fVector getVirtualCorners(float scaling = 1.0f);
 
   /**
    * Get points which define convex shape. Starting with bottom left clockwise.
@@ -62,18 +65,24 @@ class ConvexShape {
 
   /**
    * Checks whether a value is in tolerance.
-   * @param expected_value
-   * @param actual_value
+   * @param value1
+   * @param value2
    * @return true if in tolerance, otherwise false.
    */
 
-  bool ToleranceFilter(int expected_value, double actual_value) const;
+  bool isInRange(double value1, double value2) const;
 
   /**
    * Check shape status change. Useful for logging
    * @param function is called when the status change.
    */
-  void pollShapeStatus(const std::function<void(std::string)>& function);
+  void pollShapeStatus(const std::function<void(std::string)> &function);
+
+  /**
+   * Get inverted homography
+   * @return
+   */
+  cv::Mat getInvHomography();
 
   /**
    * Default destructor
@@ -87,7 +96,6 @@ class ConvexShape {
   void calculateHull();
   PointAngleVector calculatePointAngles();
   bool calculateSortedPointAngles();
-  static bool Filter(double min, double max, double value);
 
   int tolerance_{};
   PointVector raw_points_{};
@@ -95,10 +103,10 @@ class ConvexShape {
   PointAngleVector point_angles_sorted_{};
   bool is_last_shape_valid_{false};
 
-  Point2fVector virtualCorners{
-    {0 , 0},
-    {0, 17},
-    {66, 17},
-    {102, 0},
-    };
+  Point2fVector virtualCorners {
+      {0, 0},
+      {0, 17},
+      {66, 17},
+      {102, 0},
+  };
 };

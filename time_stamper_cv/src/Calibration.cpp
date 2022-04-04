@@ -8,16 +8,15 @@ Calibration::Calibration(const CalibrationConfig &cfg) {
 }
 
 cv_bridge::CvImage Calibration::ProcessImage(const sensor_msgs::Image &image) {
-  cv_bridge::CvImage out_msg;
-  out_msg.header = image_.header;
-  out_msg.encoding = image_.encoding;
-  image_ = image;
-  cv::Mat input_mat = ConvertToCvImage();
+  cv_bridge::CvImage out_msg{image.header, image.encoding};
+  cv::Mat input_mat = ConvertToCvImage(image);
   cv::Mat visualization_mat = input_mat.clone();
+
   detector_->process(input_mat);
   detector_->pollKeyPointStatus(Calibration::Log);
 
   if (detector_->isKeypointsEmpty()) {
+    Visualize(visualization_mat, -1);
     out_msg.image = input_mat;
     return out_msg;
   }
@@ -29,12 +28,11 @@ cv_bridge::CvImage Calibration::ProcessImage(const sensor_msgs::Image &image) {
   int number = -1;
   if (convex_shape_->isShapeValid()) {
     led_parser_->ProcessImage(input_mat);
-    cv::Mat inv_homography =
-        cv::findHomography(convex_shape_->getPhysicalCorners(),
-                           convex_shape_->getVirtualCorners(1),0).inv();
 
-    led_parser_->TransformLedRow(inv_homography);
-    Point3fVector led_row_transformed = led_parser_->GetLedRow();
+    /*
+     * Get inverted homography, so we know the position of each LED even if it's turned off.
+     */
+    led_parser_->TransformLedRow(convex_shape_->getInvHomography());
 
     number = led_parser_->GetBinaryValue();
   }
@@ -49,10 +47,8 @@ void Calibration::SetVisualization(bool visualization) {
   visualization_ = visualization;
 }
 
-cv::Mat Calibration::ConvertToCvImage() const {
-  cv_bridge::CvImageConstPtr cv_image = cv_bridge::toCvCopy(image_);
-  cv::Mat input_mat = cv_image->image.clone();
-  return input_mat;
+cv::Mat Calibration::ConvertToCvImage(const sensor_msgs::Image &image) {
+  return cv_bridge::toCvCopy(image)->image.clone();
 }
 
 void Calibration::Visualize(const cv::Mat &visualization_mat, int number) const {
@@ -84,8 +80,8 @@ void Calibration::Visualize(const cv::Mat &visualization_mat, int number) const 
               cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(255, 0, 0));
   cv::putText(visualization_mat, counter_text, cv::Point(s.width * 0.05, s.height * 0.9),
               cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(255, 0, 0));
-  cv::imshow(OPENCV_WINDOW + std::string(" Visualization"), visualization_mat);
-  cv::waitKey(3);
+  cv::imshow(OPENCV_WINDOW, visualization_mat);
+  cv::waitKey(1);
 }
 
 void Calibration::VisualizeCorners(const cv::Mat &visualization_mat, PointAngleVector corners) const {

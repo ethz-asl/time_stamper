@@ -3,12 +3,13 @@
 #pragma ide diagnostic ignored "cert-err58-cpp"
 #include "gtest/gtest.h"
 #include "ConvexShape.h"
+#include "Common.h"
 
 class ConvexShapeTest {
  public:
   explicit ConvexShapeTest(int tolerance) : convex_shape_(tolerance) {}
   static int Filter(double min, double max, double value) {
-    return ConvexShape::Filter(min, max, value);
+    return Common::Filter(min, max, value);
   };
   ConvexShape convex_shape_;
  private:
@@ -17,7 +18,7 @@ class ConvexShapeTest {
 ConvexShapeTest GetValidConvexShape() {
   ConvexShapeTest convex_shape_test(10);
 
-  PointVector valid_points{
+  PointVector valid_points({
     {293, 338},
     {268, 338},
     {217, 338},
@@ -31,14 +32,14 @@ ConvexShapeTest GetValidConvexShape() {
     {344, 269},
     {217, 268},
     {492, 269}
-  };
+  });
   convex_shape_test.convex_shape_.Process(valid_points);
   return convex_shape_test;
 }
 
 ConvexShapeTest GetInvalidConvexShape() {
   ConvexShapeTest convex_shape_test(10);
-  PointVector invalid_points{
+  PointVector invalid_points({
     {123, 387},
     {419, 373},
     {464, 371},
@@ -52,7 +53,7 @@ ConvexShapeTest GetInvalidConvexShape() {
     {626, 280},
     {342, 270},
     {188, 264}
-  };
+  });
 
   convex_shape_test.convex_shape_.Process(invalid_points);
   return convex_shape_test;
@@ -63,13 +64,13 @@ TEST(ConvexShapeFilter, TestOptimalValue) {
   EXPECT_EQ(convex_shape_test.Filter(10, 30, 10), true);
 }
 
-TEST(ConvexShapeFilter, TestLowerLimit) {
+TEST(ConvexShapeFilter, TestLowerBound) {
   ConvexShapeTest convex_shape_test = GetValidConvexShape();
   EXPECT_EQ(convex_shape_test.Filter(10, 30, 10.0), true);
   EXPECT_EQ(convex_shape_test.Filter(10, 30, 9.9), false);
 }
 
-TEST(ConvexShapeFilter, TestUpperLimit) {
+TEST(ConvexShapeFilter, TestUpperBound) {
   ConvexShapeTest convex_shape_test = GetValidConvexShape();
   EXPECT_EQ(convex_shape_test.Filter(10, 30, 30.0), true);
   EXPECT_EQ(convex_shape_test.Filter(10, 30, 30.1), false);
@@ -77,19 +78,19 @@ TEST(ConvexShapeFilter, TestUpperLimit) {
 
 TEST(ConvexShapeToleranceFilter, TestOptimalValue) {
   ConvexShapeTest convex_shape_test(10);
-  convex_shape_test.convex_shape_.ToleranceFilter(10, 10);
+  convex_shape_test.convex_shape_.isInRange(10, 10);
 }
 
-TEST(ConvexShapeToleranceFilter, TestLowerLimit) {
+TEST(ConvexShapeToleranceFilter, TestLowerBound) {
   ConvexShapeTest convex_shape_test(10);
-  ASSERT_EQ(convex_shape_test.convex_shape_.ToleranceFilter(10, 0), true);
-  ASSERT_EQ(convex_shape_test.convex_shape_.ToleranceFilter(10, -0.1), false);
+  ASSERT_EQ(convex_shape_test.convex_shape_.isInRange(10, 0), true);
+  ASSERT_EQ(convex_shape_test.convex_shape_.isInRange(10, -0.1), false);
 }
 
-TEST(ConvexShapeToleranceFilter, TestUpperLimit) {
+TEST(ConvexShapeToleranceFilter, TestUpperBound) {
   ConvexShapeTest convex_shape_test(10);
-  ASSERT_EQ(convex_shape_test.convex_shape_.ToleranceFilter(10, 20), true);
-  ASSERT_EQ(convex_shape_test.convex_shape_.ToleranceFilter(10, 20.1), false);
+  ASSERT_EQ(convex_shape_test.convex_shape_.isInRange(10, 20), true);
+  ASSERT_EQ(convex_shape_test.convex_shape_.isInRange(10, 20.1), false);
 }
 
 TEST(ConvexShapeValid, TestIsHullValid) {
