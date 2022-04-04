@@ -12,7 +12,7 @@ class ImageProcessor {
    * Creates a new ImageProcessor object.
    * @param cfg See configuration.h for more details
    */
-  explicit ImageProcessor(const CalibrationConfig& cfg);
+  explicit ImageProcessor(const ImageProcessorConfig& cfg);
 
   /**
    * Process a ros image.

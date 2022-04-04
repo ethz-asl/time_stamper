@@ -1,7 +1,7 @@
 #include "image_processor.h"
 #include "ros/ros.h"
 
-ImageProcessor::ImageProcessor(const CalibrationConfig &cfg) {
+ImageProcessor::ImageProcessor(const ImageProcessorConfig &cfg) {
   convex_shape_ = std::make_shared<ConvexShape>(ConvexShape(cfg.tolerance));
   detector_ = std::make_shared<detector>(detector(cfg.params));
   led_parser_ = std::make_shared<LedParser>(LedParser(cfg.led_row_config));

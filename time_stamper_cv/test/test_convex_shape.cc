@@ -9,7 +9,7 @@ class ConvexShapeTest {
  public:
   explicit ConvexShapeTest(int tolerance) : convex_shape_(tolerance) {}
   static int Filter(double min, double max, double value) {
-    return common::filter(min, max, value);
+    return Common::filter(min, max, value);
   };
   ConvexShape convex_shape_;
  private:

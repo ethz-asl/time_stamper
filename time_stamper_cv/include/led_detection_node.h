@@ -32,7 +32,7 @@ class LedDetectionNode {
   ~LedDetectionNode() = default;
 
  private:
-  CalibrationConfig getConfiguration() const;
+  ImageProcessorConfig getConfiguration() const;
 
   ros::NodeHandle nh_{};
   ros::NodeHandle nh_private_{"~"};

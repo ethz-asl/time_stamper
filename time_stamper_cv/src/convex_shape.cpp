@@ -1,5 +1,4 @@
 #include "convex_shape.h"
-#include <utility>
 #include "opencv2/opencv.hpp"
 #include "trigonometry.h"
 
@@ -18,7 +17,7 @@ void ConvexShape::process(const PointVector& raw_points) {
 }
 
 bool ConvexShape::isInRange(double value1, double value2) const {
-  return common::filter(value1 - tolerance_, value1 + tolerance_, value2);
+  return Common::filter(value1 - tolerance_, value1 + tolerance_, value2);
 }
 
 bool ConvexShape::isShapeValid() const {

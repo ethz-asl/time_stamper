@@ -38,7 +38,7 @@ struct LedRowConfig {
  * See struct above for more details.
  */
 
-struct CalibrationConfig {
+struct ImageProcessorConfig {
   int tolerance{};
   cv::SimpleBlobDetector::Params params;
   LedRowConfig led_row_config{{0, 0}, {6, 0}, 16};

@@ -20,8 +20,8 @@ void LedDetectionNode::callbackRawImage(const sensor_msgs::Image &image) const {
   img_pub_.publish(out_msg.toImageMsg());
 }
 
-CalibrationConfig LedDetectionNode::getConfiguration() const {
-  CalibrationConfig cfg;
+ImageProcessorConfig LedDetectionNode::getConfiguration() const {
+  ImageProcessorConfig cfg;
   cv::SimpleBlobDetector::Params params;
 
   params.blobColor = nh_private_.param("blob_color", 255);
