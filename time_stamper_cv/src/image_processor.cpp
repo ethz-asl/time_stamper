@@ -1,61 +1,61 @@
-#include "Calibration.h"
+#include "image_processor.h"
 #include "ros/ros.h"
 
-Calibration::Calibration(const CalibrationConfig &cfg) {
+ImageProcessor::ImageProcessor(const CalibrationConfig &cfg) {
   convex_shape_ = std::make_shared<ConvexShape>(ConvexShape(cfg.tolerance));
-  detector_ = std::make_shared<Detector>(Detector(cfg.params));
+  detector_ = std::make_shared<detector>(detector(cfg.params));
   led_parser_ = std::make_shared<LedParser>(LedParser(cfg.led_row_config));
 }
 
-cv_bridge::CvImage Calibration::ProcessImage(const sensor_msgs::Image &image) {
+cv_bridge::CvImage ImageProcessor::process(const sensor_msgs::Image &image) {
   cv_bridge::CvImage out_msg{image.header, image.encoding};
-  cv::Mat input_mat = ConvertToCvImage(image);
+  cv::Mat input_mat = convertToCvImage(image);
   cv::Mat visualization_mat = input_mat.clone();
 
   detector_->process(input_mat);
-  detector_->pollKeyPointStatus(Calibration::Log);
+  detector_->pollKeyPointStatus(ImageProcessor::log);
 
   if (detector_->isKeypointsEmpty()) {
-    Visualize(visualization_mat, -1);
+    visualize(visualization_mat, -1);
     out_msg.image = input_mat;
     return out_msg;
   }
 
   PointVector points(detector_->getKeyPoints());
-  convex_shape_->Process(points);
-  convex_shape_->pollShapeStatus(Calibration::Log);
+  convex_shape_->process(points);
+  convex_shape_->pollShapeStatus(ImageProcessor::log);
 
   int number = -1;
   if (convex_shape_->isShapeValid()) {
-    led_parser_->ProcessImage(input_mat);
+    led_parser_->processImage(input_mat);
 
     /*
      * Get inverted homography, so we know the position of each LED even if it's turned off.
      */
-    led_parser_->TransformLedRow(convex_shape_->getInvHomography());
+    led_parser_->transformLedRow(convex_shape_->getInvHomography());
 
-    number = led_parser_->GetBinaryValue();
+    number = led_parser_->getBinaryValue();
   }
   if (visualization_) {
-    Visualize(visualization_mat, number);
+    visualize(visualization_mat, number);
   }
   out_msg.image = input_mat;
   return out_msg;
 }
 
-void Calibration::SetVisualization(bool visualization) {
+void ImageProcessor::setVisualization(bool visualization) {
   visualization_ = visualization;
 }
 
-cv::Mat Calibration::ConvertToCvImage(const sensor_msgs::Image &image) {
+cv::Mat ImageProcessor::convertToCvImage(const sensor_msgs::Image &image) {
   return cv_bridge::toCvCopy(image)->image.clone();
 }
 
-void Calibration::Visualize(const cv::Mat &visualization_mat, int number) const {
+void ImageProcessor::visualize(const cv::Mat &visualization_mat, int number) const {
 
   cv::polylines(visualization_mat, convex_shape_->getHull(), true, cv::Scalar(255, 0, 0));
   if (convex_shape_->isShapeValid()) {
-    VisualizeCorners(visualization_mat, convex_shape_->getSortedPointAngles());
+    visualizeCorners(visualization_mat, convex_shape_->getSortedPointAngles());
   }
   cv::Size s = visualization_mat.size();
 
@@ -66,8 +66,8 @@ void Calibration::Visualize(const cv::Mat &visualization_mat, int number) const 
     shape_text += "Valid";
     counter_text += std::to_string(number);
 
-    for (const auto &led: led_parser_->GetLedRow()) {
-      cv::Point2f led_pos = LedParser::Normalize(led);
+    for (const auto &led: led_parser_->getLedRow()) {
+      cv::Point2f led_pos = LedParser::normalize(led);
       cv::circle(visualization_mat, led_pos, (int) 10, cv::Scalar(255, 0, 0));
     }
 
@@ -84,7 +84,7 @@ void Calibration::Visualize(const cv::Mat &visualization_mat, int number) const 
   cv::waitKey(1);
 }
 
-void Calibration::VisualizeCorners(const cv::Mat &visualization_mat, PointAngleVector corners) const {
+void ImageProcessor::visualizeCorners(const cv::Mat &visualization_mat, PointAngleVector corners) const {
   for (int i = 0; i < corners.size(); i++) {
     cv::Scalar color_circle(255, 0, 0);
     cv::Scalar color_text(255, 0, 0);
@@ -96,6 +96,6 @@ void Calibration::VisualizeCorners(const cv::Mat &visualization_mat, PointAngleV
   }
 }
 
-void Calibration::Log(const std::string& message) {
+void ImageProcessor::log(const std::string& message) {
   ROS_INFO("%s", message.c_str());
 }

@@ -10,14 +10,14 @@ catkin_simple()
 find_package(OpenCV REQUIRED)
 
 cs_add_library(${PROJECT_NAME}
-        src/LedDetectionNode.cpp
-        src/Trigonometry.cpp
-        src/ConvexShape.cpp
-        src/Calibration.cpp
-        src/LedParser.cpp
-        src/Detector.cpp
+        src/led_detection_node.cpp
+        src/trigonometry.cpp
+        src/convex_shape.cpp
+        src/image_processor.cpp
+        src/led_parser.cpp
+        src/detector.cpp
         )
-cs_add_executable(${PROJECT_NAME}-node src/Main.cpp)
+cs_add_executable(${PROJECT_NAME}-node src/main.cpp)
 
 target_link_libraries(
         ${PROJECT_NAME}-node

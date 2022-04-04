@@ -13,16 +13,12 @@ class Trigonometry {
   static double CalcDistance(const cv::Point &a, const cv::Point &b);
 
   /**
-   * Calculates inner angle of point target
+   * Calculates inner angle of point @param target
    * @param a
    * @param b
    * @param target
    * @return Inner angle in degrees
    */
   static double CalcInnerAngle(const cv::Point &a, const cv::Point &b, const cv::Point &target);
-
-  //TODO implement friend class and make LawOfCos private
-  //For testing
-  friend class TestTrigonometry;
   static double LawOfCos(double a, double b, double c);
 };

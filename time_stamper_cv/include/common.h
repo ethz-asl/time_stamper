@@ -1,9 +1,9 @@
 #pragma once
 #include "opencv2/opencv.hpp"
 
-class Common {
+class common {
  public:
-  static bool Filter(double min, double max, double value) {
+  static bool filter(double min, double max, double value) {
     if (min > max) {
       return false;
     }

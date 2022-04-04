@@ -1,9 +1,9 @@
 #pragma once
-#include "Detector.h"
+#include "detector.h"
 #include "opencv2/opencv.hpp"
-class Detector {
+class detector {
  public:
-  explicit Detector(cv::SimpleBlobDetector::Params params);
+  explicit detector(cv::SimpleBlobDetector::Params params);
   void process(const cv::Mat& input_mat);
   void pollKeyPointStatus(const std::function<void(std::string)> &function);
   std::vector<cv::KeyPoint> getKeyPoints();

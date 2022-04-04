@@ -2,14 +2,14 @@
 #pragma clang diagnostic ignored "-Wunknown-pragmas"
 #pragma ide diagnostic ignored "cert-err58-cpp"
 #include "gtest/gtest.h"
-#include "ConvexShape.h"
-#include "Common.h"
+#include "convex_shape.h"
+#include "common.h"
 
 class ConvexShapeTest {
  public:
   explicit ConvexShapeTest(int tolerance) : convex_shape_(tolerance) {}
   static int Filter(double min, double max, double value) {
-    return Common::Filter(min, max, value);
+    return common::filter(min, max, value);
   };
   ConvexShape convex_shape_;
  private:
@@ -33,7 +33,7 @@ ConvexShapeTest GetValidConvexShape() {
     {217, 268},
     {492, 269}
   });
-  convex_shape_test.convex_shape_.Process(valid_points);
+  convex_shape_test.convex_shape_.process(valid_points);
   return convex_shape_test;
 }
 
@@ -55,7 +55,7 @@ ConvexShapeTest GetInvalidConvexShape() {
     {188, 264}
   });
 
-  convex_shape_test.convex_shape_.Process(invalid_points);
+  convex_shape_test.convex_shape_.process(invalid_points);
   return convex_shape_test;
 }
 

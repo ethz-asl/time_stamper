@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <opencv2/core/types.hpp>
-#include "Common.h"
+#include "common.h"
 
 /**
  * This class is used to detect a given convex shape. First, a convex hull is calculated out of all keypoints.
@@ -24,7 +24,7 @@ class ConvexShape {
    *
    * @param raw_points
    */
-  void Process(PointVector raw_points);
+  void process(const PointVector& raw_points);
 
   /**
    * Get all points which define the convex shape.

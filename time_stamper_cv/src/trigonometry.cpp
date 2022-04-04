@@ -1,4 +1,4 @@
-#include "Trigonometry.h"
+#include "trigonometry.h"
 
 double Trigonometry::CalcDistance(const cv::Point &a, const cv::Point &b) {
   return cv::norm(a-b);

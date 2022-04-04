@@ -1,15 +1,15 @@
-#include "ConvexShape.h"
+#include "convex_shape.h"
 #include <utility>
 #include "opencv2/opencv.hpp"
-#include "Trigonometry.h"
+#include "trigonometry.h"
 
 ConvexShape::ConvexShape(int tolerance)
 : tolerance_(tolerance) {}
 
-void ConvexShape::Process(PointVector raw_points) {
+void ConvexShape::process(const PointVector& raw_points) {
   hull_.clear();
   point_angles_sorted_.clear();
-  raw_points_ = std::move(raw_points);
+  raw_points_ = raw_points;
 
   calculateHull();
   if (isHullValid()) {
@@ -18,7 +18,7 @@ void ConvexShape::Process(PointVector raw_points) {
 }
 
 bool ConvexShape::isInRange(double value1, double value2) const {
-  return Common::Filter(value1 - tolerance_, value1 + tolerance_, value2);
+  return common::filter(value1 - tolerance_, value1 + tolerance_, value2);
 }
 
 bool ConvexShape::isShapeValid() const {

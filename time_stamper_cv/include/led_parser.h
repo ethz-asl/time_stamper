@@ -1,7 +1,7 @@
 #pragma once
-#include "Common.h"
+#include "common.h"
 #include "opencv2/opencv.hpp"
-#include "Configuration.h"
+#include "configuration.h"
 
 class LedParser {
  public:
@@ -12,33 +12,33 @@ class LedParser {
    * Used for some matrix operations.
    * @param cfg See Configuration.h
    */
-  static Point3fVector GenerateLedRow(const LedRowConfig &cfg);
+  static Point3fVector generateLedRow(const LedRowConfig &cfg);
 
   /**
    * Converts point3f to point2f.
    * @param pt
    * @return normalized point
    */
-  static cv::Point2f Normalize(const cv::Point3_<float> &pt);
+  static cv::Point2f normalize(const cv::Point3_<float> &pt);
 
   /**
    * Processes new image. Overrides previous led_row.
    * @param image
    */
-  void ProcessImage(const cv::Mat &image);
+  void processImage(const cv::Mat &image);
 
   /**
    * Transforms LED row with homography.
    * @param homography
    */
-  void TransformLedRow(const cv::Mat &homography);
+  void transformLedRow(const cv::Mat &homography);
 
   /**
    * Creates an (size_ * size_) sub-image and calculates average pixel brightness.
    * @param index LED index
    * @return value between 0 and 255 or -1 on error.
    */
-  double GetLedBrightness(int index) const;
+  double getLedBrightness(int index) const;
 
   /**
    * Checks if LED at specific index is on.
@@ -52,7 +52,7 @@ class LedParser {
    * Get the binary value of the LED row
    * @return
    */
-  int GetBinaryValue() const;
+  int getBinaryValue() const;
 
   /**
    * Default destructor
@@ -60,7 +60,7 @@ class LedParser {
   ~LedParser() = default;
 
   //!Public getter
-  const Point3fVector &GetLedRow() const;
+  const Point3fVector &getLedRow() const;
 
  private:
   LedRowConfig led_row_config_{};

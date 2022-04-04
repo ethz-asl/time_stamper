@@ -1,11 +1,11 @@
 #include "ros/ros.h"
-#include "LedDetectionNode.h"
+#include "led_detection_node.h"
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "time_stamper_cv_node");
   LedDetectionNode node;
-  node.Init();
-  node.Start();
+  node.init();
+  node.start();
   ros::spin();
   return 0;
 }

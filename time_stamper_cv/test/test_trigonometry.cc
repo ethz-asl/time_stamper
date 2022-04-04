@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 #include "opencv2/opencv.hpp"
-#include "Trigonometry.h"
+#include "trigonometry.h"
 
 TEST(Trigonometry, TestCalcDistanceBasic) {
   cv::Point point_a{3, 0};

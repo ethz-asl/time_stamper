@@ -1,4 +1,4 @@
-#include "LedParser.h"
+#include "led_parser.h"
 
 #include <utility>
 
@@ -14,13 +14,13 @@ LedParser::LedParser(LedRowConfig led_row_config, int image_crop_size)
   kernel_normalized_ = 1.0 / (kernel / 255);
 }
 
-void LedParser::ProcessImage(const cv::Mat &image) {
+void LedParser::processImage(const cv::Mat &image) {
   led_row_.clear();
-  led_row_ = GenerateLedRow(led_row_config_);
+  led_row_ = generateLedRow(led_row_config_);
   image_ = image;
 }
 
-Point3fVector LedParser::GenerateLedRow(const LedRowConfig &cfg) {
+Point3fVector LedParser::generateLedRow(const LedRowConfig &cfg) {
 
   Point3fVector led_row;
   cv::Point2f led_pos = cfg.first_led_pos;
@@ -33,16 +33,16 @@ Point3fVector LedParser::GenerateLedRow(const LedRowConfig &cfg) {
   return led_row;
 }
 
-void LedParser::TransformLedRow(const cv::Mat &homography) {
+void LedParser::transformLedRow(const cv::Mat &homography) {
   Point3fVector empty_row;
   cv::transform(led_row_, empty_row, homography);
   led_row_ = empty_row;
 }
 
-double LedParser::GetLedBrightness(int index) const {
+double LedParser::getLedBrightness(int index) const {
   cv::Point3_<float> led_transformed = led_row_.at(index);
 
-  cv::Point2f led_pos = Normalize(led_transformed);
+  cv::Point2f led_pos = normalize(led_transformed);
 
   cv::Point begin(
       (int) (led_pos.x - (size_ / 2.0)),
@@ -66,15 +66,15 @@ bool LedParser::isLedOn(int index, float min_brightness) const {
   if (min_brightness > 255) {
     return false;
   }
-  double a = GetLedBrightness(index);
+  double a = getLedBrightness(index);
   return a > min_brightness;
 }
 
-const Point3fVector &LedParser::GetLedRow() const {
+const Point3fVector &LedParser::getLedRow() const {
   return led_row_;
 }
 
-int LedParser::GetBinaryValue() const {
+int LedParser::getBinaryValue() const {
   int count = 0;
   for (int i = 0; i < led_row_.size(); i++) {
     if (isLedOn(i)) {
@@ -84,7 +84,7 @@ int LedParser::GetBinaryValue() const {
   return count;
 }
 
-cv::Point2f LedParser::Normalize(const cv::Point3_<float> &pt) {
+cv::Point2f LedParser::normalize(const cv::Point3_<float> &pt) {
   return {pt.x / pt.z, pt.y / pt.z};
 }
 
