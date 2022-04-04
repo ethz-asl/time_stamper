@@ -4,6 +4,7 @@
 #include "Configuration.h"
 #include "cv_bridge/cv_bridge.h"
 #include "LedParser.h"
+#include "Detector.h"
 
 class Calibration {
  public:
@@ -33,17 +34,14 @@ class Calibration {
 
  private:
   cv::Mat ConvertToCvImage() const;
-  PointVector ConvertKeyPoints();
   void Visualize(const cv::Mat &visualization_mat, int number) const;
   void VisualizeCorners(const cv::Mat &visualization_mat, PointAngleVector corners) const;
-  void SetKeypointStatus();
   void SetShapeStatus();
+  static void Log(const std::string&);
 
-  std::vector<cv::KeyPoint> keypoints_{};
-  cv::Ptr<cv::SimpleBlobDetector> detector_{};
+  std::shared_ptr<Detector> detector_;
   bool visualization_{false};
   sensor_msgs::Image image_{};
-  bool isKeypointsEmpty{false};
   bool isLastShapeValid{false};
   static constexpr const char *OPENCV_WINDOW{"Image window"};
   std::vector<std::string> labels{"Bottom Left", "Top Left", "Top Right", "Bottom Right"};

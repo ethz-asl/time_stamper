@@ -3,7 +3,7 @@
 
 Calibration::Calibration(const CalibrationConfig &cfg) {
   convex_shape_ = std::make_shared<ConvexShape>(ConvexShape(cfg.tolerance));
-  detector_ = cv::SimpleBlobDetector::create(cfg.params);
+  detector_ = std::make_shared<Detector>(Detector(cfg.params));
   led_parser_ = std::make_shared<LedParser>(LedParser(cfg.led_row_config));
 }
 
@@ -14,15 +14,15 @@ cv_bridge::CvImage Calibration::ProcessImage(const sensor_msgs::Image &image) {
   image_ = image;
   cv::Mat input_mat = ConvertToCvImage();
   cv::Mat visualization_mat = input_mat.clone();
-  detector_->detect(input_mat, keypoints_);
+  detector_->process(input_mat);
+  detector_->pollKeyPointStatus(Calibration::Log);
 
-  SetKeypointStatus();
-  if (isKeypointsEmpty) {
+  if (detector_->isKeypointsEmpty()) {
     out_msg.image = input_mat;
     return out_msg;
   }
 
-  PointVector points(keypoints_);
+  PointVector points(detector_->getKeyPoints());
   convex_shape_->Process(points);
   SetShapeStatus();
 
@@ -53,13 +53,6 @@ cv::Mat Calibration::ConvertToCvImage() const {
   cv_bridge::CvImageConstPtr cv_image = cv_bridge::toCvCopy(image_);
   cv::Mat input_mat = cv_image->image.clone();
   return input_mat;
-}
-
-void Calibration::SetKeypointStatus() {
-  if (keypoints_.empty() != isKeypointsEmpty) {
-    std::string v = keypoints_.empty() ? "empty" : "found";
-    ROS_INFO_STREAM("Shape " << v);
-  }
 }
 
 void Calibration::SetShapeStatus() {
@@ -112,4 +105,8 @@ void Calibration::VisualizeCorners(const cv::Mat &visualization_mat, PointAngleV
     cv::putText(visualization_mat, labels.at(i), cvPoint(corner.x, corner.y - 40),
                 cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, color_text);
   }
+}
+
+void Calibration::Log(const std::string& message) {
+  ROS_INFO("%s", message.c_str());
 }

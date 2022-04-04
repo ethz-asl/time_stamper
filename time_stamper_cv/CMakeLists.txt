@@ -15,6 +15,7 @@ cs_add_library(${PROJECT_NAME}
         src/ConvexShape.cpp
         src/Calibration.cpp
         src/LedParser.cpp
+        src/Detector.cpp
         )
 cs_add_executable(${PROJECT_NAME}-node src/Main.cpp)
 
