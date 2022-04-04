@@ -36,13 +36,11 @@ class Calibration {
   cv::Mat ConvertToCvImage() const;
   void Visualize(const cv::Mat &visualization_mat, int number) const;
   void VisualizeCorners(const cv::Mat &visualization_mat, PointAngleVector corners) const;
-  void SetShapeStatus();
   static void Log(const std::string&);
 
   std::shared_ptr<Detector> detector_;
   bool visualization_{false};
   sensor_msgs::Image image_{};
-  bool isLastShapeValid{false};
   static constexpr const char *OPENCV_WINDOW{"Image window"};
   std::vector<std::string> labels{"Bottom Left", "Top Left", "Top Right", "Bottom Right"};
 

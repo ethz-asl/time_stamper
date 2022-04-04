@@ -70,6 +70,12 @@ class ConvexShape {
   bool ToleranceFilter(int expected_value, double actual_value) const;
 
   /**
+   * Check shape status change. Useful for logging
+   * @param function is called when the status change.
+   */
+  void pollShapeStatus(const std::function<void(std::string)>& function);
+
+  /**
    * Default destructor
    */
   ~ConvexShape() = default;
@@ -87,6 +93,7 @@ class ConvexShape {
   PointVector raw_points_{};
   PointVector hull_{};
   PointAngleVector point_angles_sorted_{};
+  bool is_last_shape_valid_{false};
 
   Point2fVector virtualCorners{
     {0 , 0},

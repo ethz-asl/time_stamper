@@ -17,7 +17,7 @@ void Detector::pollKeyPointStatus(const std::function<void(std::string)>& functi
   if (keypoints_.empty() != is_last_keypoints_empty_) {
     std::string v = keypoints_.empty() ? "empty" : "found";
     is_last_keypoints_empty_ = keypoints_.empty();
-    function("Shape " + v);
+    function("Keypoints " + v);
   }
 }
 

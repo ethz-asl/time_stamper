@@ -24,7 +24,7 @@ cv_bridge::CvImage Calibration::ProcessImage(const sensor_msgs::Image &image) {
 
   PointVector points(detector_->getKeyPoints());
   convex_shape_->Process(points);
-  SetShapeStatus();
+  convex_shape_->pollShapeStatus(Calibration::Log);
 
   int number = -1;
   if (convex_shape_->isShapeValid()) {
@@ -53,13 +53,6 @@ cv::Mat Calibration::ConvertToCvImage() const {
   cv_bridge::CvImageConstPtr cv_image = cv_bridge::toCvCopy(image_);
   cv::Mat input_mat = cv_image->image.clone();
   return input_mat;
-}
-
-void Calibration::SetShapeStatus() {
-  if (convex_shape_->isShapeValid() != isLastShapeValid) {
-    std::string v = convex_shape_->isShapeValid() ? "Valid" : "Invalid";
-    ROS_INFO_STREAM("Shape " << v);
-  }
 }
 
 void Calibration::Visualize(const cv::Mat &visualization_mat, int number) const {

@@ -133,3 +133,11 @@ Point2fVector ConvexShape::getPhysicalCorners() {
 
   return points;
 }
+
+void ConvexShape::pollShapeStatus(const std::function<void(std::string)> &function) {
+  if (isShapeValid() != is_last_shape_valid_) {
+    std::string v = isShapeValid() ? "Valid" : "Invalid";
+    is_last_shape_valid_ = isShapeValid();
+    function("Shape " + v);
+  }
+}
