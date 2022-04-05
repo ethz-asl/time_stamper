@@ -3,14 +3,14 @@
 #include "opencv2/opencv.hpp"
 #include "configuration.h"
 
-class LedParser {
+class LedStateParser {
  public:
-  explicit LedParser(LedRowConfig led_row_config, int image_crop_size = 16);
+  explicit LedStateParser(LedRowConfig led_row_config, int image_crop_size = 16);
 
   /**
-   * Generate a point3f vector from LedRowConfig, where the z value is 1.
+   * Generate homogenous 2d coordinates from LedRowConfig.
    * Used for some matrix operations.
-   * @param cfg See Configuration.h
+   * @param cfg See configuration.h
    */
   static Point3fVector generateLedRow(const LedRowConfig &cfg);
 
@@ -50,14 +50,14 @@ class LedParser {
 
   /**
    * Get the binary value of the LED row
-   * @return
+   * @return binary value
    */
   int getBinaryValue() const;
 
   /**
    * Default destructor
    */
-  ~LedParser() = default;
+  ~LedStateParser() = default;
 
   //!Public getter
   const Point3fVector &getLedRow() const;

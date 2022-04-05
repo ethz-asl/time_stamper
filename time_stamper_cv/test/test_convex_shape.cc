@@ -9,7 +9,7 @@ class ConvexShapeTest {
  public:
   explicit ConvexShapeTest(int tolerance) : convex_shape_(tolerance) {}
   static int Filter(double min, double max, double value) {
-    return Common::filter(min, max, value);
+    return Common::isInRange(min, max, value);
   };
   ConvexShape convex_shape_;
  private:
@@ -78,19 +78,19 @@ TEST(ConvexShapeFilter, TestUpperBound) {
 
 TEST(ConvexShapeToleranceFilter, TestOptimalValue) {
   ConvexShapeTest convex_shape_test(10);
-  convex_shape_test.convex_shape_.isInRange(10, 10);
+  convex_shape_test.convex_shape_.isWithinTolerance(10, 10);
 }
 
 TEST(ConvexShapeToleranceFilter, TestLowerBound) {
   ConvexShapeTest convex_shape_test(10);
-  ASSERT_EQ(convex_shape_test.convex_shape_.isInRange(10, 0), true);
-  ASSERT_EQ(convex_shape_test.convex_shape_.isInRange(10, -0.1), false);
+  ASSERT_EQ(convex_shape_test.convex_shape_.isWithinTolerance(10, 0), true);
+  ASSERT_EQ(convex_shape_test.convex_shape_.isWithinTolerance(10, -0.1), false);
 }
 
 TEST(ConvexShapeToleranceFilter, TestUpperBound) {
   ConvexShapeTest convex_shape_test(10);
-  ASSERT_EQ(convex_shape_test.convex_shape_.isInRange(10, 20), true);
-  ASSERT_EQ(convex_shape_test.convex_shape_.isInRange(10, 20.1), false);
+  ASSERT_EQ(convex_shape_test.convex_shape_.isWithinTolerance(10, 20), true);
+  ASSERT_EQ(convex_shape_test.convex_shape_.isWithinTolerance(10, 20.1), false);
 }
 
 TEST(ConvexShapeValid, TestIsHullValid) {

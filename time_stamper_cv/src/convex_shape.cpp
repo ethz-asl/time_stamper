@@ -2,7 +2,7 @@
 #include "opencv2/opencv.hpp"
 #include "trigonometry.h"
 
-ConvexShape::ConvexShape(int tolerance)
+ConvexShape::ConvexShape(const int tolerance)
 : tolerance_(tolerance) {}
 
 void ConvexShape::process(const PointVector& raw_points) {
@@ -16,8 +16,8 @@ void ConvexShape::process(const PointVector& raw_points) {
   }
 }
 
-bool ConvexShape::isInRange(double value1, double value2) const {
-  return Common::filter(value1 - tolerance_, value1 + tolerance_, value2);
+bool ConvexShape::isWithinTolerance(const double value1, const double value2) const {
+  return Common::isInRange(value1 - tolerance_, value1 + tolerance_, value2);
 }
 
 bool ConvexShape::isShapeValid() const {
@@ -25,10 +25,10 @@ bool ConvexShape::isShapeValid() const {
     return false;
   }
 
-  return isInRange(90, point_angles_sorted_.at(0).angle) &&
-      isInRange(90, point_angles_sorted_.at(1).angle) &&
-      isInRange(150, point_angles_sorted_.at(2).angle) &&
-      isInRange(30, point_angles_sorted_.at(3).angle);
+  return isWithinTolerance(90, point_angles_sorted_.at(0).angle) &&
+      isWithinTolerance(90, point_angles_sorted_.at(1).angle) &&
+      isWithinTolerance(150, point_angles_sorted_.at(2).angle) &&
+      isWithinTolerance(30, point_angles_sorted_.at(3).angle);
 }
 
 PointVector ConvexShape::getHull() const {
@@ -39,13 +39,13 @@ bool ConvexShape::isHullValid() const {
   return hull_.size() >= 4;
 }
 
-Point2fVector ConvexShape::getVirtualCorners(float scaling) {
+Point2fVector ConvexShape::getVirtualCorners(const float scaling) {
   Point2fVector virtualCorners_multiplied;
   virtualCorners_multiplied.reserve(virtualCorners.size());
 
   std::transform(virtualCorners.begin(), virtualCorners.end(),
                  std::back_inserter(virtualCorners_multiplied),
-                 [&scaling](cv::Point2f &point) {
+                 [&scaling](const cv::Point2f &point) {
                    return cv::Point2f(point.x * scaling, point.y * scaling);
                  }
   );
@@ -86,7 +86,7 @@ bool ConvexShape::calculateSortedPointAngles() {
   int pos;
   bool posSet = false;
   for (int i = 0; i < point_angles_sorted_.size(); i++) {
-    if (isInRange(90, point_angles_sorted_.at(i).angle)) {
+    if (isWithinTolerance(90, point_angles_sorted_.at(i).angle)) {
       count++;
     }
 

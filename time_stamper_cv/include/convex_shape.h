@@ -15,7 +15,7 @@ class ConvexShape {
  public:
   /**
    * Creates ConvexShape object
-   * @param tolerance is used for isInRange().
+   * @param tolerance is used for isWithinTolerance().
    */
   explicit ConvexShape(int tolerance);
 
@@ -70,7 +70,7 @@ class ConvexShape {
    * @return true if in tolerance, otherwise false.
    */
 
-  bool isInRange(double value1, double value2) const;
+  bool isWithinTolerance(double value1, double value2) const;
 
   /**
    * Check shape status change. Useful for logging
@@ -97,7 +97,7 @@ class ConvexShape {
   PointAngleVector calculatePointAngles();
   bool calculateSortedPointAngles();
 
-  int tolerance_{};
+  int tolerance_{10};
   PointVector raw_points_{};
   PointVector hull_{};
   PointAngleVector point_angles_sorted_{};

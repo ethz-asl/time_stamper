@@ -3,7 +3,7 @@
 
 class Common {
  public:
-  static bool filter(double min, double max, double value) {
+  static bool isInRange(const double min, const double max, const double value) {
     if (min > max) {
       return false;
     }
@@ -28,7 +28,7 @@ class PointVector : public std::vector<cv::Point> {
     std::transform(keypoints.begin(),
                    keypoints.end(),
                    std::back_inserter(*this),
-                   [](cv::KeyPoint &kp) { return kp.pt; });
+                   [](const cv::KeyPoint &kp) { return kp.pt; });
   }
   ~PointVector() = default;
 };

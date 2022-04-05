@@ -1,15 +1,15 @@
 #include "gtest/gtest.h"
-#include "led_parser.h"
+#include "led_state_parser.h"
 
 TEST(GenerateLedRow, TestVectorSize) {
   LedRowConfig led_row_config{{0, 0}, {1, 0}, 16, 1};
-  const Point3fVector& led_row = LedParser::generateLedRow(led_row_config);
+  const Point3fVector& led_row = LedStateParser::generateLedRow(led_row_config);
   ASSERT_EQ(led_row.size(), 16);
 }
 
 TEST(GenerateLedRow, TestLedPositions) {
   LedRowConfig led_row_config{{0, 0}, {1, 0}, 5, 1};
-  const Point3fVector& led_row = LedParser::generateLedRow(led_row_config);
+  const Point3fVector& led_row = LedStateParser::generateLedRow(led_row_config);
 
   cv::Point3_<float> pt1{1, 0, 1};
   cv::Point3_<float> pt2{2, 0, 1};
@@ -27,7 +27,7 @@ TEST(GenerateLedRow, TestLedPositions) {
 TEST(GenerateLedRow, TestLedPositionsInclined) {
 
   LedRowConfig led_row_config{{0, 0}, {2, 1}, 5, 1};
-  const Point3fVector& led_row = LedParser::generateLedRow(led_row_config);
+  const Point3fVector& led_row = LedStateParser::generateLedRow(led_row_config);
 
   cv::Point3_<float> pt1{2, 1, 1};
   cv::Point3_<float> pt2{4, 2, 1};

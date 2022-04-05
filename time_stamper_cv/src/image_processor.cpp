@@ -3,8 +3,8 @@
 
 ImageProcessor::ImageProcessor(const ImageProcessorConfig &cfg) {
   convex_shape_ = std::make_shared<ConvexShape>(ConvexShape(cfg.tolerance));
-  detector_ = std::make_shared<detector>(detector(cfg.params));
-  led_parser_ = std::make_shared<LedParser>(LedParser(cfg.led_row_config));
+  detector_ = std::make_shared<KeyPointDetector>(KeyPointDetector(cfg.params));
+  led_parser_ = std::make_shared<LedStateParser>(LedStateParser(cfg.led_row_config));
 }
 
 cv_bridge::CvImage ImageProcessor::process(const sensor_msgs::Image &image) {
@@ -43,7 +43,7 @@ cv_bridge::CvImage ImageProcessor::process(const sensor_msgs::Image &image) {
   return out_msg;
 }
 
-void ImageProcessor::setVisualization(bool visualization) {
+void ImageProcessor::setVisualization(const bool visualization) {
   visualization_ = visualization;
 }
 
@@ -67,7 +67,7 @@ void ImageProcessor::visualize(const cv::Mat &visualization_mat, int number) con
     counter_text += std::to_string(number);
 
     for (const auto &led: led_parser_->getLedRow()) {
-      cv::Point2f led_pos = LedParser::normalize(led);
+      cv::Point2f led_pos = LedStateParser::normalize(led);
       cv::circle(visualization_mat, led_pos, (int) 10, cv::Scalar(255, 0, 0));
     }
 

@@ -14,8 +14,8 @@ cs_add_library(${PROJECT_NAME}
         src/trigonometry.cpp
         src/convex_shape.cpp
         src/image_processor.cpp
-        src/led_parser.cpp
-        src/detector.cpp
+        src/led_state_parser.cpp
+        src/keypoint_detector.cpp
         )
 cs_add_executable(${PROJECT_NAME}-node src/main.cpp)
 
