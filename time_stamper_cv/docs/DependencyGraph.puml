@@ -1,0 +1,67 @@
+@startuml
+
+class ConvexShape
+class Detector
+class ImageProcessor
+class LedDetectionNode
+class LedParser
+class Trigonometry
+class Configuration.Configuration
+class Common.Common
+class Common.PointVector
+
+ConvexShape : process()
+ConvexShape : getHull()
+ConvexShape : isHullValid()
+ConvexShape : getSortedPointAngles()
+ConvexShape : getPhysicalCorners()
+ConvexShape : isShapeValid()
+ConvexShape : isInRange()
+ConvexShape : pollShapeStatus()
+ConvexShape : getInvHomography()
+
+Detector : process()
+Detector : pollKeyPointStatus()
+Detector : getKeyPoints()
+Detector : isKeypointsEmpty()
+
+ImageProcessor : process()
+ImageProcessor : setVisualization()
+
+LedDetectionNode : callbackRawImage()
+LedDetectionNode : init()
+LedDetectionNode : start()
+
+LedParser : generateLedRow()
+LedParser : normalize()
+LedParser : processImage()
+LedParser : transformLedRow()
+LedParser : getLedBrightness()
+LedParser : isLedOn()
+LedParser : getBinaryValue()
+LedParser : getLedRow()
+
+Trigonometry : CalcDistance()
+Trigonometry : CalcInnerAngle()
+Trigonometry : LawOfCos()
+
+Common.Common : filter()
+
+
+Common -- ConvexShape
+Common -- LedParser
+
+LedDetectionNode -- ImageProcessor
+
+ImageProcessor -- Detector
+ImageProcessor -- ConvexShape
+ImageProcessor -- LedParser
+
+ConvexShape -- Trigonometry
+ImageProcessor -- Configuration.Configuration
+Configuration.Configuration -- Configuration.LedRowConfig
+Configuration.Configuration -- Configuration.ImageProcessorConfig
+
+
+
+@enduml

@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package format="2">
+    <name>time_stamper_cv</name>
+    <version>0.0.0</version>
+    <description>The time_stamper_cv package</description>
+    <maintainer email="todo@todo.todo">todo</maintainer>
+    <license>TODO</license>
+    <buildtool_depend>catkin</buildtool_depend>
+    <build_depend>roscpp</build_depend>
+    <build_export_depend>roscpp</build_export_depend>
+    <exec_depend>roscpp</exec_depend>
+    <depend>catkin_simple</depend>
+    <depend>cv_bridge</depend>
+    <depend>sensor_msgs</depend>
+    <depend>image_undistort</depend>
+</package>
