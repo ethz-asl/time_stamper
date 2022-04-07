@@ -44,6 +44,7 @@ struct ImageProcessorConfig {
   int tolerance{10};
   cv::SimpleBlobDetector::Params params;
   LedRowConfigRepository led_row_config {
-      {"BottomRow", {{0, 0}, {6, 0}, 16}}
+      {"BottomRow", {{0, 0}, {6, 0}, 16}},
+      {"TopRow", {{0, 17}, {6, 0}, 10}}
   };
 };

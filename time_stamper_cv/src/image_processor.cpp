@@ -17,7 +17,7 @@ cv_bridge::CvImage ImageProcessor::process(const sensor_msgs::Image &image) {
 
   if (detector_->isKeypointsEmpty()) {
     if (visualization_) {
-      visualize(visualization_mat, -1);
+      visualize(visualization_mat);
     }
     out_msg.image = input_mat;
     return out_msg;
@@ -27,7 +27,6 @@ cv_bridge::CvImage ImageProcessor::process(const sensor_msgs::Image &image) {
   convex_shape_->process(points);
   convex_shape_->pollShapeStatus(ImageProcessor::log);
 
-  int number = -1;
   if (convex_shape_->isShapeValid()) {
     led_parser_->processImage(input_mat);
 
@@ -35,12 +34,17 @@ cv_bridge::CvImage ImageProcessor::process(const sensor_msgs::Image &image) {
      * Get inverted homography, so we know the position of each LED even if it's turned off.
      */
     led_parser_->transformLedRow("BottomRow", convex_shape_->getInvHomography());
+    led_parser_->transformLedRow("TopRow", convex_shape_->getInvHomography());
 
-    number = led_parser_->getBinaryValue("BottomRow");
+    if (led_parser_->isLedOn("TopRow", 0) && led_parser_->isLedOn("TopRow", 9)) {
+      ROS_INFO("Skipped invalid LED pos");
+    }
   }
+
   if (visualization_) {
-    visualize(visualization_mat, number);
+    visualize(visualization_mat);
   }
+
   out_msg.image = input_mat;
   return out_msg;
 }
@@ -53,7 +57,7 @@ cv::Mat ImageProcessor::convertToCvImage(const sensor_msgs::Image &image) {
   return cv_bridge::toCvCopy(image)->image.clone();
 }
 
-void ImageProcessor::visualize(const cv::Mat &visualization_mat, int number) const {
+void ImageProcessor::visualize(const cv::Mat &visualization_mat) const {
 
   cv::polylines(visualization_mat, convex_shape_->getHull(), true, cv::Scalar(255, 0, 0));
   if (convex_shape_->isShapeValid()) {
@@ -65,14 +69,19 @@ void ImageProcessor::visualize(const cv::Mat &visualization_mat, int number) con
   std::string counter_text("Counter: ");
 
   if (convex_shape_->isShapeValid()) {
+    int bottom_row_binary_value = led_parser_->getBinaryValue("BottomRow");
     shape_text += "Valid";
-    counter_text += std::to_string(number);
+    counter_text += std::to_string(bottom_row_binary_value);
 
     for (const auto &led: led_parser_->getLedRow("BottomRow")) {
       cv::Point2f led_pos = LedStateParser::normalize(led);
       cv::circle(visualization_mat, led_pos, (int) 10, cv::Scalar(255, 0, 0));
     }
 
+    for (const auto &led: led_parser_->getLedRow("TopRow")) {
+      cv::Point2f led_pos = LedStateParser::normalize(led);
+      cv::circle(visualization_mat, led_pos, (int) 10, cv::Scalar(255, 0, 0));
+    }
   } else {
     shape_text += "Invalid";
     counter_text += "---";
