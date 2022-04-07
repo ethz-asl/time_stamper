@@ -1,9 +1,8 @@
 #include "led_state_parser.h"
-
 #include <utility>
 
-LedStateParser::LedStateParser(LedRowConfig led_row_config, int image_crop_size)
-    : led_row_config_(std::move(led_row_config)), size_(image_crop_size) {
+LedStateParser::LedStateParser(LedRowConfigRepository  led_row_config_, int image_crop_size)
+    : led_row_configs_(std::move(led_row_config_)), size_(image_crop_size) {
 
   cv::Mat kernel = cv::Mat(image_crop_size, image_crop_size, CV_8UC1);
 
@@ -15,8 +14,10 @@ LedStateParser::LedStateParser(LedRowConfig led_row_config, int image_crop_size)
 }
 
 void LedStateParser::processImage(const cv::Mat &image) {
-  led_row_.clear();
-  led_row_ = generateLedRow(led_row_config_);
+  led_rows_.clear();
+  for (auto const& cfg : led_row_configs_) {
+    led_rows_.insert({cfg.first, generateLedRow(cfg.second)});
+  }
   image_ = image;
 }
 
@@ -33,14 +34,14 @@ Point3fVector LedStateParser::generateLedRow(const LedRowConfig &cfg) {
   return led_row;
 }
 
-void LedStateParser::transformLedRow(const cv::Mat &homography) {
+void LedStateParser::transformLedRow(const std::string& led_row_name, const cv::Mat &homography) {
   Point3fVector empty_row;
-  cv::transform(led_row_, empty_row, homography);
-  led_row_ = empty_row;
+  cv::transform(led_rows_.at(led_row_name), empty_row, homography);
+  led_rows_.at(led_row_name) = empty_row;
 }
 
-double LedStateParser::getLedBrightness(int index) const {
-  cv::Point3_<float> led_transformed = led_row_.at(index);
+double LedStateParser::getLedBrightness(const std::string& led_row_name, int index) const {
+  cv::Point3_<float> led_transformed =  led_rows_.at(led_row_name).at(index);
 
   cv::Point2f led_pos = normalize(led_transformed);
 
@@ -62,22 +63,22 @@ double LedStateParser::getLedBrightness(int index) const {
   return average.val[0];
 }
 
-bool LedStateParser::isLedOn(const int index, const float min_brightness) const {
+bool LedStateParser::isLedOn(const std::string& led_row_name, const int index, const float min_brightness) const {
   if (min_brightness > 255) {
     return false;
   }
-  double a = getLedBrightness(index);
+  double a = getLedBrightness(led_row_name, index);
   return a > min_brightness;
 }
 
-const Point3fVector &LedStateParser::getLedRow() const {
-  return led_row_;
+const Point3fVector &LedStateParser::getLedRow(const std::string& led_row_name) const {
+  return led_rows_.at(led_row_name);
 }
 
-int LedStateParser::getBinaryValue() const {
+int LedStateParser::getBinaryValue(const std::string& led_row_name) const {
   int count = 0;
-  for (int i = 0; i < led_row_.size(); i++) {
-    if (isLedOn(i)) {
+  for (int i = 0; i < led_rows_.at(led_row_name).size(); i++) {
+    if (isLedOn(led_row_name,i)) {
       count |= 1 << i;
     }
   }
