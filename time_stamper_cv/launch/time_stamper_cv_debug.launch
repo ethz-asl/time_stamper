@@ -1,0 +1,42 @@
+<launch>
+<!-- Determine this using rosrun pointgrey_camera_driver list_cameras.
+       If not specified, defaults to first camera found. -->
+  <arg name="camera_name" default="camera" />
+  <arg name="camera_serial" default="0" />
+  <arg name="calibrated" default="0" />
+
+  <group ns="$(arg camera_name)">
+    <node pkg="nodelet" type="nodelet" name="camera_nodelet_manager" args="manager" />
+
+    <node pkg="nodelet" type="nodelet" name="camera_nodelet"
+          args="load pointgrey_camera_driver/PointGreyCameraNodelet camera_nodelet_manager" >
+      <param name="frame_id" value="camera" />
+      <param name="serial" value="$(arg camera_serial)" />
+
+      <!-- When unspecified, the driver will use the default framerate as given by the camera itself. -->
+      <param name="frame_rate" value="60" />
+
+      <!-- Use the camera_calibration package to create this file -->
+      <param name="camera_info_url" if="$(arg calibrated)"
+             value="file://$(env HOME)/.ros/camera_info/$(arg camera_serial).yaml" />
+    </node>
+
+    <node pkg="nodelet" type="nodelet" name="image_proc_debayer"
+          args="load image_proc/debayer camera_nodelet_manager">
+    </node>
+  </group>
+
+
+<!-- Undistorted -->
+<arg name="scale" default="1.0" />
+<arg name="calib_path" default="$(find time_stamper_cv)/config/camchain-2022-03-15-16-17-06.yaml"/>
+
+  <node name="image_undistort_node" pkg="image_undistort" type="image_undistort_node" output="screen" clear_params="true">
+    <param name="input_camera_namespace" value="cam0"/>
+    <param name="input_camera_info_from_ros_params" value = "true"/>
+    <param name="scale" value="$(arg scale)"/>
+        <param name="publish_tf" value="false"/>
+    <rosparam file="$(arg calib_path)"/>
+    <remap from="input/image" to="/camera/image_raw"/>
+  </node>
+</launch>

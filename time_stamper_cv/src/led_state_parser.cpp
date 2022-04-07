@@ -41,6 +41,16 @@ void LedStateParser::transformLedRow(const std::string& led_row_name, const cv::
 }
 
 double LedStateParser::getLedBrightness(const std::string& led_row_name, int index) const {
+  if (led_rows_.empty()) {
+    std::cout << "Error in LedStateParser::isLedOn(): Led rows empty" << std::endl;
+    return -1;
+  }
+
+  if (index > getLedRow(led_row_name).size() - 1) {
+    std::cout << "Error in LedStateParser::isLedOn(): Index out of range" << std::endl;
+    return -1;
+  }
+
   cv::Point3_<float> led_transformed =  led_rows_.at(led_row_name).at(index);
 
   cv::Point2f led_pos = normalize(led_transformed);
