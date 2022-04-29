@@ -1,7 +1,8 @@
 #pragma once
 
 #include <fcntl.h>
-class IPwmSubsystem {
+#include "ISysfsSubsystem.h"
+class IPwmSubsystem : public ISysfsSubsystem {
  public:
   /**
    * Interface default constructor.
@@ -12,37 +13,37 @@ class IPwmSubsystem {
    * Checks if pwmchip is exported.
    * @return if true pwmchip is exported, otherwise false.
    */
-  virtual bool IsExported() = 0;
+  bool IsExported() override = 0;
 
   /**
    * Exports pwmchip.
    * @return true if successful, otherwise false.
    */
-  virtual bool Export() = 0;
+  bool Export() override = 0;
 
   /**
    * Contrary to Export()
    * @return true if successful, otherwise false.
    */
-  virtual bool Unexport() = 0;
+  bool Unexport() override = 0;
 
   /**
    * Checks if pwmchip is enabled/running
    * @return true if running, otherwise false.
    */
-  virtual bool IsRunning() = 0;
+  bool IsRunning() override = 0;
 
   /**
    * Enables pwmchip, IsRunning() is set to true.
    * @return true if successful, otherwise false and errno is set.
    */
-  virtual bool Start() = 0;
+  bool Start() override = 0;
 
   /**
    * Disables pwmchip, IsRunning() is set to false.
    * @return true if successful, otherwise false and errno is set.
    */
-  virtual bool Stop() = 0;
+  bool Stop() override = 0;
 
   /**
    * Gets clock frequency in hz
@@ -97,5 +98,5 @@ class IPwmSubsystem {
   /**
    * Default destructor
    */
-  ~IPwmSubsystem() = default;
+  ~IPwmSubsystem() override = default;
 };

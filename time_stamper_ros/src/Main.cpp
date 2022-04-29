@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
 
   Filesystem filesystem;
   SysfsPwm sysfs_pwm(pwmchip_path, filesystem);
-  Node node(sysfs_pwm);
+  Node node(sysfs_pwm, EXPOSURE);
   signal(SIGINT, SignalHandler);
 
   if (!node.Init(frequency, false)) {

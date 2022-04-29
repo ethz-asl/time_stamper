@@ -34,7 +34,7 @@ class SysfsPwm : public IPwmSubsystem {
   /**
    * Default destructor.
    */
-  ~SysfsPwm() = default;
+  ~SysfsPwm() override = default;
 
  private:
   /**
