@@ -2,19 +2,17 @@
 #include <cstring>
 #include "time_stamper_ros/Timestamp.h"
 #include "TimestampManager.h"
-#include "SysfsGpio.h"
-#include "Filesystem.h"
+
 bool Node::run_node = true;
 
-Node::Node(IPwmSubsystem &pwm_subsystem, LedMode led_mode)
-    : pwm_subsystem_(pwm_subsystem), mode_(led_mode) {}
+Node::Node(IPwmSubsystem &pwm_subsystem, IGpioSubsystem &gpio_subsystem, LedMode led_mode)
+    : pwm_subsystem_(pwm_subsystem), gpio_subsystem_(gpio_subsystem), mode_(led_mode) {}
 
 bool Node::Init(int frequency, bool forceReset) {
   if (!SetGpioMode()) {
     ROS_ERROR_STREAM("Set gpio mode failed: " << strerror(errno) << std::endl);
-  };
-
-  ROS_INFO("Mode set.");
+  }
+  ROS_INFO("Set GPIO mode");
 
   if (forceReset) {
     pwm_subsystem_.Reset();
@@ -79,15 +77,14 @@ void Node::CleanUp() {
 }
 
 bool Node::SetGpioMode() {
-  Filesystem filesystem;
-  SysfsGpio sysfs_gpio(2, filesystem);
-
-  if (!sysfs_gpio.IsExported()) {
-    if (!sysfs_gpio.Export()) {
-      std::cout << strerror(errno) << std::endl;
+  if (!gpio_subsystem_.IsExported()) {
+    if (!gpio_subsystem_.Export()) {
+      ROS_INFO_STREAM("GPIO Export failed: " << strerror(errno));
       return false;
     }
-    std::cout << "Exported GPIO" << std::endl;
+    ROS_INFO("Exported GPIO");
+  } else {
+    ROS_INFO("GPIO already exported");
   }
 
   GPIO_MODE gpio_mode;
@@ -99,9 +96,11 @@ bool Node::SetGpioMode() {
       gpio_mode = HIGH;
       break;
     default:
+      ROS_ERROR_STREAM("Invalid gpio mode: " << gpio_mode << std::endl);
       return false;
   }
-  if (!sysfs_gpio.SetDirection(OUT) || !sysfs_gpio.SetGpioMode(gpio_mode)) {
+
+  if (!gpio_subsystem_.SetDirection(OUT) || !gpio_subsystem_.SetGpioMode(gpio_mode)) {
     return false;
   }
   return true;

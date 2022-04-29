@@ -1,4 +1,4 @@
-#include <SysfsPwm.h>
+#include "sysfs/SysfsPwm.h"
 #include <unistd.h>
 
 SysfsPwm::SysfsPwm(std::string pwmchip_path, IFileSystem &file_system)
@@ -31,11 +31,11 @@ bool SysfsPwm::Reset() {
 }
 
 bool SysfsPwm::Export() {
-  return fs_.Write(pwm_chip_path_ + PWM_EXPORT, "0");
+  return fs_.Write(pwm_chip_path_ + SYSFS_EXPORT, "0");
 }
 
 bool SysfsPwm::Unexport() {
-  return fs_.Write(pwm_chip_path_ + PWM_UNEXPORT, "0");
+  return fs_.Write(pwm_chip_path_ + SYSFS_UNEXPORT, "0");
 }
 
 bool SysfsPwm::IsRunning() {

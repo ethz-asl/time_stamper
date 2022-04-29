@@ -87,10 +87,7 @@ class IPwmSubsystem : public ISysfsSubsystem {
   static constexpr int PWM_DEFAULT_PERIOD = 10000000;
   static constexpr int PWM_DEFAULT_DUTYCYCLE = PWM_DEFAULT_PERIOD / 2;
 
-  inline static const std::string PWM_PWMCHIP0 = "/sys/class/pwm/pwmchip0";
   inline static const std::string PWM0 = "/pwm0";
-  inline static const std::string PWM_EXPORT = "/export";
-  inline static const std::string PWM_UNEXPORT = "/unexport";
   inline static const std::string PWM_ENABLE = "/pwm0/enable";
   inline static const std::string PWM_PERIOD = "/pwm0/period";
   inline static const std::string PWM_DUTYCYCLE = "/pwm0/duty_cycle";

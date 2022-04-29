@@ -8,8 +8,8 @@ catkin_simple()
 
 
 cs_add_library(${PROJECT_NAME}
-        src/SysfsPwm.cpp
-        src/SysfsGpio.cpp
+        src/sysfs/SysfsPwm.cpp
+        src/sysfs/SysfsGpio.cpp
         src/Node.cpp
         src/TimestampManager.cpp
         src/Filesystem.cpp

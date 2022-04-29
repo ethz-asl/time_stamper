@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-#include "SysfsPwm.h"
+#include "sysfs/SysfsPwm.h"
 #include "../Mocks/MockFilesystem.h"
 
 using ::testing::Return;

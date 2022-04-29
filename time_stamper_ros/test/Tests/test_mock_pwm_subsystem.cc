@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-#include "IPwmSubsystem.h"
+#include "sysfs/IPwmSubsystem.h"
 #include "Node.h"
 
 using ::testing::Return;

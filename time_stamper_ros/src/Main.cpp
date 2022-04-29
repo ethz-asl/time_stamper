@@ -1,7 +1,8 @@
 #include <csignal>
 #include "ros/ros.h"
 #include "Node.h"
-#include "SysfsPwm.h"
+#include "sysfs/SysfsPwm.h"
+#include "sysfs/SysfsGpio.h"
 #include "Filesystem.h"
 
 void SignalHandler(int signum) {
@@ -20,7 +21,9 @@ int main(int argc, char **argv) {
 
   Filesystem filesystem;
   SysfsPwm sysfs_pwm(pwmchip_path, filesystem);
-  Node node(sysfs_pwm, EXPOSURE);
+  SysfsGpio sysfs_gpio(2, filesystem);
+
+  Node node(sysfs_pwm, sysfs_gpio, FPS);
   signal(SIGINT, SignalHandler);
 
   if (!node.Init(frequency, false)) {

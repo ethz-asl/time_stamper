@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <fcntl.h>
-#include "IPwmSubsystem.h"
+#include "sysfs/IPwmSubsystem.h"
 #include "IFileSystem.h"
 
 #define SYSFS_EXPERIMENTAL [[deprecated("This function is experimental and might break.")]]

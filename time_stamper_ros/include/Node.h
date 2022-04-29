@@ -1,7 +1,9 @@
 #pragma once
 #include <iostream>
-#include "SysfsPwm.h"
-#include "ros/ros.h"
+#include <ros/ros.h>
+
+#include "sysfs/SysfsGpio.h"
+#include "sysfs/SysfsPwm.h"
 
 enum LedMode {
   FPS,
@@ -15,7 +17,7 @@ class Node {
    * @param sysfs_pw
    * @param led_mode
    */
-  explicit Node(IPwmSubsystem &sysfs_pwm, LedMode led_mode);
+  explicit Node(IPwmSubsystem &sysfs_pwm, IGpioSubsystem &gpio_subsystem, LedMode led_mode);
 
   /**
    * Node initialization.
@@ -52,5 +54,6 @@ class Node {
   ros::Publisher timestamp_pub_;
   ros::NodeHandle nh_;
   IPwmSubsystem &pwm_subsystem_;
+  IGpioSubsystem &gpio_subsystem_;
 };
 

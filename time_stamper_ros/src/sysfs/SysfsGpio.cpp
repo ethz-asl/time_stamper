@@ -1,9 +1,9 @@
-#include "SysfsGpio.h"
+#include "sysfs/SysfsGpio.h"
 
 
 SysfsGpio::SysfsGpio(int gpio_nr, IFileSystem& file_system) :
     fs_(file_system), gpio_nr_(gpio_nr) {
-    gpio_path_ = GPIO_PATH + GPIO + std::to_string(gpio_nr);
+    gpio_path_ = SYSFS_PATH + std::string(GPIO) + GPIO + std::to_string(gpio_nr);
 }
 
 bool SysfsGpio::IsExported() {
@@ -11,11 +11,11 @@ bool SysfsGpio::IsExported() {
 }
 
 bool SysfsGpio::Export() {
-  return fs_.Write(GPIO_PATH + SYSFS_EXPORT, std::to_string(gpio_nr_));
+  return fs_.Write(SYSFS_PATH + std::string(SYSFS_EXPORT), std::to_string(gpio_nr_));
 }
 
 bool SysfsGpio::Unexport() {
-  return fs_.Write(GPIO_PATH + SYSFS_UNEXPORT, std::to_string(gpio_nr_));
+  return fs_.Write(SYSFS_PATH + std::string(SYSFS_UNEXPORT), std::to_string(gpio_nr_));
 }
 
 bool SysfsGpio::IsRunning() {

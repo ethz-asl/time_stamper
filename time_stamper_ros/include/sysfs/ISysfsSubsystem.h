@@ -1,6 +1,6 @@
 #pragma once
 
-#define SYS_FS_NOT_SUPPORTED [[deprecated("This function is not supported")]]
+#define SYSFS_NOT_SUPPORTED [[deprecated("This function is not supported")]]
 
 class ISysfsSubsystem {
  public:
@@ -35,14 +35,14 @@ class ISysfsSubsystem {
   virtual bool IsRunning() = 0;
 
   /**
-   * Enables subsystem, IsRunning() is set to true.
-   * @return true if successful, otherwise false and errno is set.
+   * Enables subsystem, IsRunning() is set to true. Not every subsystem supports this function.
+   * @return true if successful, otherwise false.
    */
   virtual bool Start() = 0;
 
   /**
-   * Disables subsystem, IsRunning() is set to false.
-   * @return true if successful, otherwise false and errno is set.
+   * Disables subsystem, IsRunning() is set to false. Not every subsystem supports this function.
+   * @return true if successful, otherwise false.
    */
   virtual bool Stop() = 0;
 
@@ -50,8 +50,10 @@ class ISysfsSubsystem {
    * Default destructor
    */
   virtual ~ISysfsSubsystem() = default;
+
  protected:
-  inline static const std::string SYSFS_EXPORT = "/export";
-  inline static const std::string SYSFS_UNEXPORT = "/unexport";
+  inline static const char* SYSFS_PATH = "/sys/class";
+  inline static const char* SYSFS_EXPORT = "/export";
+  inline static const char* SYSFS_UNEXPORT = "/unexport";
 };
 
