@@ -7,15 +7,15 @@ SysfsGpio::SysfsGpio(int gpio_nr, IFileSystem& file_system) :
 }
 
 bool SysfsGpio::IsExported() {
-  return fs_.DirectoryExists((gpio_path_ + "/").c_str());
+  return fs_.directoryExists((gpio_path_ + "/").c_str());
 }
 
 bool SysfsGpio::Export() {
-  return fs_.Write(SYSFS_PATH + std::string(SYSFS_EXPORT), std::to_string(gpio_nr_));
+  return fs_.write(SYSFS_PATH + std::string(SYSFS_EXPORT), std::to_string(gpio_nr_));
 }
 
 bool SysfsGpio::Unexport() {
-  return fs_.Write(SYSFS_PATH + std::string(SYSFS_UNEXPORT), std::to_string(gpio_nr_));
+  return fs_.write(SYSFS_PATH + std::string(SYSFS_UNEXPORT), std::to_string(gpio_nr_));
 }
 
 bool SysfsGpio::IsRunning() {
@@ -45,7 +45,7 @@ bool SysfsGpio::SetDirection(GPIO_DIRECTION gpio_direction) {
     default:
       return false;
   }
-  return fs_.Write(gpio_path_ + "/direction", direction);
+  return fs_.write(gpio_path_ + "/direction", direction);
 }
 
 bool SysfsGpio::SetGpioMode(GPIO_MODE gpio_mode) {
@@ -64,7 +64,7 @@ bool SysfsGpio::SetGpioMode(GPIO_MODE gpio_mode) {
       return false;
   }
 
-  return fs_.Write(gpio_path_ + "/value", mode);
+  return fs_.write(gpio_path_ + "/value", mode);
 }
 
 

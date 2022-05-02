@@ -29,13 +29,13 @@ TEST(MockFileSystem, TestSetFrequencyValidInputBasic) {
   //Expectation: Subsystem should set dutycycle and period on valid input
   int hz = 1;
   int freq = (int) (1e9 / hz);
-  EXPECT_CALL(mock_filesystem, Write("/sys/class/pwm/pwmchip0" + SysfsPwm::PWM_DUTYCYCLE, "0"))
+  EXPECT_CALL(mock_filesystem, write("/sys/class/pwm/pwmchip0" + SysfsPwm::PWM_DUTYCYCLE, "0"))
   .Times(1).WillOnce(Return(true));
 
-  EXPECT_CALL(mock_filesystem, Write("/sys/class/pwm/pwmchip0" + SysfsPwm::PWM_PERIOD, std::to_string(freq)))
+  EXPECT_CALL(mock_filesystem, write("/sys/class/pwm/pwmchip0" + SysfsPwm::PWM_PERIOD, std::to_string(freq)))
   .Times(1).WillOnce(Return(true));
 
-  EXPECT_CALL(mock_filesystem, Write("/sys/class/pwm/pwmchip0" + SysfsPwm::PWM_DUTYCYCLE, std::to_string(freq / 2)))
+  EXPECT_CALL(mock_filesystem, write("/sys/class/pwm/pwmchip0" + SysfsPwm::PWM_DUTYCYCLE, std::to_string(freq / 2)))
   .Times(1).WillOnce(Return(true));
 
   bool setFrequencyResult = sysfs_pwm.SetFrequency(hz);
@@ -50,13 +50,13 @@ TEST(MockFileSystem, TestSetFrequencyValidInputLimit) {
   //Expectation: Subsystem should set dutycycle and period on valid input
   int hz = IPwmSubsystem::PWM_MAXSPEED_HZ;
   int freq = (int) (1e9 / hz);
-  EXPECT_CALL(mock_filesystem, Write("/sys/class/pwm/pwmchip0" + SysfsPwm::PWM_DUTYCYCLE, "0"))
+  EXPECT_CALL(mock_filesystem, write("/sys/class/pwm/pwmchip0" + SysfsPwm::PWM_DUTYCYCLE, "0"))
   .Times(1).WillOnce(Return(true));
 
-  EXPECT_CALL(mock_filesystem, Write("/sys/class/pwm/pwmchip0" + SysfsPwm::PWM_PERIOD, std::to_string(freq)))
+  EXPECT_CALL(mock_filesystem, write("/sys/class/pwm/pwmchip0" + SysfsPwm::PWM_PERIOD, std::to_string(freq)))
   .Times(1).WillOnce(Return(true));
 
-  EXPECT_CALL(mock_filesystem, Write("/sys/class/pwm/pwmchip0" + SysfsPwm::PWM_DUTYCYCLE, std::to_string(freq / 2)))
+  EXPECT_CALL(mock_filesystem, write("/sys/class/pwm/pwmchip0" + SysfsPwm::PWM_DUTYCYCLE, std::to_string(freq / 2)))
   .Times(1).WillOnce(Return(true));
 
   bool setFrequencyResult = sysfs_pwm.SetFrequency(hz);

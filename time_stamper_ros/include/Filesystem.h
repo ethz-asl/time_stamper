@@ -11,7 +11,7 @@ class Filesystem : public IFileSystem {
    * @param message
    * @return true if successful, otherwise false and errno is set.
    */
-  bool Write(const std::string &path, const std::string &message) override;
+  bool write(const std::string &path, const std::string &message) override;
 
   /**
    * Wrapper for posix read(2) with some checks.
@@ -20,13 +20,13 @@ class Filesystem : public IFileSystem {
    * @param buffer_size sizeof(buffer)
    * @return true if successful, otherwise false and errno is set.
    */
-  bool Read(const std::string &path, void *buffer, size_t buffer_size) override;
+  bool read(const std::string &path, void *buffer, size_t buffer_size) override;
 
   /**
    * Checks if a directory exists at given location
    * @param path Absolute path
    * @return true if directory exists, otherwise false
    */
-  bool DirectoryExists(const char *path) override;
+  bool directoryExists(const char *path) override;
 };
 
