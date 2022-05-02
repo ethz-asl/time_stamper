@@ -19,10 +19,11 @@ int main(int argc, char **argv) {
   int frequency = nh_private.param("frequency", 50);
   std::string pwmchip_path = nh_private.param("pwmchip_path", std::string("/sys/class/pwm/pwmchip0"));
   bool exposure_mode = nh_private.param("exposure_mode", false);
+  int gpio_nr = nh_private.param("gpio_pin", 2);
 
-  Filesystem filesystem;
-  SysfsPwm sysfs_pwm(pwmchip_path, filesystem);
-  SysfsGpio sysfs_gpio(2, filesystem);
+  Filesystem fs;
+  SysfsPwm sysfs_pwm(pwmchip_path, fs);
+  SysfsGpio sysfs_gpio(gpio_nr, fs);
 
   Node node(sysfs_pwm, sysfs_gpio, exposure_mode ? EXPOSURE : FPS);
   signal(SIGINT, SignalHandler);
