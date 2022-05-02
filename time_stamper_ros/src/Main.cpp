@@ -18,12 +18,13 @@ int main(int argc, char **argv) {
   ros::NodeHandle nh_private("~");
   int frequency = nh_private.param("frequency", 50);
   std::string pwmchip_path = nh_private.param("pwmchip_path", std::string("/sys/class/pwm/pwmchip0"));
+  bool exposure_mode = nh_private.param("exposure_mode", false);
 
   Filesystem filesystem;
   SysfsPwm sysfs_pwm(pwmchip_path, filesystem);
   SysfsGpio sysfs_gpio(2, filesystem);
 
-  Node node(sysfs_pwm, sysfs_gpio, FPS);
+  Node node(sysfs_pwm, sysfs_gpio, exposure_mode ? EXPOSURE : FPS);
   signal(SIGINT, SignalHandler);
 
   if (!node.Init(frequency, false)) {
