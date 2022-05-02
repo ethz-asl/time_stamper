@@ -30,12 +30,12 @@ cv_bridge::CvImage ImageProcessor::process(const sensor_msgs::Image &image) {
   if (convex_shape_->isShapeValid()) {
     led_parser_->processImage(input_mat);
 
-    /*
-     * Get inverted homography, so we know the position of each LED even if it's turned off.
-     */
+    //Get inverted homography, so we know the position of each LED even if it's turned off.
     led_parser_->transformLedRow("BottomRow", convex_shape_->getInvHomography());
     led_parser_->transformLedRow("TopRow", convex_shape_->getInvHomography());
 
+    /* When the first and last led in the top row are on, the state of the bottom row is changing.
+       The frame has to be skipped. */
     if (led_parser_->isLedOn("TopRow", 0) && led_parser_->isLedOn("TopRow", 9)) {
       ROS_INFO("Skipped invalid LED pos");
     }
@@ -107,6 +107,6 @@ void ImageProcessor::visualizeCorners(const cv::Mat &visualization_mat, PointAng
   }
 }
 
-void ImageProcessor::log(const std::string& message) {
+void ImageProcessor::log(const std::string &message) {
   ROS_INFO("%s", message.c_str());
 }
