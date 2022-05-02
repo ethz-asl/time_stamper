@@ -13,7 +13,7 @@ enum LedMode {
 class Node {
  public:
   /**
-   * Creates new node with IPwmSubsystem
+   * Creates a new node with IPwmSubsystem and IGpioSubsystem
    * @param sysfs_pw
    * @param led_mode
    */
@@ -25,7 +25,7 @@ class Node {
    * @param forceReset resets pwmchip if true
    * @return true if successful, otherwise false
    */
-  bool Init(int frequency, bool forceReset);
+  bool Init(int frequency, bool forceReset = false);
 
   /**
    * Starts the node and loops until SIGINT is raised.
