@@ -31,8 +31,6 @@ catkin_add_gtest(${PROJECT_NAME}-test
         test/Tests/test_mock_pwm_subsystem.cc
         test/Tests/test_mock_filesystem.cc
         test/Tests/test_mock_gpio_subsystem.cc
-        test/Mocks/MockPwmSubsystem.h
-        test/Mocks/MockGpioSubsystem.h
         )
 
 target_link_libraries(${PROJECT_NAME}-test
