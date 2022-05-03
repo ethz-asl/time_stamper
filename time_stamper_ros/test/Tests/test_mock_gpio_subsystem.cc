@@ -11,10 +11,10 @@ using ::testing::Return;
  * @param mock_pwm_subsystem
  */
 void ExpectDefaultPwmSubsystem(MockPwmSubsystem &mock_pwm_subsystem) {
-  EXPECT_CALL(mock_pwm_subsystem, IsExported()).Times(1).WillOnce(Return(true));
-  EXPECT_CALL(mock_pwm_subsystem, SetFrequency(50)).WillOnce(Return(true));
-  EXPECT_CALL(mock_pwm_subsystem, IsRunning()).WillOnce(Return(false));
-  EXPECT_CALL(mock_pwm_subsystem, Start()).WillOnce(Return(true));
+  EXPECT_CALL(mock_pwm_subsystem, isExported()).Times(1).WillOnce(Return(true));
+  EXPECT_CALL(mock_pwm_subsystem, setFrequency(50)).WillOnce(Return(true));
+  EXPECT_CALL(mock_pwm_subsystem, isRunning()).WillOnce(Return(false));
+  EXPECT_CALL(mock_pwm_subsystem, start()).WillOnce(Return(true));
 }
 
 TEST(MockGpioSubsystem, TestNodeInitWhenUninitalized) {
@@ -26,12 +26,12 @@ TEST(MockGpioSubsystem, TestNodeInitWhenUninitalized) {
   ExpectDefaultPwmSubsystem(mock_pwm_subsystem);
 
   //Expectation: Export and set direction to OUT and GPIO mode to HIGH.
-  EXPECT_CALL(mock_gpio_subsystem, IsExported()).Times(1).WillOnce(Return(false));
-  EXPECT_CALL(mock_gpio_subsystem, Export()).Times(1).WillOnce(Return(true));
-  EXPECT_CALL(mock_gpio_subsystem, SetDirection(OUT)).Times(1).WillOnce(Return(true));
-  EXPECT_CALL(mock_gpio_subsystem, SetGpioMode(HIGH)).Times(1).WillOnce(Return(true));
+  EXPECT_CALL(mock_gpio_subsystem, isExported()).Times(1).WillOnce(Return(false));
+  EXPECT_CALL(mock_gpio_subsystem, exprt()).Times(1).WillOnce(Return(true));
+  EXPECT_CALL(mock_gpio_subsystem, setDirection(OUT)).Times(1).WillOnce(Return(true));
+  EXPECT_CALL(mock_gpio_subsystem, setGpioMode(HIGH)).Times(1).WillOnce(Return(true));
 
-  node.Init(50);
+  node.init(50);
 }
 
 TEST(MockGpioSubsystem, TestNodeInitAlreadyExported) {
@@ -43,11 +43,11 @@ TEST(MockGpioSubsystem, TestNodeInitAlreadyExported) {
   ExpectDefaultPwmSubsystem(mock_pwm_subsystem);
 
   //Expectation: Set direction to OUT and GPIO mode to HIGH.
-  EXPECT_CALL(mock_gpio_subsystem, IsExported()).Times(1).WillOnce(Return(true));
-  EXPECT_CALL(mock_gpio_subsystem, SetDirection(OUT)).Times(1).WillOnce(Return(true));
-  EXPECT_CALL(mock_gpio_subsystem, SetGpioMode(HIGH)).Times(1).WillOnce(Return(true));
+  EXPECT_CALL(mock_gpio_subsystem, isExported()).Times(1).WillOnce(Return(true));
+  EXPECT_CALL(mock_gpio_subsystem, setDirection(OUT)).Times(1).WillOnce(Return(true));
+  EXPECT_CALL(mock_gpio_subsystem, setGpioMode(HIGH)).Times(1).WillOnce(Return(true));
 
-  node.Init(50);
+  node.init(50);
 }
 
 TEST(MockGpioSubsystem, TestNodeInitWithExposureMode) {
@@ -59,22 +59,22 @@ TEST(MockGpioSubsystem, TestNodeInitWithExposureMode) {
   ExpectDefaultPwmSubsystem(mock_pwm_subsystem);
 
   //Expectation: Set direction to OUT and GPIO mode to LOW.
-  EXPECT_CALL(mock_gpio_subsystem, IsExported()).Times(1).WillOnce(Return(true));
-  EXPECT_CALL(mock_gpio_subsystem, SetDirection(OUT)).Times(1).WillOnce(Return(true));
-  EXPECT_CALL(mock_gpio_subsystem, SetGpioMode(LOW)).Times(1).WillOnce(Return(true));
+  EXPECT_CALL(mock_gpio_subsystem, isExported()).Times(1).WillOnce(Return(true));
+  EXPECT_CALL(mock_gpio_subsystem, setDirection(OUT)).Times(1).WillOnce(Return(true));
+  EXPECT_CALL(mock_gpio_subsystem, setGpioMode(LOW)).Times(1).WillOnce(Return(true));
 
-  node.Init(50);
+  node.init(50);
 }
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 TEST(MockGpioSubsystem, TestStartNotSupported) {
   MockGpioSubsystem mock_gpio_subsystem;
-  ASSERT_EQ(mock_gpio_subsystem.Start(), false);
+  ASSERT_EQ(mock_gpio_subsystem.start(), false);
 }
 
 TEST(MockGpioSubsystem, TestStopNotSupported) {
   MockGpioSubsystem mock_gpio_subsystem;
-  ASSERT_EQ(mock_gpio_subsystem.Stop(), false);
+  ASSERT_EQ(mock_gpio_subsystem.stop(), false);
 }
 #pragma clang diagnostic pop

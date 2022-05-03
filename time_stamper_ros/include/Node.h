@@ -25,17 +25,17 @@ class Node {
    * @param forceReset resets pwmchip if true
    * @return true if successful, otherwise false
    */
-  bool Init(int frequency, bool forceReset = false);
+  bool init(int frequency, bool forceReset = false);
 
   /**
    * Starts the node and loops until SIGINT is raised.
    */
-  void Start();
+  void start();
 
   /**
    * Turns off pwmchip but does NOT unexport.
    */
-  void CleanUp();
+  void cleanUp();
 
   /**
    * Default destructor.
@@ -48,7 +48,7 @@ class Node {
 
   static bool run_node;
  private:
-  bool SetGpioMode();
+  bool setGpioMode();
 
   LedMode mode_;
   ros::Publisher timestamp_pub_;

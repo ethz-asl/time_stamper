@@ -8,17 +8,17 @@
 class SysfsGpio : public IGpioSubsystem {
  public:
   SysfsGpio(int gpio_nr, IFileSystem& file_system);
-  bool IsExported() override;
-  bool Export() override;
-  bool Unexport() override;
-  bool IsRunning() override;
-  bool SetDirection(GPIO_DIRECTION direction) override;
-  bool SetGpioMode(GPIO_MODE mode) override;
+  bool isExported() override;
+  bool exprt() override;
+  bool unexport() override;
+  bool isRunning() override;
+  bool setDirection(GPIO_DIRECTION gpio_direction) override;
+  bool setGpioMode(GPIO_MODE gpio_mode) override;
   ~SysfsGpio() override = default;
 
  private:
-  bool Start() override;
-  bool Stop() override;
+  bool start() override;
+  bool stop() override;
 
   inline static const char* GPIO = "/gpio";
 

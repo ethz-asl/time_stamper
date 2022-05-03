@@ -6,34 +6,34 @@ SysfsGpio::SysfsGpio(int gpio_nr, IFileSystem& file_system) :
     gpio_path_ = SYSFS_PATH + std::string(GPIO) + GPIO + std::to_string(gpio_nr);
 }
 
-bool SysfsGpio::IsExported() {
+bool SysfsGpio::isExported() {
   return fs_.directoryExists((gpio_path_ + "/").c_str());
 }
 
-bool SysfsGpio::Export() {
+bool SysfsGpio::exprt() {
   return fs_.write(SYSFS_PATH + std::string(SYSFS_EXPORT), std::to_string(gpio_nr_));
 }
 
-bool SysfsGpio::Unexport() {
+bool SysfsGpio::unexport() {
   return fs_.write(SYSFS_PATH + std::string(SYSFS_UNEXPORT), std::to_string(gpio_nr_));
 }
 
-bool SysfsGpio::IsRunning() {
+bool SysfsGpio::isRunning() {
   //There is no "running" state for gpios, consider export state as running state
-  return IsExported();
+  return isExported();
 }
 
-bool SysfsGpio::Start() {
+bool SysfsGpio::start() {
   //Not supported
   return false;
 }
 
-bool SysfsGpio::Stop() {
+bool SysfsGpio::stop() {
   //Not supported
   return false;
 }
 
-bool SysfsGpio::SetDirection(GPIO_DIRECTION gpio_direction) {
+bool SysfsGpio::setDirection(GPIO_DIRECTION gpio_direction) {
   std::string direction;
   switch (gpio_direction) {
     case IN:
@@ -48,7 +48,7 @@ bool SysfsGpio::SetDirection(GPIO_DIRECTION gpio_direction) {
   return fs_.write(gpio_path_ + "/direction", direction);
 }
 
-bool SysfsGpio::SetGpioMode(GPIO_MODE gpio_mode) {
+bool SysfsGpio::setGpioMode(GPIO_MODE gpio_mode) {
   if (direction_ == IN) {
     return false;
   }

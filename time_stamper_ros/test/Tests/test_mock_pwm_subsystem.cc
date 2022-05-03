@@ -11,9 +11,9 @@ using ::testing::Return;
  * @param mock_gpio_subsystem
  */
 void ExpectDefaultGpioSubsystem(MockGpioSubsystem &mock_gpio_subsystem) {
-  EXPECT_CALL(mock_gpio_subsystem, IsExported()).Times(1).WillOnce(Return(true));
-  EXPECT_CALL(mock_gpio_subsystem, SetDirection(OUT)).Times(1).WillOnce(Return(true));
-  EXPECT_CALL(mock_gpio_subsystem, SetGpioMode(HIGH)).Times(1).WillOnce(Return(true));
+  EXPECT_CALL(mock_gpio_subsystem, isExported()).Times(1).WillOnce(Return(true));
+  EXPECT_CALL(mock_gpio_subsystem, setDirection(OUT)).Times(1).WillOnce(Return(true));
+  EXPECT_CALL(mock_gpio_subsystem, setGpioMode(HIGH)).Times(1).WillOnce(Return(true));
 }
 
 TEST(MockPwmSubsystem, TestNodeInitWhenUninitialized) {
@@ -24,13 +24,13 @@ TEST(MockPwmSubsystem, TestNodeInitWhenUninitialized) {
 
   ExpectDefaultGpioSubsystem(mock_gpio_subsystem);
   //Expectation: Export, set frequency to 50 and start subsystem.
-  EXPECT_CALL(mock_pwm_subsystem, IsExported()).Times(1).WillOnce(Return(false));
-  EXPECT_CALL(mock_pwm_subsystem, Export()).WillOnce(Return(true));
-  EXPECT_CALL(mock_pwm_subsystem, SetFrequency(50)).WillOnce(Return(true));
-  EXPECT_CALL(mock_pwm_subsystem, IsRunning()).WillOnce(Return(false));
-  EXPECT_CALL(mock_pwm_subsystem, Start()).WillOnce(Return(true));
+  EXPECT_CALL(mock_pwm_subsystem, isExported()).Times(1).WillOnce(Return(false));
+  EXPECT_CALL(mock_pwm_subsystem, exprt()).WillOnce(Return(true));
+  EXPECT_CALL(mock_pwm_subsystem, setFrequency(50)).WillOnce(Return(true));
+  EXPECT_CALL(mock_pwm_subsystem, isRunning()).WillOnce(Return(false));
+  EXPECT_CALL(mock_pwm_subsystem, start()).WillOnce(Return(true));
 
-  node.Init(50, false);
+  node.init(50, false);
 }
 
 TEST(MockPwmSubsystem, TestNodeInitUninitializedWithForceReset) {
@@ -41,14 +41,14 @@ TEST(MockPwmSubsystem, TestNodeInitUninitializedWithForceReset) {
 
   ExpectDefaultGpioSubsystem(mock_gpio_subsystem);
   //Expectation: Export, set frequency to 50 and start subsystem.
-  EXPECT_CALL(mock_pwm_subsystem, Reset()).Times(1).WillOnce(Return(true));
-  EXPECT_CALL(mock_pwm_subsystem, IsExported()).Times(1).WillOnce(Return(false));
-  EXPECT_CALL(mock_pwm_subsystem, Export()).WillOnce(Return(true));
-  EXPECT_CALL(mock_pwm_subsystem, SetFrequency(50)).WillOnce(Return(true));
-  EXPECT_CALL(mock_pwm_subsystem, IsRunning()).WillOnce(Return(false));
-  EXPECT_CALL(mock_pwm_subsystem, Start()).WillOnce(Return(true));
+  EXPECT_CALL(mock_pwm_subsystem, reset()).Times(1).WillOnce(Return(true));
+  EXPECT_CALL(mock_pwm_subsystem, isExported()).Times(1).WillOnce(Return(false));
+  EXPECT_CALL(mock_pwm_subsystem, exprt()).WillOnce(Return(true));
+  EXPECT_CALL(mock_pwm_subsystem, setFrequency(50)).WillOnce(Return(true));
+  EXPECT_CALL(mock_pwm_subsystem, isRunning()).WillOnce(Return(false));
+  EXPECT_CALL(mock_pwm_subsystem, start()).WillOnce(Return(true));
 
-  node.Init(50, true);
+  node.init(50, true);
 }
 
 TEST(MockPwmSubsystem, TestNodeInitFailExport) {
@@ -59,10 +59,10 @@ TEST(MockPwmSubsystem, TestNodeInitFailExport) {
 
   ExpectDefaultGpioSubsystem(mock_gpio_subsystem);
   //Expectation: Subsystem fails export.
-  EXPECT_CALL(mock_pwm_subsystem, IsExported()).Times(1).WillOnce(Return(false));
-  EXPECT_CALL(mock_pwm_subsystem, Export()).WillOnce(Return(false));
+  EXPECT_CALL(mock_pwm_subsystem, isExported()).Times(1).WillOnce(Return(false));
+  EXPECT_CALL(mock_pwm_subsystem, exprt()).WillOnce(Return(false));
 
-  node.Init(50, false);
+  node.init(50, false);
 }
 
 TEST(MockPwmSubsystem, TestNodeInitAlreadyExported) {
@@ -73,12 +73,12 @@ TEST(MockPwmSubsystem, TestNodeInitAlreadyExported) {
 
   ExpectDefaultGpioSubsystem(mock_gpio_subsystem);
   //Expectation: Subsystem does not export, sets frequency to 50 and starts.
-  EXPECT_CALL(mock_pwm_subsystem, IsExported()).Times(1).WillOnce(Return(true));
-  EXPECT_CALL(mock_pwm_subsystem, SetFrequency(50)).WillOnce(Return(true));
-  EXPECT_CALL(mock_pwm_subsystem, IsRunning()).WillOnce(Return(false));
-  EXPECT_CALL(mock_pwm_subsystem, Start()).WillOnce(Return(true));
+  EXPECT_CALL(mock_pwm_subsystem, isExported()).Times(1).WillOnce(Return(true));
+  EXPECT_CALL(mock_pwm_subsystem, setFrequency(50)).WillOnce(Return(true));
+  EXPECT_CALL(mock_pwm_subsystem, isRunning()).WillOnce(Return(false));
+  EXPECT_CALL(mock_pwm_subsystem, start()).WillOnce(Return(true));
 
-  node.Init(50, false);
+  node.init(50, false);
 }
 
 TEST(MockPwmSubsystem, TestNodeInitAlreadyRunning) {
@@ -89,11 +89,11 @@ TEST(MockPwmSubsystem, TestNodeInitAlreadyRunning) {
 
   ExpectDefaultGpioSubsystem(mock_gpio_subsystem);
   // Subsystem sets frequency to 50
-  EXPECT_CALL(mock_pwm_subsystem, IsExported()).Times(1).WillOnce(Return(true));
-  EXPECT_CALL(mock_pwm_subsystem, SetFrequency(50)).WillOnce(Return(true));
-  EXPECT_CALL(mock_pwm_subsystem, IsRunning()).WillOnce(Return(true));
+  EXPECT_CALL(mock_pwm_subsystem, isExported()).Times(1).WillOnce(Return(true));
+  EXPECT_CALL(mock_pwm_subsystem, setFrequency(50)).WillOnce(Return(true));
+  EXPECT_CALL(mock_pwm_subsystem, isRunning()).WillOnce(Return(true));
 
-  node.Init(50, false);
+  node.init(50, false);
 }
 
 TEST(MockPwmSubsystem, TestNodeInitFailSetFrequency) {
@@ -104,8 +104,8 @@ TEST(MockPwmSubsystem, TestNodeInitFailSetFrequency) {
 
   ExpectDefaultGpioSubsystem(mock_gpio_subsystem);
   //Expectation: Subsystem fails to set frequency
-  EXPECT_CALL(mock_pwm_subsystem, IsExported()).Times(1).WillOnce(Return(true));
-  EXPECT_CALL(mock_pwm_subsystem, SetFrequency(50)).WillOnce(Return(false));
+  EXPECT_CALL(mock_pwm_subsystem, isExported()).Times(1).WillOnce(Return(true));
+  EXPECT_CALL(mock_pwm_subsystem, setFrequency(50)).WillOnce(Return(false));
 
-  node.Init(50, false);
+  node.init(50, false);
 }

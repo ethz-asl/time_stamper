@@ -13,11 +13,11 @@ TEST(MockFileSystem, TestSetFrequencyInvalidInput) {
 
   //Expectation: Subsystem should filter invalid values
 
-  bool setFrequencyResult = sysfs_pwm.SetFrequency(IPwmSubsystem::PWM_MAXSPEED_HZ + 1);
+  bool setFrequencyResult = sysfs_pwm.setFrequency(IPwmSubsystem::PWM_MAXSPEED_HZ + 1);
   EXPECT_EQ(setFrequencyResult, false);
-  setFrequencyResult = sysfs_pwm.SetFrequency(0);
+  setFrequencyResult = sysfs_pwm.setFrequency(0);
   EXPECT_EQ(setFrequencyResult, false);
-  setFrequencyResult = sysfs_pwm.SetFrequency(-1);
+  setFrequencyResult = sysfs_pwm.setFrequency(-1);
   EXPECT_EQ(setFrequencyResult, false);
 }
 
@@ -38,7 +38,7 @@ TEST(MockFileSystem, TestSetFrequencyValidInputBasic) {
   EXPECT_CALL(mock_filesystem, write("/sys/class/pwm/pwmchip0" + SysfsPwm::PWM_DUTYCYCLE, std::to_string(freq / 2)))
   .Times(1).WillOnce(Return(true));
 
-  bool setFrequencyResult = sysfs_pwm.SetFrequency(hz);
+  bool setFrequencyResult = sysfs_pwm.setFrequency(hz);
   EXPECT_EQ(setFrequencyResult, true);
 }
 
@@ -59,7 +59,7 @@ TEST(MockFileSystem, TestSetFrequencyValidInputLimit) {
   EXPECT_CALL(mock_filesystem, write("/sys/class/pwm/pwmchip0" + SysfsPwm::PWM_DUTYCYCLE, std::to_string(freq / 2)))
   .Times(1).WillOnce(Return(true));
 
-  bool setFrequencyResult = sysfs_pwm.SetFrequency(hz);
+  bool setFrequencyResult = sysfs_pwm.setFrequency(hz);
   EXPECT_EQ(setFrequencyResult, true);
 
 }

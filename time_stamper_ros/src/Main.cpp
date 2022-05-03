@@ -28,10 +28,10 @@ int main(int argc, char **argv) {
   Node node(sysfs_pwm, sysfs_gpio, exposure_mode ? EXPOSURE : FPS);
   signal(SIGINT, SignalHandler);
 
-  if (!node.Init(frequency, false)) {
+  if (!node.init(frequency, false)) {
     ROS_FATAL("Failed to initialize node.");
     return -1;
   }
-  node.Start();
+  node.start();
   return 0;
 }

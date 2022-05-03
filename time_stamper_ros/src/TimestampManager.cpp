@@ -6,7 +6,7 @@
 
 TimestampManager::TimestampManager() = default;
 
-bool TimestampManager::Poll() {
+bool TimestampManager::poll() {
   int fd_ = open("/sys/kernel/time_stamper/ts_buffer", O_RDWR);
 
   if (fd_ == -1) {
@@ -31,7 +31,7 @@ bool TimestampManager::Poll() {
   return true;
 }
 
-double TimestampManager::GetLastTimestamp() const {
+double TimestampManager::getLastTimestamp() const {
   return last_timestamp_;
 }
 
