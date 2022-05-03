@@ -35,11 +35,16 @@ struct LedRowConfig {
  * Parameters for the OpenCV SimpleBlobDetector. See OpenCV docs for more details.
  *
  * @param led_row_config
- * See struct above for more details.
+ * LedRowConfig with reference key.
+ * See @struct LedRowConfig above for more details.
  */
+typedef std::map<std::string, LedRowConfig> LedRowConfigRepository;
 
 struct ImageProcessorConfig {
   int tolerance{10};
   cv::SimpleBlobDetector::Params params;
-  LedRowConfig led_row_config{{0, 0}, {6, 0}, 16};
+  LedRowConfigRepository led_row_config {
+      {"BottomRow", {{0, 0}, {6, 0}, 16}},
+      {"TopRow", {{0, 17}, {6, 0}, 10}}
+  };
 };

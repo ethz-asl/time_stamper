@@ -34,7 +34,7 @@ class ImageProcessor {
 
  private:
   static cv::Mat convertToCvImage(const sensor_msgs::Image &image) ;
-  void visualize(const cv::Mat &visualization_mat, int number) const;
+  void visualize(const cv::Mat &visualization_mat) const;
   void visualizeCorners(const cv::Mat &visualization_mat, PointAngleVector corners) const;
   static void log(const std::string&);
 
