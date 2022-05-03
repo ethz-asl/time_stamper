@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-#include "SysfsPwm.h"
+#include "sysfs/SysfsPwm.h"
 #include "../Mocks/MockFilesystem.h"
 
 using ::testing::Return;
@@ -13,11 +13,11 @@ TEST(MockFileSystem, TestSetFrequencyInvalidInput) {
 
   //Expectation: Subsystem should filter invalid values
 
-  bool setFrequencyResult = sysfs_pwm.SetFrequency(IPwmSubsystem::PWM_MAXSPEED_HZ + 1);
+  bool setFrequencyResult = sysfs_pwm.setFrequency(IPwmSubsystem::PWM_MAXSPEED_HZ + 1);
   EXPECT_EQ(setFrequencyResult, false);
-  setFrequencyResult = sysfs_pwm.SetFrequency(0);
+  setFrequencyResult = sysfs_pwm.setFrequency(0);
   EXPECT_EQ(setFrequencyResult, false);
-  setFrequencyResult = sysfs_pwm.SetFrequency(-1);
+  setFrequencyResult = sysfs_pwm.setFrequency(-1);
   EXPECT_EQ(setFrequencyResult, false);
 }
 
@@ -29,16 +29,16 @@ TEST(MockFileSystem, TestSetFrequencyValidInputBasic) {
   //Expectation: Subsystem should set dutycycle and period on valid input
   int hz = 1;
   int freq = (int) (1e9 / hz);
-  EXPECT_CALL(mock_filesystem, Write("/sys/class/pwm/pwmchip0" + SysfsPwm::PWM_DUTYCYCLE, "0"))
+  EXPECT_CALL(mock_filesystem, write("/sys/class/pwm/pwmchip0" + SysfsPwm::PWM_DUTYCYCLE, "0"))
   .Times(1).WillOnce(Return(true));
 
-  EXPECT_CALL(mock_filesystem, Write("/sys/class/pwm/pwmchip0" + SysfsPwm::PWM_PERIOD, std::to_string(freq)))
+  EXPECT_CALL(mock_filesystem, write("/sys/class/pwm/pwmchip0" + SysfsPwm::PWM_PERIOD, std::to_string(freq)))
   .Times(1).WillOnce(Return(true));
 
-  EXPECT_CALL(mock_filesystem, Write("/sys/class/pwm/pwmchip0" + SysfsPwm::PWM_DUTYCYCLE, std::to_string(freq / 2)))
+  EXPECT_CALL(mock_filesystem, write("/sys/class/pwm/pwmchip0" + SysfsPwm::PWM_DUTYCYCLE, std::to_string(freq / 2)))
   .Times(1).WillOnce(Return(true));
 
-  bool setFrequencyResult = sysfs_pwm.SetFrequency(hz);
+  bool setFrequencyResult = sysfs_pwm.setFrequency(hz);
   EXPECT_EQ(setFrequencyResult, true);
 }
 
@@ -50,16 +50,16 @@ TEST(MockFileSystem, TestSetFrequencyValidInputLimit) {
   //Expectation: Subsystem should set dutycycle and period on valid input
   int hz = IPwmSubsystem::PWM_MAXSPEED_HZ;
   int freq = (int) (1e9 / hz);
-  EXPECT_CALL(mock_filesystem, Write("/sys/class/pwm/pwmchip0" + SysfsPwm::PWM_DUTYCYCLE, "0"))
+  EXPECT_CALL(mock_filesystem, write("/sys/class/pwm/pwmchip0" + SysfsPwm::PWM_DUTYCYCLE, "0"))
   .Times(1).WillOnce(Return(true));
 
-  EXPECT_CALL(mock_filesystem, Write("/sys/class/pwm/pwmchip0" + SysfsPwm::PWM_PERIOD, std::to_string(freq)))
+  EXPECT_CALL(mock_filesystem, write("/sys/class/pwm/pwmchip0" + SysfsPwm::PWM_PERIOD, std::to_string(freq)))
   .Times(1).WillOnce(Return(true));
 
-  EXPECT_CALL(mock_filesystem, Write("/sys/class/pwm/pwmchip0" + SysfsPwm::PWM_DUTYCYCLE, std::to_string(freq / 2)))
+  EXPECT_CALL(mock_filesystem, write("/sys/class/pwm/pwmchip0" + SysfsPwm::PWM_DUTYCYCLE, std::to_string(freq / 2)))
   .Times(1).WillOnce(Return(true));
 
-  bool setFrequencyResult = sysfs_pwm.SetFrequency(hz);
+  bool setFrequencyResult = sysfs_pwm.setFrequency(hz);
   EXPECT_EQ(setFrequencyResult, true);
 
 }

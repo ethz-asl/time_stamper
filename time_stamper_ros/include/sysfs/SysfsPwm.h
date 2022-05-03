@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <fcntl.h>
-#include "IPwmSubsystem.h"
+#include "sysfs/IPwmSubsystem.h"
 #include "IFileSystem.h"
 
 #define SYSFS_EXPERIMENTAL [[deprecated("This function is experimental and might break.")]]
@@ -20,27 +20,27 @@ class SysfsPwm : public IPwmSubsystem {
   /**
    * Interface functions are documented in IPwmSubsystem.h
    */
-  bool IsExported() override;
-  bool Export() override;
-  bool Unexport() override;
-  bool IsRunning() override;
-  bool Start() override;
-  bool Stop() override;
-  bool SetFrequency(int hz) override;
-  bool Reset() override;
-  bool GetFrequency(void *buffer, ssize_t size) override;
-  SYSFS_EXPERIMENTAL bool ChangeDutyCycle(int percentage) override;
+  bool isExported() override;
+  bool exprt() override;
+  bool unexport() override;
+  bool isRunning() override;
+  bool start() override;
+  bool stop() override;
+  bool setFrequency(int hz) override;
+  bool reset() override;
+  bool getFrequency(void *buffer, ssize_t size) override;
+  SYSFS_EXPERIMENTAL bool changeDutyCycle(int percentage) override;
 
   /**
    * Default destructor.
    */
-  ~SysfsPwm() = default;
+  ~SysfsPwm() override = default;
 
  private:
   /**
    * IPwmSubsystem internal functions
    */
-  bool ChangeDutyCycleRaw(int value) override;
+  bool changeDutyCycleRaw(int value) override;
 
   /**
    * Stores pwmchip path.

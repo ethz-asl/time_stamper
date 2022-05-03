@@ -11,13 +11,13 @@ class TimestampManager {
    * Polls timestamps. If new timestamp is available, it gets moved to @var last_timestamp_
    * @return true if new timestamp is available otherwise false
    */
-  bool Poll();
+  bool poll();
 
   /**
    *
    * @return value of last timestamp
    */
-  double GetLastTimestamp() const;
+  double getLastTimestamp() const;
 
   /**
    * Default destructor.

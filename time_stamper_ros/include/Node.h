@@ -1,14 +1,23 @@
 #pragma once
 #include <iostream>
-#include "SysfsPwm.h"
-#include "ros/ros.h"
+#include <ros/ros.h>
+
+#include "sysfs/SysfsGpio.h"
+#include "sysfs/SysfsPwm.h"
+
+enum LedMode {
+  FPS,
+  EXPOSURE
+};
+
 class Node {
  public:
   /**
-   * Creates new node with IPwmSubsystem
-   * @param sysfs_pwm
+   * Creates a new node with IPwmSubsystem and IGpioSubsystem
+   * @param sysfs_pw
+   * @param led_mode
    */
-  explicit Node(IPwmSubsystem &sysfs_pwm);
+  explicit Node(IPwmSubsystem &sysfs_pwm, IGpioSubsystem &gpio_subsystem, LedMode led_mode);
 
   /**
    * Node initialization.
@@ -16,17 +25,17 @@ class Node {
    * @param forceReset resets pwmchip if true
    * @return true if successful, otherwise false
    */
-  bool Init(int frequency, bool forceReset);
+  bool init(int frequency, bool forceReset = false);
 
   /**
    * Starts the node and loops until SIGINT is raised.
    */
-  void Start();
+  void start();
 
   /**
    * Turns off pwmchip but does NOT unexport.
    */
-  void CleanUp();
+  void cleanUp();
 
   /**
    * Default destructor.
@@ -39,8 +48,12 @@ class Node {
 
   static bool run_node;
  private:
+  bool setGpioMode();
+
+  LedMode mode_;
   ros::Publisher timestamp_pub_;
   ros::NodeHandle nh_;
   IPwmSubsystem &pwm_subsystem_;
+  IGpioSubsystem &gpio_subsystem_;
 };
 
