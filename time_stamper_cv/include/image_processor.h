@@ -5,6 +5,8 @@
 #include "cv_bridge/cv_bridge.h"
 #include "led_state_parser.h"
 #include "keypoint_detector.h"
+#include <vector>
+#include "time_stamper_cv/Ledstate.h"
 
 class ImageProcessor {
  public:
@@ -28,6 +30,12 @@ class ImageProcessor {
   void setVisualization(bool visualization);
 
   /**
+   * Message to be published
+   * @return Led state with set values
+   */
+  time_stamper_cv::Ledstate getLedStateMessage();
+
+  /**
    * Default destructor
    */
   ~ImageProcessor() = default;
@@ -41,6 +49,7 @@ class ImageProcessor {
   std::shared_ptr<KeyPointDetector> detector_;
   std::shared_ptr<ConvexShape> convex_shape_{};
   std::shared_ptr<LedStateParser> led_parser_{};
+  ImageProcessorConfig cfg_;
 
   bool visualization_{false};
   static constexpr const char *OPENCV_WINDOW{"Visualization"};

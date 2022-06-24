@@ -2,12 +2,13 @@
 #include "trigonometry.h"
 
 LedDetectionNode::LedDetectionNode() {
-  calibration_ = std::make_shared<ImageProcessor>(ImageProcessor(getConfiguration()));
+  image_processor_ = std::make_shared<ImageProcessor>(ImageProcessor(getConfiguration()));
 }
 
 void LedDetectionNode::init() {
-  img_pub_ = nh_.advertise<sensor_msgs::Image>("time_stamper_cv_image", 1);
-  calibration_->setVisualization(nh_private_.param("show_visualization", true));
+  img_pub_ = nh_.advertise<sensor_msgs::Image>("timestamper/image", 1);
+  led_state_pub_ = nh_.advertise<time_stamper_cv::Ledstate>("timestamper/led_state", 1);
+  image_processor_->setVisualization(nh_private_.param("show_visualization", true));
 }
 
 void LedDetectionNode::start() {
@@ -16,7 +17,13 @@ void LedDetectionNode::start() {
 }
 
 void LedDetectionNode::callbackRawImage(const sensor_msgs::Image &image) const {
-  cv_bridge::CvImage out_msg = calibration_->process(image);
+  ROS_INFO_ONCE("Received first image");
+  cv_bridge::CvImage out_msg = image_processor_->process(image);
+
+  time_stamper_cv::Ledstate  led_msg = image_processor_->getLedStateMessage();
+  led_msg.header = image.header;
+  led_state_pub_.publish(led_msg);
+
   img_pub_.publish(out_msg.toImageMsg());
 }
 

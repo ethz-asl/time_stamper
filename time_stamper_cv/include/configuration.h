@@ -41,10 +41,13 @@ struct LedRowConfig {
 typedef std::map<std::string, LedRowConfig> LedRowConfigRepository;
 
 struct ImageProcessorConfig {
+  inline static constexpr const char *TOP_ROW{"TopRow"};
+  inline static constexpr const char *BOTTOM_ROW{"BottomRow"};
+
   int tolerance{10};
   cv::SimpleBlobDetector::Params params;
   LedRowConfigRepository led_row_config {
-      {"BottomRow", {{0, 0}, {6, 0}, 16}},
-      {"TopRow", {{0, 17}, {6, 0}, 10}}
+      {BOTTOM_ROW, {{0, 0}, {6, 0}, 16}},
+      {TOP_ROW, {{0, 17}, {6, 0}, 10}}
   };
 };
