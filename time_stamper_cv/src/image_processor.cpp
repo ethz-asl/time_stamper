@@ -119,20 +119,16 @@ void ImageProcessor::log(const std::string &message) {
   ROS_INFO("%s", message.c_str());
 }
 
-time_stamper_cv::Ledstate ImageProcessor::fillInLedStateMessage() {
-  time_stamper_cv::Ledstate msg;
-
-  msg.counter = led_parser_->getBinaryValue(ImageProcessorConfig::BOTTOM_ROW);
-  msg.is_valid = convex_shape_->isShapeValid();
+void ImageProcessor::fillInLedStateMessage(time_stamper_cv::Ledstate* msg) {
+  msg->counter = led_parser_->getBinaryValue(ImageProcessorConfig::BOTTOM_ROW);
+  msg->is_valid = convex_shape_->isShapeValid();
 
   std::vector<std::string> rows = cfg_.rows();
   std::for_each(rows.begin(), rows.end(), [this, &msg] (const std::string& name) {
     for (int i = 0; i < led_parser_->getLedRow(name).size(); i++) {
       double brightness = led_parser_->getLedBrightness(name, i);
-      msg.intensity.push_back(brightness);
-      msg.binary_state.push_back(led_parser_->isLedOn(name, i));
+      msg->intensity.push_back(brightness);
+      msg->binary_state.push_back(led_parser_->isLedOn(name, i));
     }
   });
-
-  return msg;
 }

@@ -32,10 +32,9 @@ class ImageProcessor {
   void setVisualization(bool visualization);
 
   /**
-   * Message to be published
-   * @return Led state with set values but without header (header comes from camera frame)
+   * Fills in message to be published without header
    */
-  time_stamper_cv::Ledstate fillInLedStateMessage();
+  void fillInLedStateMessage(time_stamper_cv::Ledstate *led_msg);
 
   /**
    * Default destructor
