@@ -123,7 +123,7 @@ time_stamper_cv::Ledstate ImageProcessor::getLedStateMessage() {
 
   for (int i = 0; i < led_parser_->getLedRow(ImageProcessorConfig::TOP_ROW).size(); i++) {
     double brightness = led_parser_->getLedBrightness(ImageProcessorConfig::TOP_ROW, i);
-    msg.intensity.push_back((uint8_t) std::lround(brightness));
+    msg.intensity.push_back(brightness);
     msg.binary_state.push_back(led_parser_->isLedOn(ImageProcessorConfig::TOP_ROW, i));
   }
 
