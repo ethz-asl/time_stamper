@@ -1,5 +1,6 @@
-#include "led_state_parser.h"
 #include <utility>
+
+#include "led_state_parser.h"
 
 LedStateParser::LedStateParser(LedRowConfigRepository  led_row_config_, int image_crop_size)
     : led_row_configs_(std::move(led_row_config_)), size_(image_crop_size) {

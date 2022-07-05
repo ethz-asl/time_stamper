@@ -1,7 +1,9 @@
 #pragma once
 #include <vector>
 #include <functional>
+
 #include <opencv2/core/types.hpp>
+
 #include "common.h"
 
 /**

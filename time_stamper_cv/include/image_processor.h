@@ -1,11 +1,13 @@
 #pragma once
+#include <vector>
+
 #include "opencv2/opencv.hpp"
+#include "cv_bridge/cv_bridge.h"
+
 #include "convex_shape.h"
 #include "configuration.h"
-#include "cv_bridge/cv_bridge.h"
 #include "led_state_parser.h"
 #include "keypoint_detector.h"
-#include <vector>
 #include "time_stamper_cv/Ledstate.h"
 
 class ImageProcessor {

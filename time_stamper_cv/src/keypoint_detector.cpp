@@ -1,5 +1,6 @@
-#include "keypoint_detector.h"
 #include "ros/ros.h"
+
+#include "keypoint_detector.h"
 
 KeyPointDetector::KeyPointDetector(cv::SimpleBlobDetector::Params params) {
   detector_ = cv::SimpleBlobDetector::create(params);

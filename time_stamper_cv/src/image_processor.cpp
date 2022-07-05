@@ -1,5 +1,6 @@
-#include "image_processor.h"
 #include "ros/ros.h"
+
+#include "image_processor.h"
 #include <time_stamper_cv/Ledstate.h>
 
 ImageProcessor::ImageProcessor(const ImageProcessorConfig &cfg) : cfg_(cfg) {
