@@ -33,9 +33,9 @@ class ImageProcessor {
 
   /**
    * Message to be published
-   * @return Led state with set values
+   * @return Led state with set values but without header (header comes from camera frame)
    */
-  time_stamper_cv::Ledstate getLedStateMessage();
+  time_stamper_cv::Ledstate fillInLedStateMessage();
 
   /**
    * Default destructor

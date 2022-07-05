@@ -32,9 +32,11 @@ cv_bridge::CvImage ImageProcessor::process(const sensor_msgs::Image &image) {
   if (convex_shape_->isShapeValid()) {
     led_parser_->processImage(input_mat);
 
+    std::vector<std::string> rows = cfg_.rows();
     //Get inverted homography, so we know the position of each LED even if it's turned off.
-    led_parser_->transformLedRow(ImageProcessorConfig::BOTTOM_ROW, convex_shape_->getInvHomography());
-    led_parser_->transformLedRow(ImageProcessorConfig::TOP_ROW, convex_shape_->getInvHomography());
+    std::for_each(rows.begin(), rows.end(), [this] (const std::string& name) {
+      led_parser_->transformLedRow(name, convex_shape_->getInvHomography());
+    });
 
     /* When the first and last led in the top row are on, the state of the bottom row is changing.
        The frame has to be skipped. */
@@ -77,24 +79,26 @@ void ImageProcessor::visualize(const cv::Mat &visualization_mat) const {
     shape_text += "Valid";
     counter_text += std::to_string(bottom_row_binary_value);
 
-    for (const auto &led: led_parser_->getLedRow(ImageProcessorConfig::BOTTOM_ROW)) {
-      cv::Point2f led_pos = LedStateParser::normalize(led);
-      cv::circle(visualization_mat, led_pos, (int) 10, cv::Scalar(255, 0, 0));
-    }
+    std::vector<std::string> rows = cfg_.rows();
+    std::for_each(rows.begin(), rows.end(), [this, &visualization_mat](const std::string& name) {
+      for (const auto &led : led_parser_->getLedRow(name)) {
+        cv::Point2f led_pos = LedStateParser::normalize(led);
+        cv::circle(visualization_mat, led_pos, (int) 10, cv::Scalar(255, 0, 0));
+      }
+    });
 
-    for (const auto &led: led_parser_->getLedRow(ImageProcessorConfig::TOP_ROW)) {
-      cv::Point2f led_pos = LedStateParser::normalize(led);
-      cv::circle(visualization_mat, led_pos, (int) 10, cv::Scalar(255, 0, 0));
-    }
   } else {
     shape_text += "Invalid";
     counter_text += "---";
   }
 
-  cv::putText(visualization_mat, shape_text, cv::Point(s.width * 0.05, s.height * 0.85),
-              cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(255, 0, 0));
-  cv::putText(visualization_mat, counter_text, cv::Point(s.width * 0.05, s.height * 0.9),
-              cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(255, 0, 0));
+  //Print text on screen row by row
+  double height_multiplier = 0.85;
+  for (const auto &text: {shape_text, counter_text}) {
+    cv::putText(visualization_mat, text, cv::Point((int) (s.width * 0.05), (int) (s.height * height_multiplier)),
+                cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(255, 0, 0));
+    height_multiplier += 0.05;
+  }
   cv::imshow(OPENCV_WINDOW, visualization_mat);
   cv::waitKey(1);
 }
@@ -115,23 +119,20 @@ void ImageProcessor::log(const std::string &message) {
   ROS_INFO("%s", message.c_str());
 }
 
-time_stamper_cv::Ledstate ImageProcessor::getLedStateMessage() {
+time_stamper_cv::Ledstate ImageProcessor::fillInLedStateMessage() {
   time_stamper_cv::Ledstate msg;
 
   msg.counter = led_parser_->getBinaryValue(ImageProcessorConfig::BOTTOM_ROW);
   msg.is_valid = convex_shape_->isShapeValid();
 
-  for (int i = 0; i < led_parser_->getLedRow(ImageProcessorConfig::TOP_ROW).size(); i++) {
-    double brightness = led_parser_->getLedBrightness(ImageProcessorConfig::TOP_ROW, i);
-    msg.intensity.push_back(brightness);
-    msg.binary_state.push_back(led_parser_->isLedOn(ImageProcessorConfig::TOP_ROW, i));
-  }
-
-  for (int i = 0; i < led_parser_->getLedRow(ImageProcessorConfig::BOTTOM_ROW).size(); i++) {
-    double brightness = led_parser_->getLedBrightness(ImageProcessorConfig::BOTTOM_ROW, i);
-    msg.binary_state.push_back(led_parser_->isLedOn(ImageProcessorConfig::BOTTOM_ROW, i));
-    msg.intensity.push_back((uint8_t) std::lround(brightness));
-  }
+  std::vector<std::string> rows = cfg_.rows();
+  std::for_each(rows.begin(), rows.end(), [this, &msg] (const std::string& name) {
+    for (int i = 0; i < led_parser_->getLedRow(name).size(); i++) {
+      double brightness = led_parser_->getLedBrightness(name, i);
+      msg.intensity.push_back(brightness);
+      msg.binary_state.push_back(led_parser_->isLedOn(name, i));
+    }
+  });
 
   return msg;
 }

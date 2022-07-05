@@ -50,4 +50,19 @@ struct ImageProcessorConfig {
       {BOTTOM_ROW, {{0, 0}, {6, 0}, 16}},
       {TOP_ROW, {{0, 17}, {6, 0}, 10}}
   };
+
+  /**
+   * Get row names
+   * @return string vector
+   */
+ public:
+  std::vector<std::string> rows() const {
+    std::vector<std::string> res{};
+
+    std::map<std::string, LedRowConfig>::const_iterator it;
+    for (it = led_row_config.begin() ; it != led_row_config.end(); it++) {
+      res.push_back(it->first);
+    }
+    return res;
+  }
 };

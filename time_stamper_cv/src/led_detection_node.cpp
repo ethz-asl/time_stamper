@@ -20,7 +20,7 @@ void LedDetectionNode::callbackRawImage(const sensor_msgs::Image &image) const {
   ROS_INFO_ONCE("Received first image");
   cv_bridge::CvImage out_msg = image_processor_->process(image);
 
-  time_stamper_cv::Ledstate  led_msg = image_processor_->getLedStateMessage();
+  time_stamper_cv::Ledstate  led_msg = image_processor_->fillInLedStateMessage();
   led_msg.header = image.header;
   led_state_pub_.publish(led_msg);
 
