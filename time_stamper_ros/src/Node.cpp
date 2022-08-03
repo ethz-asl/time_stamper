@@ -50,6 +50,7 @@ bool Node::init(int frequency, bool forceReset) {
     }
     ROS_INFO("Started pwm");
   }
+  is_initialized_ = true;
   return true;
 }
 
@@ -111,6 +112,11 @@ bool Node::setGpioMode() {
 }
 
 void Node::configCallback(time_stamper_ros::LedConfig &config) {
+
+  //Ignore if not initialized to avoid memory corruption
+  if (!is_initialized_) {
+    return;
+  }
   mode_ = static_cast<LedMode>(config.mode); //Convert int to enum
 
   pwm_subsystem_.setFrequency(config.frequency);

@@ -59,6 +59,7 @@ class Node {
   static bool run_node;
  private:
   bool setGpioMode();
+  bool is_initialized_{false};
 
   LedMode mode_;
   ros::Publisher timestamp_pub_;
