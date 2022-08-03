@@ -11,4 +11,5 @@
   <depend>std_msgs</depend>
   <depend>message_generation</depend>
   <depend>message_runtime</depend>
+  <depend>dynamic_reconfigure</depend>
 </package>

@@ -1,13 +1,17 @@
 #pragma once
 #include <iostream>
+#include <string>
+
 #include <ros/ros.h>
+#include <dynamic_reconfigure/server.h>
 
 #include "sysfs/SysfsGpio.h"
 #include "sysfs/SysfsPwm.h"
+#include "time_stamper_ros/LedConfig.h"
 
 enum LedMode {
-  FPS,
-  EXPOSURE
+  FPS = 0,
+  EXPOSURE = 1
 };
 
 class Node {
@@ -38,6 +42,12 @@ class Node {
   void cleanUp();
 
   /**
+   * Dynamic reconfigure callback
+   * @param config
+   */
+  void configCallback(time_stamper_ros::LedConfig &config);
+
+  /**
    * Default destructor.
    */
   ~Node() = default;
@@ -55,5 +65,6 @@ class Node {
   ros::NodeHandle nh_;
   IPwmSubsystem &pwm_subsystem_;
   IGpioSubsystem &gpio_subsystem_;
+  dynamic_reconfigure::Server<time_stamper_ros::LedConfig> server_;
 };
 

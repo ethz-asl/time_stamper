@@ -4,7 +4,7 @@ project(time_stamper_ros)
 add_compile_options(-std=c++17 -Wdeprecated-declarations)
 
 find_package(catkin_simple REQUIRED)
-catkin_simple()
+catkin_simple(ALL_DEPS_REQUIRED)
 
 
 cs_add_library(${PROJECT_NAME}
