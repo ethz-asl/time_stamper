@@ -1,5 +1,6 @@
-#include "led_state_parser.h"
 #include <utility>
+
+#include "led_state_parser.h"
 
 LedStateParser::LedStateParser(LedRowConfigRepository  led_row_config_, int image_crop_size)
     : led_row_configs_(std::move(led_row_config_)), size_(image_crop_size) {
@@ -11,6 +12,9 @@ LedStateParser::LedStateParser(LedRowConfigRepository  led_row_config_, int imag
              cv::Scalar(255, 255, 255), -1);
 
   kernel_normalized_ = 1.0 / (kernel / 255);
+  for (auto const& cfg : led_row_configs_) {
+    led_rows_.insert({cfg.first, generateLedRow(cfg.second)});
+  }
 }
 
 void LedStateParser::processImage(const cv::Mat &image) {
@@ -60,7 +64,7 @@ double LedStateParser::getLedBrightness(const std::string& led_row_name, int ind
       (int) (led_pos.y - (size_ / 2.0)));
 
   if ((begin.y + size_) > image_.rows || begin.x + size_ > image_.cols ||
-      (begin.x < 0 && begin.y < 0)) {
+      (begin.x < 0 || begin.y < 0)) {
     return -1;
   }
 

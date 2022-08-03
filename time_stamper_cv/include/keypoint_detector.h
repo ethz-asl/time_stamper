@@ -1,6 +1,9 @@
 #pragma once
-#include "opencv2/opencv.hpp"
+
 #include <functional>
+
+#include "opencv2/opencv.hpp"
+
 
 class KeyPointDetector {
  public:

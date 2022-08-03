@@ -1,7 +1,9 @@
-#include "image_processor.h"
 #include "ros/ros.h"
 
-ImageProcessor::ImageProcessor(const ImageProcessorConfig &cfg) {
+#include "image_processor.h"
+#include <time_stamper_cv/Ledstate.h>
+
+ImageProcessor::ImageProcessor(const ImageProcessorConfig &cfg) : cfg_(cfg) {
   convex_shape_ = std::make_shared<ConvexShape>(ConvexShape(cfg.tolerance));
   detector_ = std::make_shared<KeyPointDetector>(KeyPointDetector(cfg.params));
   led_parser_ = std::make_shared<LedStateParser>(LedStateParser(cfg.led_row_config));
@@ -30,14 +32,18 @@ cv_bridge::CvImage ImageProcessor::process(const sensor_msgs::Image &image) {
   if (convex_shape_->isShapeValid()) {
     led_parser_->processImage(input_mat);
 
+    std::vector<std::string> rows = cfg_.rows();
     //Get inverted homography, so we know the position of each LED even if it's turned off.
-    led_parser_->transformLedRow("BottomRow", convex_shape_->getInvHomography());
-    led_parser_->transformLedRow("TopRow", convex_shape_->getInvHomography());
+    std::for_each(rows.begin(), rows.end(), [this] (const std::string& name) {
+      led_parser_->transformLedRow(name, convex_shape_->getInvHomography());
+    });
 
     /* When the first and last led in the top row are on, the state of the bottom row is changing.
        The frame has to be skipped. */
-    if (led_parser_->isLedOn("TopRow", 0) && led_parser_->isLedOn("TopRow", 9)) {
-      ROS_INFO("Skipped invalid LED pos");
+    int last_led_in_row = cfg_.led_row_config.at(ImageProcessorConfig::TOP_ROW).amount - 1;
+    if (led_parser_->isLedOn(ImageProcessorConfig::TOP_ROW, 0)
+        && led_parser_->isLedOn(ImageProcessorConfig::TOP_ROW, last_led_in_row)) {
+      ROS_DEBUG("Skipped invalid LED pos");
     }
   }
 
@@ -69,28 +75,30 @@ void ImageProcessor::visualize(const cv::Mat &visualization_mat) const {
   std::string counter_text("Counter: ");
 
   if (convex_shape_->isShapeValid()) {
-    int bottom_row_binary_value = led_parser_->getBinaryValue("BottomRow");
+    int bottom_row_binary_value = led_parser_->getBinaryValue(ImageProcessorConfig::BOTTOM_ROW);
     shape_text += "Valid";
     counter_text += std::to_string(bottom_row_binary_value);
 
-    for (const auto &led: led_parser_->getLedRow("BottomRow")) {
-      cv::Point2f led_pos = LedStateParser::normalize(led);
-      cv::circle(visualization_mat, led_pos, (int) 10, cv::Scalar(255, 0, 0));
-    }
+    std::vector<std::string> rows = cfg_.rows();
+    std::for_each(rows.begin(), rows.end(), [this, &visualization_mat](const std::string& name) {
+      for (const auto &led : led_parser_->getLedRow(name)) {
+        cv::Point2f led_pos = LedStateParser::normalize(led);
+        cv::circle(visualization_mat, led_pos, (int) 10, cv::Scalar(255, 0, 0));
+      }
+    });
 
-    for (const auto &led: led_parser_->getLedRow("TopRow")) {
-      cv::Point2f led_pos = LedStateParser::normalize(led);
-      cv::circle(visualization_mat, led_pos, (int) 10, cv::Scalar(255, 0, 0));
-    }
   } else {
     shape_text += "Invalid";
     counter_text += "---";
   }
 
-  cv::putText(visualization_mat, shape_text, cv::Point(s.width * 0.05, s.height * 0.85),
-              cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(255, 0, 0));
-  cv::putText(visualization_mat, counter_text, cv::Point(s.width * 0.05, s.height * 0.9),
-              cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(255, 0, 0));
+  //Print text on screen row by row
+  double height_multiplier = 0.85;
+  for (const auto &text: {shape_text, counter_text}) {
+    cv::putText(visualization_mat, text, cv::Point((int) (s.width * 0.05), (int) (s.height * height_multiplier)),
+                cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(255, 0, 0));
+    height_multiplier += 0.05;
+  }
   cv::imshow(OPENCV_WINDOW, visualization_mat);
   cv::waitKey(1);
 }
@@ -109,4 +117,17 @@ void ImageProcessor::visualizeCorners(const cv::Mat &visualization_mat, PointAng
 
 void ImageProcessor::log(const std::string &message) {
   ROS_INFO("%s", message.c_str());
+}
+
+void ImageProcessor::fillInLedStateMessage(time_stamper_cv::Ledstate* msg) {
+  msg->counter = led_parser_->getBinaryValue(ImageProcessorConfig::BOTTOM_ROW);
+  msg->is_valid = convex_shape_->isShapeValid();
+
+  for (const auto& name: cfg_.rows()) {
+    for (int i = 0; i < led_parser_->getLedRow(name).size(); i++) {
+      double brightness = led_parser_->getLedBrightness(name, i);
+      msg->intensity.push_back(brightness);
+      msg->binary_state.push_back(led_parser_->isLedOn(name, i));
+    }
+  }
 }

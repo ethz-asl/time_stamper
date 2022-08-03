@@ -1,10 +1,14 @@
 #pragma once
+#include <vector>
+
 #include "opencv2/opencv.hpp"
+#include "cv_bridge/cv_bridge.h"
+
 #include "convex_shape.h"
 #include "configuration.h"
-#include "cv_bridge/cv_bridge.h"
 #include "led_state_parser.h"
 #include "keypoint_detector.h"
+#include "time_stamper_cv/Ledstate.h"
 
 class ImageProcessor {
  public:
@@ -28,6 +32,11 @@ class ImageProcessor {
   void setVisualization(bool visualization);
 
   /**
+   * Fills in message to be published without header
+   */
+  void fillInLedStateMessage(time_stamper_cv::Ledstate *led_msg);
+
+  /**
    * Default destructor
    */
   ~ImageProcessor() = default;
@@ -41,6 +50,7 @@ class ImageProcessor {
   std::shared_ptr<KeyPointDetector> detector_;
   std::shared_ptr<ConvexShape> convex_shape_{};
   std::shared_ptr<LedStateParser> led_parser_{};
+  ImageProcessorConfig cfg_;
 
   bool visualization_{false};
   static constexpr const char *OPENCV_WINDOW{"Visualization"};

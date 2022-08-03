@@ -1,5 +1,6 @@
-#include "convex_shape.h"
 #include "opencv2/opencv.hpp"
+
+#include "convex_shape.h"
 #include "trigonometry.h"
 
 ConvexShape::ConvexShape(const int tolerance)

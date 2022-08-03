@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(time_stamper_cv)
 
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 add_definitions(-Wall -Werror=return-type)
 find_package(catkin_simple REQUIRED)
 

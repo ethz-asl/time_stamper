@@ -1,7 +1,9 @@
 #pragma once
+
 #include "ros/ros.h"
 #include "cv_bridge/cv_bridge.h"
 #include "sensor_msgs/Image.h"
+
 #include "image_processor.h"
 #include "configuration.h"
 
@@ -38,5 +40,6 @@ class LedDetectionNode {
   ros::NodeHandle nh_private_{"~"};
   __attribute__((unused)) ros::Subscriber img_sub_{};
   ros::Publisher img_pub_{};
-  std::shared_ptr<ImageProcessor> calibration_{};
+  std::shared_ptr<ImageProcessor> image_processor_{};
+  ros::Publisher led_state_pub_;
 };
