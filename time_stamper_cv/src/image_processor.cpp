@@ -123,12 +123,11 @@ void ImageProcessor::fillInLedStateMessage(time_stamper_cv::Ledstate* msg) {
   msg->counter = led_parser_->getBinaryValue(ImageProcessorConfig::BOTTOM_ROW);
   msg->is_valid = convex_shape_->isShapeValid();
 
-  std::vector<std::string> rows = cfg_.rows();
-  std::for_each(rows.begin(), rows.end(), [this, &msg] (const std::string& name) {
+  for (const auto& name: cfg_.rows()) {
     for (int i = 0; i < led_parser_->getLedRow(name).size(); i++) {
       double brightness = led_parser_->getLedBrightness(name, i);
       msg->intensity.push_back(brightness);
       msg->binary_state.push_back(led_parser_->isLedOn(name, i));
     }
-  });
+  }
 }

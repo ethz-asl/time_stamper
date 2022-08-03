@@ -56,12 +56,10 @@ struct ImageProcessorConfig {
    * @return string vector
    */
  public:
-  std::vector<std::string> rows() const {
+  [[nodiscard]] std::vector<std::string> rows() const {
     std::vector<std::string> res{};
-
-    std::map<std::string, LedRowConfig>::const_iterator it;
-    for (it = led_row_config.begin() ; it != led_row_config.end(); it++) {
-      res.push_back(it->first);
+    for (const auto& [item, _] : led_row_config) {
+      res.push_back(item);
     }
     return res;
   }
