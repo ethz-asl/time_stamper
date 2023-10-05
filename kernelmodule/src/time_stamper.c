@@ -84,7 +84,7 @@ static ssize_t ts_buffer_readout(struct kobject *kobj, struct kobj_attribute *at
 
     /// fill the requested buffer with the timestamps in the ringbuffer until all is read or a certain limit is reached
     while(r < READ_CHARACTER_LIMIT && ringbuffer.tail != ringbuffer.head){
-        r += sprintf(buf + r, "%lld.%ld\n", ringbuffer.bufferentries[ringbuffer.tail].tv_sec, ringbuffer.bufferentries[ringbuffer.tail].tv_nsec);
+        r += sprintf(buf + r, "%lld.%09ld\n", ringbuffer.bufferentries[ringbuffer.tail].tv_sec, ringbuffer.bufferentries[ringbuffer.tail].tv_nsec);
         ringbuffer.tail = (ringbuffer.tail+1) % N_BUFFER_ENTRIES;
     }
 
