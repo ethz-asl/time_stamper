@@ -110,7 +110,7 @@ static int __init ts_init(void)
     int err;
 
     /// create sysfs kernel object folder for the file to access in the file system under /sys/kernel/time_stamper/
-    ts_kobject = kobject_create_and_add("time_stamper", kernel_kobj);
+    ts_kobject = kobject_create_and_add(DRV_NAME, kernel_kobj);
     if(!ts_kobject)
         return -ENOMEM;
 
