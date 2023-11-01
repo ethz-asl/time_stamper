@@ -3,10 +3,13 @@
 #include "time_stamper_ros/Timestamp.h"
 #include "TimestampManager.h"
 
+
 bool Node::run_node = true;
 
 Node::Node(IPwmSubsystem &pwm_subsystem, IGpioSubsystem &gpio_subsystem, LedMode led_mode)
-    : pwm_subsystem_(pwm_subsystem), gpio_subsystem_(gpio_subsystem), mode_(led_mode) {}
+    : pwm_subsystem_(pwm_subsystem), gpio_subsystem_(gpio_subsystem), mode_(led_mode) {
+  server_.setCallback(boost::bind(&Node::configCallback, this, _1));
+}
 
 bool Node::init(int frequency, bool forceReset) {
   if (!setGpioMode()) {
@@ -47,6 +50,7 @@ bool Node::init(int frequency, bool forceReset) {
     }
     ROS_INFO("Started pwm");
   }
+  is_initialized_ = true;
   return true;
 }
 
@@ -85,7 +89,7 @@ bool Node::setGpioMode() {
     }
     ROS_INFO("Exported GPIO");
   } else {
-    ROS_INFO("GPIO already exported");
+    ROS_INFO_ONCE("GPIO already exported");
   }
 
   GPIO_MODE gpio_mode;
@@ -105,4 +109,17 @@ bool Node::setGpioMode() {
     return false;
   }
   return true;
+}
+
+void Node::configCallback(time_stamper_ros::LedConfig &config) {
+
+  //Ignore if not initialized to avoid memory corruption
+  if (!is_initialized_) {
+    return;
+  }
+  mode_ = static_cast<LedMode>(config.mode); //Convert int to enum
+
+  pwm_subsystem_.setFrequency(config.frequency);
+  setGpioMode();
+  ROS_INFO_STREAM("Config update received. Mode: " << mode_ << " Frequency: " << config.frequency);
 }
